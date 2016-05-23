@@ -5,4 +5,5 @@ def heapinfo(prog, libc: 'libc')
 end
 
 require 'heapinfo/process'
-require 'heapinfo/helper.rb'
+require 'heapinfo/helper'
+require 'heapinfo/segment'
