@@ -30,5 +30,15 @@ module HeapInfo
         s
       end.compact
     end
+
+    # wrapper color for pretty inspect
+    def self.color(s)
+      s = s.to_s
+      if s =~ /^(0x)?[0-9a-f]+$/ # integers
+        "\e[38;5;12m#{s}\e[0m"
+      else #normal string
+        "\e[38;5;1m#{s}\e[0m"
+      end
+    end
   end
 end
