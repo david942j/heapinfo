@@ -7,7 +7,7 @@ module HeapInfo
     end
 
     def to_s
-      "%28s\tbase @ #{Helper.color("%#x" % base)}\n" % Helper.color(name.split('/')[-1])
+      "%-28s\tbase @ #{Helper.color("%#x" % base)}\n" % Helper.color(name.split('/')[-1])
     end
 
     # maps is return value of Helper.parse_maps
