@@ -6,8 +6,15 @@ def heapinfo(prog, libc: /libc[^\w]/)
   puts h
   h
 end
-
+module HeapInfo
+  TMP_DIR = '/tmp/.heapinfo'
+  CACHE_DIR = '~/.cache/heapinfo'
+  FileUtils.mkdir_p(TMP_DIR)
+  FileUtils.mkdir_p(CACHE_DIR)
+end
 require 'heapinfo/process'
 require 'heapinfo/helper'
 require 'heapinfo/segment'
+require 'heapinfo/libc'
+require 'heapinfo/main_arena'
 require 'heapinfo/dumper'

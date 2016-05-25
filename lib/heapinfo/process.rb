@@ -67,7 +67,7 @@ module HeapInfo
       maps = Helper.parse_maps Helper.maps_of pid
       @status = {
         program: Segment.find(maps, File.readlink("/proc/#{pid}/exe")),
-        libc:    Segment.find(maps, maps.map{|s| s[3]}.find{|seg| libc.is_a?(Regexp) ? seg =~ libc : seg.include?(libc)}),
+        libc:    Libc.find(maps, maps.map{|s| s[3]}.find{|seg| libc.is_a?(Regexp) ? seg =~ libc : seg.include?(libc)}, self),
         heap:    Segment.find(maps, 'heap'),
         stack:   Segment.find(maps, 'stack'),
         arch: elf[4] == "\x01" ? '32' : '64',

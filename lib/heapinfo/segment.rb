@@ -14,7 +14,7 @@ module HeapInfo
     def self.find(_maps, name)
       maps = _maps.select {|m| m[3] == name}
       maps = _maps.select {|m| m[3].include? name} if maps.empty? # be careful!
-      Segment.new maps.map{|m| m[0]}.min, name unless maps.empty?
+      self.new maps.map{|m| m[0]}.min, name unless maps.empty?
     end
   end
 end
