@@ -36,7 +36,7 @@ h.libc.name
 
 #### Dump
 query content of specific address   
-NOTICE: you MUST have permission of attach a program, otherwise dump will fail   
+NOTICE: you MUST have permission of attaching a program, otherwise dump will fail   
 i.e. `/proc/sys/kernel/yama/ptrace_scope` set to 0 or run as root
 
 ```ruby

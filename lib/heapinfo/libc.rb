@@ -7,10 +7,10 @@ module HeapInfo
     end
 
     def main_arena
-      return @_main_arena if @_main_arena
+      return @_main_arena.reload if @_main_arena
       off = main_arena_offset
       return if off.nil?
-      @_main_arena = MainArena.new(off + self.base, process.arch, process)
+      @_main_arena = Arena.new(off + self.base, process.arch, process.dumper)
     end
 
     def self.find(_maps, name, process)
@@ -22,7 +22,6 @@ module HeapInfo
 
   private
     attr_accessor :process
-    attr_accessor :_main_arena, :_main_arena_offset
     # only for searching offset of main_arena now
     def exhaust_search(symbol)
       return false if symbol != :main_arena

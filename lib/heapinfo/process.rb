@@ -60,6 +60,11 @@ module HeapInfo
       libc.to_s
     end
 
+    # for children to access memory
+    def dumper
+      Proc.new {|*args| self.dump(*args)}
+    end
+
   private
     def load_status(libc)
       sta  = Helper.status_of pid

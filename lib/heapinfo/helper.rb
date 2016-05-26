@@ -43,5 +43,9 @@ module HeapInfo
         "\e[38;5;1m#{s}\e[0m"
       end
     end
+
+    def self.unpack(size_t, data)
+      data.unpack(size_t == 4 ? 'L*' : 'Q*')[0]
+    end
   end
 end
