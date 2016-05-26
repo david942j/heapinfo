@@ -31,17 +31,25 @@ module HeapInfo
       end.compact
     end
 
+    COLOR_CODE = {
+      esc_m: "\e[0m",
+      normal_s: "\e[38;5;1m", # red
+      integer: "\e[38;5;12m", # light blue
+      fatal: "\e[38;5;197m" #dark red
+    }
     # wrapper color for pretty inspect
     def self.color(s, sev: nil)
       s = s.to_s
+      color = ''
+      cc = COLOR_CODE
       if sev == :fatal
-        return "\e[38;5;197m#{s}\e[0m"
-      end
-      if s =~ /^(0x)?[0-9a-f]+$/ # integers
-        "\e[38;5;12m#{s}\e[0m"
+        color = cc[:fatal]
+      elsif s =~ /^(0x)?[0-9a-f]+$/ # integers
+        color = cc[:integer]
       else #normal string
-        "\e[38;5;1m#{s}\e[0m"
+        color = cc[:normal_s]
       end
+      "#{color}#{s.sub(cc[:esc_m], color)}#{cc[:esc_m]}"
     end
 
     def self.unpack(size_t, data)

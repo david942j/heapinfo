@@ -15,6 +15,8 @@ module HeapInfo
       end
       file.pos = addr + offset
       file.read len
+    rescue
+      nil
     end
 
   private
