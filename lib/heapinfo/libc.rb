@@ -31,15 +31,16 @@ module HeapInfo
     end
 
     def resolve_main_arena_offset
-      #TODO: use specific ld to run #important!
       tmp_elf = HeapInfo::TMP_DIR + "/get_arena"
       libc_file = HeapInfo::TMP_DIR + "/libc.so.6"
+      ld_file = HeapInfo::TMP_DIR + "/ld.so"
       flags = "-w #{@process.arch == '32' ? '-m32' : ''}"
       %x(cp #{self.name} #{libc_file} && \
+         cp #{@process.ld.name} #{ld_file} && \
          chdir #{File.expand_path('../tools', __FILE__)} && \
          gcc #{flags} get_arena.c -o #{tmp_elf} 2>&1 > /dev/null && \
-         LD_LIBRARY_PATH=#{HeapInfo::TMP_DIR} #{tmp_elf} && \
-         rm #{tmp_elf} #{libc_file}).to_i(16)
+         #{ld_file} --library-path #{HeapInfo::TMP_DIR} #{tmp_elf} && \
+         rm #{tmp_elf} #{libc_file} #{ld_file}).to_i(16)
     end
   end
 end

@@ -1,14 +1,18 @@
 #encoding: ascii-8bit
 module HeapInfo
   class Process
+    DEFAULT_LIB = {
+      libc: /libc[^\w]/,
+      ld:   /ld[^\w]/,
+    }
     attr_reader :pid, :status
-    def initialize(prog, libc)
+    def initialize(prog, options = {})
       if prog.is_a? String
         @pid = Helper.pidof prog
       elsif prog.is_a? Integer
         @pid = prog
       end
-      load_status libc
+      load_status options.merge(DEFAULT_LIB)
       need_permission unless dumpable?
     end
 
@@ -57,7 +61,8 @@ module HeapInfo
       program.to_s +
       heap.to_s + 
       stack.to_s +
-      libc.to_s
+      libc.to_s +
+      ld.to_s
     end
 
     # for children to access memory
@@ -66,15 +71,18 @@ module HeapInfo
     end
 
   private
-    def load_status(libc)
+    def load_status(options)
       sta  = Helper.status_of pid
       elf  = Helper.exe_of pid
       maps = Helper.parse_maps Helper.maps_of pid
+      libc = options[:libc]
+      ld   = options[:ld]
       @status = {
         program: Segment.find(maps, File.readlink("/proc/#{pid}/exe")),
         libc:    Libc.find(maps, maps.map{|s| s[3]}.find{|seg| libc.is_a?(Regexp) ? seg =~ libc : seg.include?(libc)}, self),
         heap:    Segment.find(maps, 'heap'),
         stack:   Segment.find(maps, 'stack'),
+        ld:      Segment.find(maps, maps.map{|s| s[3]}.find{|seg| ld.is_a?(Regexp) ? seg =~ ld : seg.include?(ld)}),
         arch: elf[4] == "\x01" ? '32' : '64',
       }
       @status[:elf] = @status[:program] #alias
