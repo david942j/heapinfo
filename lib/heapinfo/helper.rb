@@ -35,15 +35,16 @@ module HeapInfo
       esc_m: "\e[0m",
       normal_s: "\e[38;5;1m", # red
       integer: "\e[38;5;12m", # light blue
-      fatal: "\e[38;5;197m" #dark red
+      fatal: "\e[38;5;197m", # dark red
+      bin: "\e[38;5;120m", # light green
     }
     # wrapper color for pretty inspect
     def self.color(s, sev: nil)
       s = s.to_s
       color = ''
       cc = COLOR_CODE
-      if sev == :fatal
-        color = cc[:fatal]
+      if cc.keys.include?(sev)
+        color = cc[sev]
       elsif s =~ /^(0x)?[0-9a-f]+$/ # integers
         color = cc[:integer]
       else #normal string

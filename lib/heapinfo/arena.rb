@@ -7,13 +7,15 @@ module HeapInfo
     end
 
     def reload
-      # TODO: handle main_arena not init yet
+      top_ptr = Helper.unpack(size_t, @dumper.call(@base + 8 + size_t * 10, size_t))
+      @fastbin = []
+      return self if top_ptr == 0 # arena not init yet
+      @top_chunk = Chunk.new size_t, top_ptr, @dumper
       @fastbin = Array.new(7) do |idx|
         f = Fastbin.new(size_t, @base + 8 - size_t * 2 + size_t * idx, @dumper, head: true)
         f.index = idx
         f
       end
-      @top_chunk = Chunk.new size_t, Helper.unpack(size_t, @dumper.call(@base + 8 + size_t * 10, size_t)), @dumper
       self 
     end
 
@@ -42,7 +44,7 @@ module HeapInfo
     end
 
     def inspect
-      ret = Helper.color("Fastbin [%s]" % Helper.color(index))
+      ret = "%s[%s]" % [Helper.color("Fastbin", sev: :bin),  Helper.color(index)]
       ptr = @fd
       while ptr != 0
         # TODO: handle invalid ptr # important!
