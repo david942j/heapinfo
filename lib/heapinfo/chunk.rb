@@ -18,5 +18,8 @@ module HeapInfo
       r_size = [r_size, 0].max # prevent negative size
       @data = dump(@base + size_t * 2, r_size)
     end
+    def class_name
+      self.class.name.split('::').last || self.class.name
+    end
   end
 end
