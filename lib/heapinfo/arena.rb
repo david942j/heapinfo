@@ -1,6 +1,6 @@
 module HeapInfo
   class Arena
-    attr_reader :fastbin, :unsorted_bin, :small_bin, :large_bin, :top_chunk, :last_remainder
+    attr_reader :fastbin, :unsorted_bin, :smallbin, :largebin, :top_chunk, :last_remainder
     def initialize(base, arch, dumper)
       @base, @arch, @dumper = base, arch, dumper
       reload
@@ -17,6 +17,11 @@ module HeapInfo
         f
       end
       @unsorted_bin = UnsortedBin.new(size_t, @base + 8 + size_t * 10, @dumper, head: true)
+      @smallbin = Array.new(55) do |idx|
+        s = Smallbin.new(size_t, @base + 8 + size_t * (26 + 2 * idx), @dumper, head: true)
+        s.index = idx
+        s
+      end
       self
     end
 
@@ -24,6 +29,7 @@ module HeapInfo
       res = ''
       res += fastbin_layout if args.include? :fastbin
       res += unsorted_layout if args.include? :unsorted_bin
+      res += smallbin_layout if args.include? :smallbin
       res
     end
 
@@ -34,6 +40,10 @@ module HeapInfo
 
     def unsorted_layout
       unsorted_bin.inspect
+    end
+
+    def smallbin_layout
+      smallbin.map(&:inspect).join
     end
 
   private
@@ -49,8 +59,16 @@ module HeapInfo
       @fd = Helper.unpack(size_t, @data[0, @size_t])
     end
 
+    def idx_to_size
+      index * size_t * 2 + size_t * 4
+    end
+
+    def title
+      "%s%s: " % [Helper.color(self.class_name, sev: :bin),  index.nil? ? nil : "[#{Helper.color("%#x" % idx_to_size)}]"]
+    end
+
     def inspect
-      ret = "%s[%s]" % [Helper.color(self.class_name, sev: :bin),  Helper.color(index)]
+      ret = title
       dup = {}
       ptr = @fd
       # TODO: check valid chunk?
@@ -89,8 +107,9 @@ module HeapInfo
     # size: at most extend size
     # size=2: bk, bk, bin, fd, fd
     def inspect(size: 2)
-      ret = "%s: " % Helper.color(self.class_name, sev: :bin)
       list = link_list(size)
+      return '' if list.size <= 1 and self.class_name != 'UnsortedBin' # bad..
+      ret = title
       center = nil
       ret += list.map.with_index do |c, idx|
         next center = Helper.color("[self]", sev: :bin) if c == @base
@@ -134,6 +153,9 @@ module HeapInfo
   end
 
   class Smallbin < UnsortedBin
+    def idx_to_size
+      index * size_t * 2 + size_t * 18
+    end
   end
 
   class Largebin < Smallbin
