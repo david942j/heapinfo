@@ -45,12 +45,14 @@ module HeapInfo
 
     def inspect
       ret = "%s[%s]" % [Helper.color("Fastbin", sev: :bin),  Helper.color(index)]
+      dup = {}
       ptr = @fd
       while ptr != 0
-        # TODO: handle invalid ptr # important!
         ret += " => %s" % Helper.color("%#x" % ptr)
+        return ret += "(loop)" if dup[ptr]
+        dup[ptr] = true
         t = dump(ptr + size_t * 2, size_t)
-        return ret += " => (invalid)" if t.nil?
+        return ret += "(invalid)" if t.nil?
         ptr = Helper.unpack(size_t, t)
       end
       ret + " => (nil)"

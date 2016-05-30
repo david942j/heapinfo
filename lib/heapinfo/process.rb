@@ -34,12 +34,11 @@ module HeapInfo
     def dump(*args)
       return need_permission unless dumpable?
       mem = Dumper.dump(@status, f = mem_f, *args)
-      # remember to close file so that still can be traced by gdb or other tracers
       f.close
       mem
     end
 
-    # use /proc/[pid]/mem for memory dump, must sure not be traced by others
+    # use /proc/[pid]/mem for memory dump, must sure have permission
     def dumpable?
       mem_f.close
       true
