@@ -91,10 +91,24 @@ module HeapInfo
     def inspect(size: 2)
       ret = "%s: " % Helper.color(self.class_name, sev: :bin)
       list = link_list(size)
-      ret += list.map do |c|
-        next Helper.color("[self]") if c == @base
-        Helper.color("%#x" % c)
-      end.join(" <=> ")
+      center = nil
+      ret += list.map.with_index do |c, idx|
+        next center = Helper.color("[self]", sev: :bin) if c == @base
+        fwd = fd_of(c)
+        next "%s(invalid)" % Helper.color("%#x" % c) if fwd.nil? # invalid c
+        bck = bk_of(c)
+        if center.nil? # bk side
+          next Helper.color("%s%s" % [
+            Helper.color("%#x" % c),
+            fwd == list[idx+1] ? nil : "(%#x)" % fwd,
+          ])
+        else #fd size
+          next Helper.color("%s%s" % [
+            bck == list[idx-1] ? nil : "(%#x)" % bck,
+            Helper.color("%#x" % c),
+          ])
+        end
+      end.join(" === ")
       ret + "\n"
     end
 
