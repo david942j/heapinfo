@@ -13,15 +13,17 @@ module HeapInfo
       end
       @prev_size = Helper.unpack(size_t, sz[0, size_t])
       @size = Helper.unpack(size_t, sz[size_t..-1])
-      r_size = [@size & -8, size_t * 4].min # don't read too much data
+      r_size = [real_size - size_t * 2, size_t * 4].min # don't read too much data
       r_size = [r_size, 0].max # prevent negative size
       @data = dump(@base + size_t * 2, r_size)
     end
     def to_s
-      Helper.color("#<%s:%#018x>\n" % [self.class.to_s, self.object_id * 2], sev: :klass) +
+      ret = Helper.color("#<%s:%#x>\n" % [self.class.to_s, @base], sev: :klass) +
       "flags = [#{flags.map{|f|Helper.color(":#{f}", sev: :sym)}.join(',')}]\n" +
-      "size = #{Helper.color "%#x" % real_size}" + " (#{bintype})" + "\n"
-      
+      "size = #{Helper.color "%#x" % real_size} (#{bintype})\n"
+      ret += "prev_size = #{Helper.color "%#x" % @prev_size}\n" unless flags.include? :prev_inuse
+      ret += "data = #{Helper.color @data.inspect}#{'...' if @data.length < real_size - size_t * 2}\n"
+      ret
     end
 
     def flags

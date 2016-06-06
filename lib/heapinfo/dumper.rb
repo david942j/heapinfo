@@ -19,7 +19,6 @@ module HeapInfo
       nil
     end
 
-  private
     def self.parse_cmd(args)
       return :fail if args.empty?
       if args.size == 1 # 'heap, 100, 32'

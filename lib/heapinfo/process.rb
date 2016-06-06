@@ -40,7 +40,9 @@ module HeapInfo
     # dump_chunks take the dump result as chunks, and pretty print it
     def dump_chunks(*args)
       return need_permission unless dumpable?
-      dump(*args).to_chunks(bits: @status[:arch].to_i)
+      base, offset, _ = Dumper.parse_cmd(args)
+      base = @status[base].base if @status[base].is_a? Segment
+      dump(*args).to_chunks(bits: @status[:arch].to_i, base: base + offset)
     end
 
     # use /proc/[pid]/mem for memory dump, must sure have permission
