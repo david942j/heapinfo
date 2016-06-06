@@ -45,16 +45,8 @@ module HeapInfo
       dump(*args).to_chunks(bits: @status[:arch].to_i, base: base + offset)
     end
 
-    # use /proc/[pid]/mem for memory dump, must sure have permission
-    def dumpable?
-      mem_f.close
-      true
-    rescue => e
-      if e.is_a? Errno::EACCES
-        false
-      else
-        throw e
-      end
+    def layouts(*args)
+      self.libc.main_arena.layouts *args
     end
 
     def to_s
@@ -72,6 +64,18 @@ module HeapInfo
     end
 
   private
+    # use /proc/[pid]/mem for memory dump, must sure have permission
+    def dumpable?
+      mem_f.close
+      true
+    rescue => e
+      if e.is_a? Errno::EACCES
+        false
+      else
+        throw e
+      end
+    end
+
     def load_status(options)
       sta  = Helper.status_of pid
       elf  = Helper.exe_of pid

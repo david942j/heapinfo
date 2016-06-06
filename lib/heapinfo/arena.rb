@@ -25,7 +25,7 @@ module HeapInfo
       self
     end
 
-    def layout(*args)
+    def layouts(*args)
       res = ''
       res += fastbin_layout if args.include? :fastbin
       res += unsorted_layout if args.include? :unsorted_bin
