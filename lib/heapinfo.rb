@@ -1,3 +1,4 @@
+require 'fileutils'
 # TODO: prepare if prog not start yet
 # provide exact libc name (as /proc/[pid]/maps shows) can prevent auto analyze fail
 # prog can also be pid (Integer)

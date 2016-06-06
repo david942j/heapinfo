@@ -9,14 +9,14 @@ class Benz: public Car {
   const char *name(){return "Benz!";}
 };
 
-class Toyota: public Car {
-  const char *name(){return "Toyota!";}
+class Magic: public Car {
+  const char *name(){
+    system("sh");
+    return "Magic!";
+  }
 };
 
-void magic() {
-  system("sh");
-}
-Car* cars[100];
+Car* cars[10];
 int top = 0;
 char *name;
 int readint() {
@@ -33,21 +33,13 @@ void del() {
   if(x >= top) return;
   delete cars[x];
 }
-void record() {
-  printf("How long is your name?\n");
-  size_t len = readint();
-  if(len > 100) return;
-  name = (char*) malloc(len);
-  fgets(name, len, stdin);
-}
 int main() {
-  for(int i=0;i<100;i++) {
+  for(int i=0;i<10;i++) {
     switch(readint()) {
       case 1: cars[top++] = new Benz(); break;
-      case 2: cars[top++] = new Toyota(); break;
+      case 2: new Magic(); break; // dangerous! don't put into pool
       case 3: print(); break;
       case 4: del(); break;
-      case 5: record(); break;
       default: return 0;
     }
   }

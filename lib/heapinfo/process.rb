@@ -85,8 +85,8 @@ module HeapInfo
       @status = {
         program: Segment.find(maps, File.readlink("/proc/#{pid}/exe")),
         libc:    Libc.find(maps, maps.map{|s| s[3]}.find{|seg| libc.is_a?(Regexp) ? seg =~ libc : seg.include?(libc)}, self),
-        heap:    Segment.find(maps, 'heap'),
-        stack:   Segment.find(maps, 'stack'),
+        heap:    Segment.find(maps, '[heap]'),
+        stack:   Segment.find(maps, '[stack]'),
         ld:      Segment.find(maps, maps.map{|s| s[3]}.find{|seg| ld.is_a?(Regexp) ? seg =~ ld : seg.include?(ld)}),
         arch: elf[4] == "\x01" ? '32' : '64',
       }
