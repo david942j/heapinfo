@@ -22,7 +22,6 @@ module HeapInfo
     # dump(:heap, 256, 64) # &heap[256, 64]
     # dump('heap+256, 64') # &heap[256, 64]
     # dump('heap+0x100') # &heap[256, 8]
-    # if argument `heap` is present, dumper will try to mark chunks and pretty the output
     # dump(:segment, 8) semgent can be [heap, stack, (program|elf), libc]
     # dump(addr, 64) # addr[0, 64]
 
@@ -38,6 +37,12 @@ module HeapInfo
       mem
     end
 
+    # dump_chunks take the dump result as chunks, and pretty print it
+    def dump_chunks(*args)
+      return need_permission unless dumpable?
+      dump(*args).to_chunks(bits: @status[:arch].to_i)
+    end
+
     # use /proc/[pid]/mem for memory dump, must sure have permission
     def dumpable?
       mem_f.close
@@ -49,11 +54,6 @@ module HeapInfo
         throw e
       end
     end
-
-    def interact
-      #TODO
-    end
-    alias :interactive :interact
 
     def to_s
       "Program: #{Helper.color program.name} PID: #{Helper.color pid}\n" +
