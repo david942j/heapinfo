@@ -11,7 +11,7 @@ module HeapInfo
 
         def to_chunks(bits: 64)
           size_t = bits / 8
-          chunks = []
+          chunks = Chunks.new
           cur = 0
           while cur + size_t * 2 < self.length
             now_chunk = self[cur, size_t * 2].to_chunk
