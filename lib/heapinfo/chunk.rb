@@ -17,6 +17,35 @@ module HeapInfo
       r_size = [r_size, 0].max # prevent negative size
       @data = dump(@base + size_t * 2, r_size)
     end
+    def to_s
+      Helper.color("#<%s:%#018x>\n" % [self.class.to_s, self.object_id * 2], sev: :klass) +
+      "flags = [#{flags.map{|f|Helper.color(":#{f}", sev: :sym)}.join(',')}]\n" +
+      "size = #{Helper.color "%#x" % real_size}" + " (#{bintype})" + "\n"
+      
+    end
+
+    def flags
+      mask = @size - real_size
+      flag = []
+      flag << :non_main_arena unless mask & 4 == 0
+      flag << :mmapped unless mask & 2 == 0
+      flag << :prev_inuse unless mask & 1 == 0
+      flag
+    end
+
+    def real_size
+      @size & -8
+    end
+
+    def bintype
+      sz = real_size
+      return '????' if sz < @size_t * 4
+      return 'fast' if sz <= @size_t * 16
+      return 'small' if sz <= @size_t * 0x7e
+      return 'large' if sz <= @size_t * 0x3ffe # is this correct? 
+      return 'mmap'
+    end
+
     def class_name
       self.class.name.split('::').last || self.class.name
     end

@@ -37,6 +37,8 @@ module HeapInfo
       integer: "\e[38;5;12m", # light blue
       fatal: "\e[38;5;197m", # dark red
       bin: "\e[38;5;120m", # light green
+      klass: "\e[38;5;155m", # pry like
+      sym: "\e[38;5;229m", # pry like
     }
     # wrapper color for pretty inspect
     def self.color(s, sev: nil)

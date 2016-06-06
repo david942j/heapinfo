@@ -12,5 +12,9 @@ module HeapInfo
     def each(&block)
       @chunks.each(&block)
     end
+
+    def to_s
+      @chunks.map(&:to_s).join("\n")
+    end
   end
 end
