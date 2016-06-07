@@ -1,3 +1,8 @@
+[![Code Climate](https://codeclimate.com/github/david942j/heapinfo/badges/gpa.svg)](https://codeclimate.com/github/david942j/heapinfo)
+[![Issue Count](https://codeclimate.com/github/david942j/heapinfo/badges/issue_count.svg)](https://codeclimate.com/github/david942j/heapinfo)
+[![Test Coverage](https://codeclimate.com/github/david942j/heapinfo/badges/coverage.svg)](https://codeclimate.com/github/david942j/heapinfo/coverage)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](http://choosealicense.com/licenses/mit/)
+
 ## HeapInfo
 While playing CTF with heap exploitation, we always need a debugger (e.g. gdb) for tracking memory layout. But we don't really need a debugger if we just want to see whether the heap layout same as our imagine or not. Hope this small tool helps us exploit easier ;).
 
