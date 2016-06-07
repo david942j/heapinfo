@@ -3,7 +3,7 @@ module HeapInfo
   class Process
     DEFAULT_LIB = {
       libc: /libc[^\w]/,
-      ld:   /ld[^\w]/,
+      ld:   /\/ld-.+\.so/,
     }
     attr_reader :pid, :status
     def initialize(prog, options = {})
