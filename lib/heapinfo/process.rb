@@ -79,20 +79,24 @@ module HeapInfo
     def load_status(options)
       elf  = Helper.exe_of pid
       maps = Helper.parse_maps Helper.maps_of pid
-      libc = options[:libc]
-      ld   = options[:ld]
       @status = {
         program: Segment.find(maps, File.readlink("/proc/#{pid}/exe")),
-        libc:    Libc.find(maps, maps.map{|s| s[3]}.find{|seg| libc.is_a?(Regexp) ? seg =~ libc : seg.include?(libc)}, self),
+        libc:    Libc.find(maps, match_maps(maps, options[:libc]), self),
         heap:    Segment.find(maps, '[heap]'),
         stack:   Segment.find(maps, '[stack]'),
-        ld:      Segment.find(maps, maps.map{|s| s[3]}.find{|seg| ld.is_a?(Regexp) ? seg =~ ld : seg.include?(ld)}),
-        arch: elf[4] == "\x01" ? '32' : '64',
+        ld:      Segment.find(maps, match_maps(maps, options[:ld])),
+        arch:    bit(elf),
       }
       @status[:elf] = @status[:program] #alias
       @status.keys.each do |m|
         self.class.send(:define_method, m) {@status[m]}
       end
+    end
+    def match_maps(maps, pattern)
+      maps.map{|s| s[3]}.find{|seg| pattern.is_a?(Regexp) ? seg =~ pattern : sef.include?(pattern)}
+    end
+    def bit(elf)
+      elf[4] == "\x01" ? '32' : '64'
     end
     def mem_f
       File.open("/proc/#{pid}/mem")

@@ -120,7 +120,7 @@ module HeapInfo
             Helper.color("%#x" % c),
             fwd == list[idx+1] ? nil : "(%#x)" % fwd,
           ])
-        else #fd size
+        else #fd side
           next Helper.color("%s%s" % [
             bck == list[idx-1] ? nil : "(%#x)" % bck,
             Helper.color("%#x" % c),

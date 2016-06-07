@@ -32,9 +32,10 @@ describe HeapInfo::Dumper do
       expect(HeapInfo::Dumper.parse_cmd ['heap, 10']).to eq [:heap, 0, 10]
       expect(HeapInfo::Dumper.parse_cmd ['heap, 0x33, 10']).to eq [:heap, 51, 10]
       expect(HeapInfo::Dumper.parse_cmd ['heap+0x15, 10']).to eq [:heap, 0x15, 10]
+      expect(HeapInfo::Dumper.parse_cmd ['heap + 0x15, 10']).to eq [:heap, 0x15, 10]
     end
     it 'mixed' do
-      expect(HeapInfo::Dumper.parse_cmd ['heap+0x10', 10]).to eq [:heap, 0x10, 10]
+      expect(HeapInfo::Dumper.parse_cmd ['heap+ 0x10', 10]).to eq [:heap, 0x10, 10]
       expect(HeapInfo::Dumper.parse_cmd ['heap', 10]).to eq [:heap, 0, 10]
     end
   end
