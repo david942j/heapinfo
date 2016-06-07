@@ -16,5 +16,10 @@ module HeapInfo
     def to_s
       @chunks.map(&:to_s).join("\n")
     end
+
+    def size
+      @chunks.size
+    end
+    alias :length :size
   end
 end

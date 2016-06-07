@@ -13,7 +13,7 @@ module HeapInfo
           size_t = bits / 8
           chunks = Chunks.new
           cur = 0
-          while cur + size_t * 2 < self.length
+          while cur + size_t * 2 <= self.length
             now_chunk = self[cur, size_t * 2].to_chunk
             sz = now_chunk.real_size
             chunks << self[cur, sz + 1].to_chunk(bits: bits, base: base + cur) # +1 for dump prev_inuse
