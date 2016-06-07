@@ -10,6 +10,10 @@ describe HeapInfo::Helper do
     end
   end
 
+  it 'proc' do
+    expect { HeapInfo::Helper.exe_of 0 }.to raise_error ArgumentError
+  end
+
   describe 'parse_maps' do
     before(:all) do
       @files_dir = File.expand_path('../files', __FILE__)

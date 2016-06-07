@@ -11,7 +11,7 @@ module HeapInfo
       elsif base.is_a? Integer
         addr = base
       else
-        throw "dump #{args} not valid"
+        throw
       end
       file.pos = addr + offset
       file.read len

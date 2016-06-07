@@ -15,6 +15,10 @@ describe HeapInfo::Dumper do
       segments = {elf: HeapInfo::Segment.new(0x400000, 'elf')}
       expect(HeapInfo::Dumper.dump(segments, @mem_f, :elf, 4)).to eq "\x7fELF"
     end
+    it 'invalid' do
+      expect(HeapInfo::Dumper.dump({}, @mem_f, :zzz, 1)).to be nil
+      expect(HeapInfo::Dumper.dump({}, @mem_f, 0x12345, 1)).to be nil
+    end
   end
   describe 'parse_cmd' do
     it 'normal' do

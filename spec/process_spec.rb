@@ -4,6 +4,7 @@ describe HeapInfo::Process do
   before(:all) do
     @prog = File.readlink('/proc/self/exe')
     @h = HeapInfo::Process.new(@prog)
+    expect(heapinfo(@h.instance_variable_get(:@pid)).elf.name).to eq @h.elf.name
     @h.instance_variable_set(:@pid, 'self')
   end
   it 'basic' do
@@ -20,6 +21,18 @@ describe HeapInfo::Process do
  
   it 'dump' do
     expect(@h.dump(:elf, 4)).to eq "\x7fELF"
+  end
+
+  it 'dump_chunks' do
+    expect(@h.dump_chunks(:heap, 0x30).class).to be HeapInfo::Chunks
+  end
+
+  it 'dumpable?' do
+    expect(@h.send(:dumpable?)).to be true
+    # a little hack
+    @h.instance_variable_set(:@pid, 1)
+    expect(@h.send(:dumpable?)).to be false
+    @h.instance_variable_set(:@pid, 'self')
   end
 
   describe 'main_arena' do
