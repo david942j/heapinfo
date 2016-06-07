@@ -21,8 +21,8 @@ module HeapInfo
 
     def self.parse_cmd(args)
       return :fail if args.empty?
-      if args.size == 1 # 'heap, 100, 32'
-        args = args[0].split(/[, ]/).select{|c|not c.empty?}
+      if args[0].is_a? String # 'heap+100, 32'
+        args = args[0].split(/[, ]/).reject(&:empty?) + args[1..-1]
       end
       return :fail unless args.size.between? 1, 3
       offset = 0
