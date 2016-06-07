@@ -8,7 +8,7 @@ module HeapInfo
       #TODO: handle when multi processes exists
     end
     # create read /proc/$pid/* methods
-    %w(status exe maps).each do |method|
+    %w(exe maps).each do |method|
       self.define_singleton_method("#{method}_of".to_sym) do |pid|
         begin
           IO.binread("/proc/#{pid}/#{method}")

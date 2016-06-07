@@ -46,7 +46,7 @@ module HeapInfo
     end
 
     def layouts(*args)
-      self.libc.main_arena.layouts *args
+      self.libc.main_arena.layouts(*args)
     end
 
     def to_s
@@ -77,7 +77,6 @@ module HeapInfo
     end
 
     def load_status(options)
-      sta  = Helper.status_of pid
       elf  = Helper.exe_of pid
       maps = Helper.parse_maps Helper.maps_of pid
       libc = options[:libc]

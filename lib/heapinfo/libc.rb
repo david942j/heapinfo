@@ -13,8 +13,8 @@ module HeapInfo
       @_main_arena = Arena.new(off + self.base, process.arch, process.dumper)
     end
 
-    def self.find(_maps, name, process)
-      obj = super(_maps, name)
+    def self.find(maps, name, process)
+      obj = super(maps, name)
       obj.send(:process=, process)
       obj
     end

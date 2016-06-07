@@ -11,10 +11,10 @@ module HeapInfo
     end
 
     # maps is return value of Helper.parse_maps
-    def self.find(_maps, name)
-      maps = _maps.select {|m| m[3] == name}
-      maps = _maps.select {|m| m[3].include? name} if maps.empty? # be careful!
-      self.new maps.map{|m| m[0]}.min, name unless maps.empty?
+    def self.find(maps, name)
+      need = maps.select {|m| m[3] == name}
+      need = maps.select {|m| m[3].include? name} if need.empty? # be careful!
+      self.new need.map{|m| m[0]}.min, name unless need.empty?
     end
   end
 end

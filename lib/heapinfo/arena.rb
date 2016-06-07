@@ -71,7 +71,6 @@ module HeapInfo
       ret = title
       dup = {}
       ptr = @fd
-      # TODO: check valid chunk?
       while ptr != 0
         ret += " => %s" % Helper.color("%#x" % ptr)
         return ret += "(loop)\n" if dup[ptr]
