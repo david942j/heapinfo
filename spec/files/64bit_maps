@@ -1,0 +1,29 @@
+00400000-00401000 r-xp 00000000 ca:01 464143                             /home/heapinfo/examples/uaf/uaf
+00600000-00601000 r--p 00000000 ca:01 464143                             /home/heapinfo/examples/uaf/uaf
+00601000-00602000 rw-p 00001000 ca:01 464143                             /home/heapinfo/examples/uaf/uaf
+7f65ac7b8000-7f65ac7ce000 r-xp 00000000 ca:01 402137                     /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f65ac7ce000-7f65ac9cd000 ---p 00016000 ca:01 402137                     /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f65ac9cd000-7f65ac9ce000 rw-p 00015000 ca:01 402137                     /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f65ac9ce000-7f65acad3000 r-xp 00000000 ca:01 401788                     /lib/x86_64-linux-gnu/libm-2.19.so
+7f65acad3000-7f65accd2000 ---p 00105000 ca:01 401788                     /lib/x86_64-linux-gnu/libm-2.19.so
+7f65accd2000-7f65accd3000 r--p 00104000 ca:01 401788                     /lib/x86_64-linux-gnu/libm-2.19.so
+7f65accd3000-7f65accd4000 rw-p 00105000 ca:01 401788                     /lib/x86_64-linux-gnu/libm-2.19.so
+7f65accd4000-7f65ace8f000 r-xp 00000000 ca:01 402326                     /lib/x86_64-linux-gnu/libc-2.19.so
+7f65ace8f000-7f65ad08e000 ---p 001bb000 ca:01 402326                     /lib/x86_64-linux-gnu/libc-2.19.so
+7f65ad08e000-7f65ad092000 r--p 001ba000 ca:01 402326                     /lib/x86_64-linux-gnu/libc-2.19.so
+7f65ad092000-7f65ad094000 rw-p 001be000 ca:01 402326                     /lib/x86_64-linux-gnu/libc-2.19.so
+7f65ad094000-7f65ad099000 rw-p 00000000 00:00 0
+7f65ad099000-7f65ad17f000 r-xp 00000000 ca:01 13857                      /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19
+7f65ad17f000-7f65ad37e000 ---p 000e6000 ca:01 13857                      /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19
+7f65ad37e000-7f65ad386000 r--p 000e5000 ca:01 13857                      /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19
+7f65ad386000-7f65ad388000 rw-p 000ed000 ca:01 13857                      /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.19
+7f65ad388000-7f65ad39d000 rw-p 00000000 00:00 0
+7f65ad39d000-7f65ad3c0000 r-xp 00000000 ca:01 402319                     /lib/x86_64-linux-gnu/ld-2.19.so
+7f65ad5aa000-7f65ad5af000 rw-p 00000000 00:00 0
+7f65ad5bc000-7f65ad5bf000 rw-p 00000000 00:00 0
+7f65ad5bf000-7f65ad5c0000 r--p 00022000 ca:01 402319                     /lib/x86_64-linux-gnu/ld-2.19.so
+7f65ad5c0000-7f65ad5c1000 rw-p 00023000 ca:01 402319                     /lib/x86_64-linux-gnu/ld-2.19.so
+7f65ad5c1000-7f65ad5c2000 rw-p 00000000 00:00 0
+7fff3d1e8000-7fff3d209000 rw-p 00000000 00:00 0                          [stack]
+7fff3d309000-7fff3d30b000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]

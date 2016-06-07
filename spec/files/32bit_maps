@@ -1,0 +1,23 @@
+08048000-08049000 r-xp 00000000 ca:01 464143                             /home/heapinfo/examples/uaf/uaf
+08049000-0804a000 r--p 00000000 ca:01 464143                             /home/heapinfo/examples/uaf/uaf
+0804a000-0804b000 rw-p 00001000 ca:01 464143                             /home/heapinfo/examples/uaf/uaf
+f73d4000-f73d7000 rw-p 00000000 00:00 0
+f73d7000-f73f3000 r-xp 00000000 ca:01 160460                             /usr/lib32/libgcc_s.so.1
+f73f3000-f73f4000 rw-p 0001b000 ca:01 160460                             /usr/lib32/libgcc_s.so.1
+f73f4000-f7438000 r-xp 00000000 ca:01 402366                             /lib32/libm-2.19.so
+f7438000-f7439000 r--p 00043000 ca:01 402366                             /lib32/libm-2.19.so
+f7439000-f743a000 rw-p 00044000 ca:01 402366                             /lib32/libm-2.19.so
+f743a000-f75df000 r-xp 00000000 ca:01 463662                             /lib32/libc-2.19.so
+f75df000-f75e1000 r--p 001a5000 ca:01 463662                             /lib32/libc-2.19.so
+f75e1000-f75e2000 rw-p 001a7000 ca:01 463662                             /lib32/libc-2.19.so
+f75e2000-f75e5000 rw-p 00000000 00:00 0
+f75e5000-f76c1000 r-xp 00000000 ca:01 137147                             /usr/lib32/libstdc++.so.6.0.19
+f76c1000-f76c5000 r--p 000dc000 ca:01 137147                             /usr/lib32/libstdc++.so.6.0.19
+f76c5000-f76c6000 rw-p 000e0000 ca:01 137147                             /usr/lib32/libstdc++.so.6.0.19
+f76c6000-f76ce000 rw-p 00000000 00:00 0
+f76db000-f76dd000 rw-p 00000000 00:00 0
+f76dd000-f76de000 r-xp 00000000 00:00 0                                  [vdso]
+f76de000-f76fe000 r-xp 00000000 ca:01 463655                             /lib32/ld-2.19.so
+f76fe000-f76ff000 r--p 0001f000 ca:01 463655                             /lib32/ld-2.19.so
+f76ff000-f7700000 rw-p 00020000 ca:01 463655                             /lib32/ld-2.19.so
+ffdd7000-ffdf8000 rw-p 00000000 00:00 0                                  [stack]
