@@ -8,9 +8,9 @@ module HeapInfo
     attr_reader :pid, :status
     def initialize(prog, options = {})
       @prog = prog
-      @pid = fetch_pid
+      @options = options.merge DEFAULT_LIB
+      load!
       return unless load?
-      load_status options.merge(DEFAULT_LIB)
       need_permission unless dumpable?
     end
 
@@ -60,13 +60,20 @@ module HeapInfo
     end
 
     def debug
-      return unless load?
+      return unless load!
       yield if block_given?
     end
 
   private
     def load?
       @pid != nil
+    end
+
+    def load! # force load is not efficient
+      @pid = fetch_pid
+      return false if @pid.nil? # still can't load
+      load_status @options
+      true
     end
 
     def fetch_pid

