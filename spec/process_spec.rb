@@ -43,7 +43,7 @@ describe HeapInfo::Process do
       # run without ASLR
       exec "setarch `uname -m` -R /bin/sh -c #{@victim}" if pid.nil?
       loop until `pidof #{@victim}` != '' 
-      @h = heapinfo(@victim)
+      @h = heapinfo(@victim, ld: '/ld')
     end
     after(:all) do
       %x(killall #{@victim})
@@ -55,6 +55,12 @@ describe HeapInfo::Process do
       pid = @h.pid
       expect(pid.is_a? Integer).to be true
       expect(HeapInfo::Process.new(pid).elf.name).to eq @h.elf.name
+    end
+
+    it 'debug wrapper' do
+      @h.instance_variable_set(:@pid, nil)
+      # will reload pid
+      expect(@h.debug { @h.to_s }).to eq @h.to_s
     end
 
     it 'main_arena' do

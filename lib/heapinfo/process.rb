@@ -8,7 +8,7 @@ module HeapInfo
     attr_reader :pid, :status
     def initialize(prog, options = {})
       @prog = prog
-      @options = options.merge DEFAULT_LIB
+      @options = DEFAULT_LIB.merge options
       load!
       return unless load?
       need_permission unless dumpable?
@@ -115,7 +115,7 @@ module HeapInfo
       end
     end
     def match_maps(maps, pattern)
-      maps.map{|s| s[3]}.find{|seg| pattern.is_a?(Regexp) ? seg =~ pattern : sef.include?(pattern)}
+      maps.map{|s| s[3]}.find{|seg| pattern.is_a?(Regexp) ? seg =~ pattern : seg.include?(pattern)}
     end
     def bit(elf)
       elf[4] == "\x01" ? '32' : '64'
