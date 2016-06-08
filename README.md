@@ -5,13 +5,21 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](http://choosealicense.com/licenses/mit/)
 
 ## HeapInfo
-While playing CTF with heap exploitation, we always need a debugger (e.g. gdb) for tracking memory layout. But we don't really need a debugger if we just want to see whether the heap layout same as our imagine or not. Hope this small tool helps us exploit easier ;).
+As pwn lovers, while playing CTF with heap exploitation, we always need a debugger (e.g. gdb) for tracking memory layout. But we don't really need a debugger if we just want to see whether the heap layout same as our imagine or not. Hope this small tool helps us exploit easier ;).
 
 Implement with ruby because I love ruby :P. But might also implement with Python (if no others did) in the future.
 
-There's almost NOTHING here now. Will implement a pretty dump of heap / bin layout first, any suggestion of features is welcome.
+If you prefer pwntools for exploiting, you can still use **heapinfo** in irb/pry as a small debugger.
+
+Any suggestion of features is welcome.
 
 Relation works are [pwntools-ruby](https://github.com/peter50216/pwntools-ruby) and [gdbpwn](https://github.com/scwuaptx/Pwngdb).
+
+## Features
+* Use in irb/pry or in your exploit script
+* **heapinfo** will work when the `victim` is being traced! i.e. you can use ltrace/strace/gdb and **heapinfo** simultaneously!
+* `dump` - can dump arbitrarily address memory.
+* `layouts` - show the current bin layouts, very useful for heap exploitation.
 
 ## Usage
 
@@ -23,15 +31,16 @@ h = heapinfo('victim')
 # or use h = heapinfo(20568) to prevent multi processes exist
 
 # will present simple info when loading:
-# Program: /home/ubuntu/victim PID: 20568
+# Program: /home/heapinfo/victim PID: 20568
 # victim          base @ 0x400000
-# heap            base @ 0x11cc000
-# stack           base @ 0x7fffa0e20000
-# libc-2.19.so    base @ 0x7f62b146b000
+# [heap]          base @ 0x11cc000
+# [stack]         base @ 0x7fff2b244000
+# libc-2.19.so    base @ 0x7f892a63a000
+# ld-2.19.so      base @ 0x7f892bee6000
 
 # query segments' info
 "%#x" % h.libc.base
-# => "0x7f62b146b000"
+# => "0x7f892a63a000"
 h.libc.name
 # => "/lib/x86_64-linux-gnu/libc-2.19.so"
 "%#x" % h.elf.base
@@ -58,5 +67,4 @@ p h.dump(0x400000, 8) # or simply give addr
 # invalid examples:
 # h.dump('meow') # no such segment
 # h.dump('heap-1, 64') # not support `-`
-# h.dump('heap+123, 256, 64') # valid but parser will take it same as 'heap+123, 64'
 ```

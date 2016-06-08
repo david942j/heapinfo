@@ -28,7 +28,6 @@ module HeapInfo
     # invalid:
     # dump('meow') # no such segment
     # dump('heap-1, 64') # not support `-`
-    # dump('heap+123, 256, 64') # parser will take it same as 'heap+123, 64'
     
     def dump(*args)
       return need_permission unless dumpable?

@@ -108,9 +108,12 @@ module HeapInfo
     def inspect(size: 2)
       list = link_list(size)
       return '' if list.size <= 1 and self.class_name != 'UnsortedBin' # bad..
-      ret = title
+      title + pretty_list(list) + "\n"
+    end
+
+    def pretty_list(list)
       center = nil
-      ret += list.map.with_index do |c, idx|
+      list.map.with_index do |c, idx|
         next center = Helper.color("[self]", sev: :bin) if c == @base
         fwd = fd_of(c)
         next "%s(invalid)" % Helper.color("%#x" % c) if fwd.nil? # invalid c
@@ -127,7 +130,6 @@ module HeapInfo
           ])
         end
       end.join(" === ")
-      ret + "\n"
     end
 
     def link_list(expand_size)
