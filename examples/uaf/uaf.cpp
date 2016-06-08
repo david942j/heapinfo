@@ -1,3 +1,7 @@
+/*
+    make && \
+    ncat -vkl 127.0.0.1 12345 -c 'strace ./uaf' 
+ */
 #include <cstdlib>
 #include <cstdio>
 class Car {
@@ -18,7 +22,6 @@ class Magic: public Car {
 
 Car* cars[10];
 int top = 0;
-char *name;
 int readint() {
   int x;
   scanf("%d", &x);

@@ -2,3 +2,4 @@
 !*/*.c
 !*/*.cpp
 !*/*.rb
+!*/Makefile
