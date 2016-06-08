@@ -3,6 +3,7 @@ module HeapInfo
     def self.pidof(prog)
       # plz, don't cmd injection your self :p
       pid = `pidof #{prog}`.strip.to_i
+      return nil if pid == 0 # process not exists yet
       throw "pidof #{prog} fail" unless pid.between?(2, 65535)
       pid
       #TODO: handle when multi processes exists

@@ -13,8 +13,8 @@ module HeapInfo
   FileUtils.mkdir_p(TMP_DIR)
   FileUtils.mkdir_p(CACHE_DIR)
 end
-require 'heapinfo/process'
 require 'heapinfo/helper'
+require 'heapinfo/process'
 require 'heapinfo/segment'
 require 'heapinfo/libc'
 require 'heapinfo/chunk'

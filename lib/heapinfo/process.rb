@@ -7,11 +7,8 @@ module HeapInfo
     }
     attr_reader :pid, :status
     def initialize(prog, options = {})
-      if prog.is_a? String
-        @pid = Helper.pidof prog
-      elsif prog.is_a? Integer
-        @pid = prog
-      end
+      @prog = prog
+      @pid = fetch_pid
       load_status options.merge(DEFAULT_LIB)
       need_permission unless dumpable?
     end
@@ -36,7 +33,7 @@ module HeapInfo
       mem
     end
 
-    # dump_chunks take the dump result as chunks, and pretty print it
+    # return the dump result as chunks
     def dump_chunks(*args)
       return need_permission unless dumpable?
       base, offset, _ = Dumper.parse_cmd(args)
@@ -63,6 +60,16 @@ module HeapInfo
     end
 
   private
+    def fetch_pid
+      pid = nil
+      if @prog.is_a? String
+        pid = Helper.pidof @prog
+      elsif @prog.is_a? Integer
+        pid = @prog
+      end
+      pid
+    end
+
     # use /proc/[pid]/mem for memory dump, must sure have permission
     def dumpable?
       mem_f.close

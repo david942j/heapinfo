@@ -52,7 +52,7 @@ describe HeapInfo::Process do
 
     it 'check process' do
       expect(@h.elf.name).to eq @victim
-      pid = @h.instance_variable_get(:@pid)
+      pid = @h.pid
       expect(pid.is_a? Integer).to be true
       expect(HeapInfo::Process.new(pid).elf.name).to eq @h.elf.name
     end

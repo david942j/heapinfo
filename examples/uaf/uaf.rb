@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 #encoding: ascii-8bit
+#TODO: bug that crash occasionally
 require 'heapinfo'
 require 'socket'
 $HOST, $PORT = '', 12345
