@@ -9,6 +9,7 @@ module HeapInfo
     def initialize(prog, options = {})
       @prog = prog
       @pid = fetch_pid
+      return unless load?
       load_status options.merge(DEFAULT_LIB)
       need_permission unless dumpable?
     end
@@ -27,6 +28,7 @@ module HeapInfo
     # dump('heap-1, 64') # not support `-`
     
     def dump(*args)
+      return unless load?
       return need_permission unless dumpable?
       mem = Dumper.dump(@status, f = mem_f, *args)
       f.close
@@ -35,6 +37,7 @@ module HeapInfo
 
     # return the dump result as chunks
     def dump_chunks(*args)
+      return unless load?
       return need_permission unless dumpable?
       base, offset, _ = Dumper.parse_cmd(args)
       base = @status[base].base if @status[base].is_a? Segment
@@ -42,10 +45,12 @@ module HeapInfo
     end
 
     def layouts(*args)
+      return unless load?
       self.libc.main_arena.layouts(*args)
     end
 
     def to_s
+      return "Process not found" unless load?
       "Program: #{Helper.color program.name} PID: #{Helper.color pid}\n" +
       program.to_s +
       heap.to_s + 
@@ -54,12 +59,16 @@ module HeapInfo
       ld.to_s
     end
 
-    # for children to access memory
-    def dumper
-      Proc.new {|*args| self.dump(*args)}
+    def debug
+      return unless load?
+      yield if block_given?
     end
 
   private
+    def load?
+      @pid != nil
+    end
+
     def fetch_pid
       pid = nil
       if @prog.is_a? String
@@ -109,6 +118,9 @@ module HeapInfo
     end
     def need_permission
       puts Helper.color(%q(Could not attach to process. Check the setting of /proc/sys/kernel/yama/ptrace_scope, or try again as the root user.  For more details, see /etc/sysctl.d/10-ptrace.conf), sev: :fatal)
+    end
+    def dumper
+      Proc.new {|*args| self.dump(*args)}
     end
   end
 end
