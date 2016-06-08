@@ -1,0 +1,29 @@
+#include <cstdlib>
+#include <cstdio>
+#include <unistd.h>
+int main(int argc, char **argv) {
+  if(argc <=1 ) alarm(10);
+  void *v, *u;
+  int *i, *j;
+  
+  // normal
+  v = malloc(24); u = malloc(24);
+  free(v); free(u);
+
+  // invalid
+  i = (int*)malloc(40);
+  free(i);
+  *i = 0xdeadbeef;
+
+  // loop
+  v = malloc(56); u = malloc(56);
+  free(v); free(u); free(v);
+
+  v = malloc(136);
+  malloc(72); // to prevent small bin merge with top_chunk
+  free(v);
+  v = malloc(152); // let 136 put into smallbin
+  malloc(200); // to prevent merge with top_chunk
+  free(v); // put into unsorted bin 
+  scanf("%*c");
+}

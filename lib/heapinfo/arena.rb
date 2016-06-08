@@ -68,17 +68,25 @@ module HeapInfo
     end
 
     def inspect
-      ret = title
+      title + list.map do |ptr|
+        next "(#{ptr})\n" if ptr.is_a? Symbol
+        next " => (nil)\n" if ptr.nil?
+        " => %s" % Helper.color("%#x" % ptr)
+      end.join
+    end
+
+    def list
       dup = {}
       ptr = @fd
+      ret = []
       while ptr != 0
-        ret += " => %s" % Helper.color("%#x" % ptr)
-        return ret += "(loop)\n" if dup[ptr]
+        ret << ptr
+        return ret << :loop if dup[ptr]
         dup[ptr] = true
         ptr = fd_of(ptr)
-        return ret += "(invalid)\n" if ptr.nil?
+        return ret << :invalid if ptr.nil?
       end
-      ret + " => (nil)\n"
+      ret << nil
     end
 
     def addr_of(ptr, offset)
