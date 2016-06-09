@@ -11,7 +11,7 @@ module HeapInfo
     attr_reader :pid
     attr_reader :status
 
-    # Instantiate a #HeapInfo::Process object
+    # Instantiate a <tt>HeapInfo::Process</tt> object
     # @param [String, Fixnum] prog Process name or pid, see <tt>HeapInfo::heapinfo</tt> for more information
     # @param [Hash] options libraries' filename, see <tt>HeapInfo::heapinfo</tt> for more information
     def initialize(prog, options = {})

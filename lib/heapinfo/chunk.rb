@@ -1,12 +1,20 @@
 module HeapInfo
+  # The object of a heap chunk
   class Chunk
-    attr_accessor :size_t, :base, :prev_size, :size, :data
-    def initialize(size_t, chunk_ptr, dumper, head: false) # head: if fake chunk in main_arena
+    # @return [Integer] 4 or 8 according to 32bit or 64bit, respectively.
+    attr_accessor :size_t
+    attr_accessor :base, :prev_size, :size, :data
+
+    # Instantiate a <tt>HeapInfo::Chunk</tt> object
+    #
+    # @param [Integer] size_t 4 or 8
+    # @param [Integer] base Start address of this chunk
+    # @param [Proc] dumper For dump more information of this chunk
+    def initialize(size_t, base, dumper, head: false) # head: if fake chunk in main_arena
       fail unless [4, 8].include? size_t 
       self.class.send(:define_method, :dump){|*args| dumper.call(*args)}
-      @head = head if head # create var only if need
       @size_t = size_t
-      @base = chunk_ptr
+      @base = base
       sz = dump(@base, size_t * 2)
       if head # no need to read size if is bin
         return @data = dump(@base + size_t * 2, size_t * 4)
