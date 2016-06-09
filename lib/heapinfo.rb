@@ -36,6 +36,11 @@ module HeapInfo
   #   # [stack]         base @ 0x7fff2b244000
   #   # libc-2.19.so    base @ 0x7f892a63a000
   #   # ld-2.19.so      base @ 0x7f892bee6000
+  #   p h.libc.name
+  #   # => "/lib/x86_64-linux-gnu/libc-2.19.so"
+  #   p h.ld.name
+  #   # => "/lib/x86_64-linux-gnu/ld-2.19.so"
+  #  
   # @example
   #   h = heapinfo(27605, libc: 'libc.so.6', ld: 'ld-linux-x86-64.so.2')
   #   # pid 27605 is run by custom loader

@@ -115,7 +115,7 @@ describe HeapInfo::Process do
       end
       it 'mmap' do
         expect(@mmap_chunk.base & 0xfff).to be 0
-        expect(@mmap_chunk.bintype).to eq 'mmap'
+        expect(@mmap_chunk.bintype).to eq :mmap
         expect(@mmap_chunk.flags).to eq [:mmapped]
         expect(@mmap_chunk.to_s).to include ':mmapped'
       end

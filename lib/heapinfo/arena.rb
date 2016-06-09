@@ -64,7 +64,7 @@ module HeapInfo
     end
 
     def title
-      "%s%s: " % [Helper.color(self.class_name, sev: :bin),  index.nil? ? nil : "[#{Helper.color("%#x" % idx_to_size)}]"]
+      "%s%s: " % [Helper.color(Helper.class_name(self), sev: :bin),  index.nil? ? nil : "[#{Helper.color("%#x" % idx_to_size)}]"]
     end
 
     def inspect
@@ -115,7 +115,7 @@ module HeapInfo
     # size=2: bk, bk, bin, fd, fd
     def inspect(size: 2)
       list = link_list(size)
-      return '' if list.size <= 1 and self.class_name != 'UnsortedBin' # bad..
+      return '' if list.size <= 1 and Helper.class_name(self) != 'UnsortedBin' # bad..
       title + pretty_list(list) + "\n"
     end
 

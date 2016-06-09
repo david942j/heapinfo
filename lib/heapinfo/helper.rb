@@ -92,5 +92,16 @@ module HeapInfo
     def self.unpack(size_t, data)
       data.unpack(size_t == 4 ? 'L*' : 'Q*')[0]
     end
+
+    # Retrieve pure class name(without module) of an object
+    # @param [Object] obj Any instance
+    # @return [String] Class name of <tt>obj</tt>
+    # @example
+    #   # suppose obj is an instance of HeapInfo::Chunk
+    #   Helper.class_name(obj)
+    #   # => 'Chunk'
+    def self.class_name(obj)
+      obj.class.name.split('::').last || obj.class.name
+    end
   end
 end

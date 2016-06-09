@@ -4,7 +4,7 @@ describe String do
   it 'to_chunk' do
     chunk = "\x00\x00\x00\x00\x00\x00\x00\x00g\x00\x00\x00\x00\x00\x00\x00".to_chunk
     expect(chunk.class).to be HeapInfo::Chunk
-    expect(chunk.real_size).to be 0x60
+    expect(chunk.size).to be 0x60
     expect(chunk.flags).to eq [:non_main_arena, :mmapped, :prev_inuse]
   end
 
@@ -12,7 +12,7 @@ describe String do
     chunks = [0,0x21,0,0,0,0x41].pack("Q*").to_chunks
     expect(chunks.size).to be 2
     chunks.each{|chunk| # test each
-      expect(chunk.real_size & 15).to be 0
+      expect(chunk.size & 15).to be 0
     }
   end
 end
