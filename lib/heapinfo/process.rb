@@ -12,7 +12,8 @@ module HeapInfo
     attr_reader :status
 
     # Instantiate a #HeapInfo::Process object
-    # @param [String, Fixnum] prog Process name or pid, see #HeapInfo.heapinfo for more information
+    # @param [String, Fixnum] prog Process name or pid, see <tt>HeapInfo::heapinfo</tt> for more information
+    # @param [Hash] options libraries' filename, see <tt>HeapInfo::heapinfo</tt> for more information
     def initialize(prog, options = {})
       @prog = prog
       @options = DEFAULT_LIB.merge options
@@ -23,9 +24,9 @@ module HeapInfo
 
     # Use this method to wrapper all HeapInfo methods.
     #
-    # Since `HeapInfo` is a tool(debugger) for local usage, 
+    # Since <tt>::HeapInfo</tt> is a tool(debugger) for local usage, 
     # while exploiting remote service, all methods will not work properly.
-    # So I suggest to wrapper all methods inside `debug`,
+    # So I suggest to wrapper all methods inside <tt>#debug</tt>,
     # which will ignore the block while the victim process is not found.
     #
     # @example
@@ -35,7 +36,7 @@ module HeapInfo
     #     # for local to check if exploit correct
     #     fail('libc_base') unless libc_base == h.libc.base
     #   }
-    #   # block of `debug` will not execute if h.pid is nil
+    #   # block of #debug will not execute if h.pid is nil
     def debug
       return unless load!
       yield if block_given?
@@ -45,7 +46,7 @@ module HeapInfo
     #
     # Note: This method require you have permission of attaching another process. If not, a warning message will present.
     #
-    # @param [Mixed] args Will be parsed to <tt>[base, offset, length]</tt>, see @example for more information.
+    # @param [Mixed] args Will be parsed into <tt>[base, offset, length]</tt>, see Examples for more information.
     # @return [String, NilClass] The content needed. When the request address is not readable or the process not exists, <tt>nil</tt> is returned.
     #
     # @example
@@ -69,10 +70,11 @@ module HeapInfo
     end
 
     # Return the dump result as chunks.
-    # see `HeapInfo::Chunks` and `HeapInfo::Chunk` for more information.
-    # Note: Same as `dump`, need permission of attaching another process.
-    # @return [HeapInfo::Chunks] An array of chunks.
-    # @param [Mixed] args Same as arguments of #dump
+    # see <tt>HeapInfo::Chunks</tt> and <tt>HeapInfo::Chunk</tt> for more information.
+    #
+    # Note: Same as <tt>dump</tt>, need permission of attaching another process.
+    # @return [HeapInfo::Chunks] An array of chunk(s).
+    # @param [Mixed] args Same arguments of <tt>#dump</tt>
     def dump_chunks(*args)
       return unless load?
       return need_permission unless dumpable?
