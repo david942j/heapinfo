@@ -50,6 +50,9 @@ module HeapInfo
   end
 end
 
+# Alias method of #HeapInfo::heapinfo for global usage
+# @return [HeapInfo::Process]
+# @param [Mixed] args see #HeapInfo::heapinfo for more information
 def heapinfo(*args)
   ::HeapInfo::heapinfo(*args)
 end

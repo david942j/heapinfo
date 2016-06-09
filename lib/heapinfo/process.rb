@@ -7,12 +7,12 @@ module HeapInfo
       libc: /libc[^\w]/,
       ld:   /\/ld-.+\.so/,
     }
-    # @return [Fixnum, NilClass] return the pid of process, nil for no such process found
+    # @return [Fixnum, NilClass] return the pid of process, <tt>nil</tt> if no such process found
     attr_reader :pid
     attr_reader :status
 
-    # Instantiate a `HeapInfo::Process` object
-    # @param [String, Fixnum] prog Process name or pid, see `HeapInfo.heapinfo` for more information
+    # Instantiate a #HeapInfo::Process object
+    # @param [String, Fixnum] prog Process name or pid, see #HeapInfo.heapinfo for more information
     def initialize(prog, options = {})
       @prog = prog
       @options = DEFAULT_LIB.merge options
@@ -35,7 +35,7 @@ module HeapInfo
     #     # for local to check if exploit correct
     #     fail('libc_base') unless libc_base == h.libc.base
     #   }
-    #   # block of `debug` will not execute if <tt>h.pid</tt> is <tt>nil</tt>
+    #   # block of `debug` will not execute if h.pid is nil
     def debug
       return unless load!
       yield if block_given?
@@ -43,22 +43,23 @@ module HeapInfo
 
     # Dump the content of specific memory address.
     #
+    # Note: This method require you have permission of attaching another process. If not, a warning message will present.
+    #
+    # @param [Mixed] args Will be parsed to <tt>[base, offset, length]</tt>, see @example for more information.
     # @return [String, NilClass] The content needed. When the request address is not readable or the process not exists, <tt>nil</tt> is returned.
     #
     # @example
     #   dump(:heap) # &heap[0, 8]
     #   dump(:heap, 64) # &heap[0, 64]
     #   dump(:heap, 256, 64) # &heap[256, 64]
-    #   dump('heap+256, 64') # &heap[256, 64]
+    #   dump('heap+256, 64'  # &heap[256, 64]
     #   dump('heap+0x100', 64) # &heap[256, 64]
     #   dump(<segment>, 8) # semgent can be [heap, stack, (program|elf), libc, ld]
     #   dump(addr, 64) # addr[0, 64]
     #
-    # @invalid
+    #   # Invalid usage
     #   dump(:meow) # no such segment
-    #   dump('heap-1, 64') # not support <tt>-</tt>
-    # @notice
-    #   This method require you have permission of attaching another process. If not, a warning message will present.
+    #   dump('heap-1, 64') # not support '-'
     def dump(*args)
       return unless load?
       return need_permission unless dumpable?
@@ -69,9 +70,9 @@ module HeapInfo
 
     # Return the dump result as chunks.
     # see `HeapInfo::Chunks` and `HeapInfo::Chunk` for more information.
-    # @return [HeapInfo::Chunks]
-    # @notice
-    #   Same as `dump`, need permission of attaching another process.
+    # Note: Same as `dump`, need permission of attaching another process.
+    # @return [HeapInfo::Chunks] An array of chunks.
+    # @param [Mixed] args Same as arguments of #dump
     def dump_chunks(*args)
       return unless load?
       return need_permission unless dumpable?
