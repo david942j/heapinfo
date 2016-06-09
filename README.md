@@ -5,8 +5,6 @@
 [![Inline docs](https://inch-ci.org/github/david942j/heapinfo.svg?branch=master)](https://inch-ci.org/github/david942j/heapinfo)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](http://choosealicense.com/licenses/mit/)
 
-- [RDoc](http://www.rubydoc.info/github/david942j/heapinfo/master/)
-
 ## HeapInfo
 As pwn lovers, while playing CTF with heap exploitation, we always need a debugger (e.g. gdb) for tracking memory layout. But we don't really need a debugger if we just want to see whether the heap layout same as our imagine or not. Hope this small tool helps us exploit easier ;).
 
@@ -19,14 +17,17 @@ Any suggestion of features is welcome.
 Relation works are [pwntools-ruby](https://github.com/peter50216/pwntools-ruby) and [gdbpwn](https://github.com/scwuaptx/Pwngdb).
 
 ## Features
-* Use in irb/pry or in your exploit script
+* Can use in your ruby exploit script or in irb/pry
 * **heapinfo** will work when the `victim` is being traced! i.e. you can use ltrace/strace/gdb and **heapinfo** simultaneously!
-* `dump` - can dump arbitrarily address memory.
+* `dump` - dump arbitrarily address memory.
 * `layouts` - show the current bin layouts, very useful for heap exploitation.
+* `x` - Provide gdb-like commands.
+* More features and details can be found in [RDoc](http://www.rubydoc.info/github/david942j/heapinfo/master/)
 
 ## Usage
 
 #### Load
+
 ```ruby
 require 'heapinfo'
 # ./victim is running
@@ -52,22 +53,53 @@ h.libc.name
 # => "0x11cc000"
 ```
 
+NOTICE: While the process is not found, most methods will return `nil`. One way to prevent some error happend is to wrapper methods within `debug`, the block will be ignored while doing remote exploitation.
+
+```ruby
+h = heapinfo('remote')
+# Process not found
+h.pid # nil
+h.debug {
+  p h.libc.base # wrapper with `debug` so that no error will be raised when pwning remote service
+}
+```
+
 #### Dump
 query content of specific address   
 NOTICE: you MUST have permission of attaching a program, otherwise dump will fail   
 i.e. `/proc/sys/kernel/yama/ptrace_scope` set to 0 or run as root
 
 ```ruby
-p h.dump(:libc, 8)
-# => "\x7FELF\x02\x01\x01\x00"
-p h.dump(:heap, 16)
-# => "\x00\x00\x00\x00\x00\x00\x00\x00\x31\x00\x00\x00\x00\x00\x00\x00"
-p h.dump('heap+0x30, 16') # support offset!
-# => "\x00\x00\x00\x00\x00\x00\x00\x00\x81\x00\x00\x00\x00\x00\x00\x00"
-p h.dump(0x400000, 8) # or simply give addr
-# => "\x7FELF\x02\x01\x01\x00"
-
+h.debug {
+  p h.dump(:libc, 8)
+  # => "\x7FELF\x02\x01\x01\x00"
+  p h.dump(:heap, 16)
+  # => "\x00\x00\x00\x00\x00\x00\x00\x00\x31\x00\x00\x00\x00\x00\x00\x00"
+  p h.dump('heap+0x30, 16') # support offset!
+  # => "\x00\x00\x00\x00\x00\x00\x00\x00\x81\x00\x00\x00\x00\x00\x00\x00"
+  p h.dump(:elf, 8)
+  # => "\x7FELF\x02\x01\x01\x00"
+  p h.dump(0x400000, 8) # or simply give addr
+  # => "\x7FELF\x02\x01\x01\x00"
+}
 # invalid examples:
 # h.dump('meow') # no such segment
 # h.dump('heap-1, 64') # not support `-`
 ```
+
+#### layouts
+```ruby
+puts h.layouts :fastbin
+```
+![fastbin layouts](https://github.com/david942j/heapinfo/blob/master/examples/fastbin_layouts.png?raw=true)
+
+```ruby
+puts h.layouts :unsorted_bin, :smallbin
+```
+![smallbin layouts](https://github.com/david942j/heapinfo/blob/master/examples/unsorted_smallbin_layouts.png?raw=true)
+
+#### x
+```ruby
+puts h.x 8, :heap
+```
+![x/8gx](https://github.com/david942j/heapinfo/blob/master/examples/x8_heap.png?raw=true)

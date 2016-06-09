@@ -100,6 +100,7 @@ module HeapInfo
     #   # 0x400000:       0x00010102464c457f      0x0000000000000000
     #   # 0x400010:       0x00000001003e0002
     def x(count, *commands)
+      return unless load?
       commands = commands + [count * size_t]
       base = base_of_dump_commands(*commands)
       res = dump(*commands).unpack(size_t == 4 ? "L*" : "Q*")
