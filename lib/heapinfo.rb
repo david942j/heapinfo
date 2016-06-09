@@ -22,7 +22,7 @@ module HeapInfo
 
   # Entry point for using HeapInfo.
   # Show segments info of the process after loaded
-  # @param [String, Integer] prog The program name of victim. If an Integer is given, seem as pid (useful when multi-processes exist)
+  # @param [String, Fixnum] prog The program name of victim. If a number is given, seem as pid (useful when multi-processes exist)
   # @param [Hash] options Give library's file name.
   # @option options [String, Regexp] :libc file name of glibc, default is <tt>/libc[^\w]/</tt>
   # @option options [String, Regexp] :ld file name of dynamic linker/loader, default is <tt>/\/ld-.+\.so/</tt>

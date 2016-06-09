@@ -1,11 +1,18 @@
 #encoding: ascii-8bit
 module HeapInfo
   class Process
+    # The dafault options of libaries,
+    # use for matching glibc and ld segments in <tt>/proc/[pid]/maps</tt>
     DEFAULT_LIB = {
       libc: /libc[^\w]/,
       ld:   /\/ld-.+\.so/,
     }
-    attr_reader :pid, :status
+    # @return [Fixnum, NilClass] return the pid of process, nil for no such process found
+    attr_reader :pid
+    attr_reader :status
+
+    # Instantiate a `HeapInfo::Process` object
+    # @param [String, Fixnum] prog Process name or pid, see `HeapInfo.heapinfo` for more information
     def initialize(prog, options = {})
       @prog = prog
       @options = DEFAULT_LIB.merge options
@@ -14,19 +21,44 @@ module HeapInfo
       need_permission unless dumpable?
     end
 
-    # example:
-    # dump(:heap) # &heap[0, 8]
-    # dump(:heap, 64) # &heap[0, 64]
-    # dump(:heap, 256, 64) # &heap[256, 64]
-    # dump('heap+256, 64') # &heap[256, 64]
-    # dump('heap+0x100') # &heap[256, 8]
-    # dump(:segment, 8) semgent can be [heap, stack, (program|elf), libc]
-    # dump(addr, 64) # addr[0, 64]
+    # Use this method to wrapper all HeapInfo methods.
+    #
+    # Since `HeapInfo` is a tool(debugger) for local usage, 
+    # while exploiting remote service, all methods will not work properly.
+    # So I suggest to wrapper all methods inside `debug`,
+    # which will ignore the block while the victim process is not found.
+    #
+    # @example
+    #   h = heapinfo('./victim') # such process is not exist
+    #   libc_base = leak_libc_base_of_victim # normal exploit
+    #   h.debug {
+    #     # for local to check if exploit correct
+    #     fail('libc_base') unless libc_base == h.libc.base
+    #   }
+    #   # block of `debug` will not execute if <tt>h.pid</tt> is <tt>nil</tt>
+    def debug
+      return unless load!
+      yield if block_given?
+    end
 
-    # invalid:
-    # dump('meow') # no such segment
-    # dump('heap-1, 64') # not support `-`
-    
+    # Dump the content of specific memory address.
+    #
+    # @return [String, NilClass] The content needed. When the request address is not readable or the process not exists, <tt>nil</tt> is returned.
+    #
+    # @example
+    #   dump(:heap) # &heap[0, 8]
+    #   dump(:heap, 64) # &heap[0, 64]
+    #   dump(:heap, 256, 64) # &heap[256, 64]
+    #   dump('heap+256, 64') # &heap[256, 64]
+    #   dump('heap+0x100', 64) # &heap[256, 64]
+    #   dump(<segment>, 8) # semgent can be [heap, stack, (program|elf), libc, ld]
+    #   dump(addr, 64) # addr[0, 64]
+    #
+    # @invalid
+    #   dump(:meow) # no such segment
+    #   dump('heap-1, 64') # not support <tt>-</tt>
+    # @notice
+    #   This method require you have permission of attaching another process. If not, a warning message will present.
     def dump(*args)
       return unless load?
       return need_permission unless dumpable?
@@ -35,7 +67,11 @@ module HeapInfo
       mem
     end
 
-    # return the dump result as chunks
+    # Return the dump result as chunks.
+    # see `HeapInfo::Chunks` and `HeapInfo::Chunk` for more information.
+    # @return [HeapInfo::Chunks]
+    # @notice
+    #   Same as `dump`, need permission of attaching another process.
     def dump_chunks(*args)
       return unless load?
       return need_permission unless dumpable?
@@ -44,11 +80,23 @@ module HeapInfo
       dump(*args).to_chunks(bits: @status[:arch].to_i, base: base + offset)
     end
 
+    # Pretty dump of bins layouts.
+    #
+    # @param [Symbol] args Bin type(s) you want to see.
+    # @return [String] Bin layouts that wrapper with color codes.
+    # @example
+    #   puts h.layouts :fastbin, :unsorted_bin, :smallbin
     def layouts(*args)
       return unless load?
       self.libc.main_arena.layouts(*args)
     end
 
+    # Show simple information of target process.
+    # Contains program names, pid, and segments' info.
+    #
+    # @return [String]
+    # @example
+    #   puts h
     def to_s
       return "Process not found" unless load?
       "Program: #{Helper.color program.name} PID: #{Helper.color pid}\n" +
@@ -57,11 +105,6 @@ module HeapInfo
       stack.to_s +
       libc.to_s +
       ld.to_s
-    end
-
-    def debug
-      return unless load!
-      yield if block_given?
     end
 
   private
