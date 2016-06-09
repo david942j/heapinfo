@@ -1,11 +1,21 @@
 module HeapInfo
   class Arena
-    attr_reader :fastbin, :unsorted_bin, :smallbin, :largebin, :top_chunk, :last_remainder
+    attr_reader :fastbin, :unsorted_bin, :smallbin, :top_chunk
+    # attr_reader :largebin, :last_remainder
+
+    # Instantiate a <tt>HeapInfo::Arena</tt> object
+    #
+    # @param [Integer] base Base address of arena.
+    # @param [String] arch Either '64' or '32'
+    # @param [Proc] dumper For dump more data
     def initialize(base, arch, dumper)
       @base, @arch, @dumper = base, arch, dumper
       reload
     end
 
+    # Refresh all attributes
+    # Retrive data using <tt>@dumper</tt>, load bins, top chunk etc.
+    # @return [HeapInfo::Arena] self
     def reload
       top_ptr = Helper.unpack(size_t, @dumper.call(@base + 8 + size_t * 10, size_t))
       @fastbin = []
@@ -25,25 +35,18 @@ module HeapInfo
       self
     end
 
+    # Pretty dump of bins layouts.
+    #
+    # @param [Symbol] args Bin type(s) you want to see.
+    # @return [String] Bin layouts that wrapper with color codes.
+    # @example
+    #   puts h.libc.main_arena.layouts :fastbin, :unsorted_bin, :smallbin
     def layouts(*args)
       res = ''
-      res += fastbin_layout if args.include? :fastbin
-      res += unsorted_layout if args.include? :unsorted_bin
-      res += smallbin_layout if args.include? :smallbin
+      res += fastbin.map(&:inspect).join if args.include? :fastbin
+      res += unsorted_bin.inspect if args.include? :unsorted_bin
+      res += smallbin.map(&:inspect).join if args.include? :smallbin
       res
-    end
-
-    # should use inspect or to_s .. QQ?
-    def fastbin_layout
-      fastbin.map(&:inspect).join
-    end
-
-    def unsorted_layout
-      unsorted_bin.inspect
-    end
-
-    def smallbin_layout
-      smallbin.map(&:inspect).join
     end
 
   private
@@ -53,16 +56,25 @@ module HeapInfo
   end
 
   class Fastbin < Chunk
-    attr_accessor :fd, :index
+    attr_reader :fd
+    attr_accessor :index
+    
+    # Instantiate a <tt>HeapInfo::Fastbin</tt> object
+    #
+    # @param [Mixed] args See <tt>HeapInfo::Chunk</tt> for more information.
     def initialize(*args)
       super
       @fd = Helper.unpack(size_t, @data[0, @size_t])
     end
 
+    # Mapping index of fastbin to chunk size
+    # @return [Integer] size
     def idx_to_size
       index * size_t * 2 + size_t * 4
     end
 
+    # For pretty inspect
+    # @return [String] Title with color codes
     def title
       "%s%s: " % [Helper.color(Helper.class_name(self), sev: :bin),  index.nil? ? nil : "[#{Helper.color("%#x" % idx_to_size)}]"]
     end
@@ -75,6 +87,11 @@ module HeapInfo
       end.join
     end
 
+    # @return [Array<Integer, Symbol, NilClass>] single link list of <tt>fd</tt> chain.
+    #   Last element will be:
+    #   - <tt>:loop</tt> if loop detectded
+    #   - <tt>:invalid</tt> invalid address detected
+    #   - <tt>nil</tt> end with zero address (normal case)
     def list
       dup = {}
       ptr = @fd
@@ -89,12 +106,6 @@ module HeapInfo
       ret << nil
     end
 
-    def addr_of(ptr, offset)
-      t = dump(ptr + size_t * offset, size_t)
-      return nil if t.nil?
-      Helper.unpack(size_t, t)
-    end
-
     def fd_of(ptr)
       addr_of(ptr, 2)
     end
@@ -102,10 +113,17 @@ module HeapInfo
     def bk_of(ptr)
       addr_of(ptr, 3)
     end
+
+  private
+    def addr_of(ptr, offset)
+      t = dump(ptr + size_t * offset, size_t)
+      return nil if t.nil?
+      Helper.unpack(size_t, t)
+    end
   end
 
   class UnsortedBin < Fastbin
-    attr_accessor :bk
+    attr_reader :bk
     def initialize(*args)
       super
       @bk = Helper.unpack(size_t, @data[@size_t, @size_t])
@@ -162,12 +180,15 @@ module HeapInfo
   end
 
   class Smallbin < UnsortedBin
+
+    # Mapping index of smallbin to chunk size
+    # @return [Integer] size
     def idx_to_size
       index * size_t * 2 + size_t * 18
     end
   end
 
-  class Largebin < Smallbin
-    attr_accessor :fd_nextsize, :bk_nextsize
-  end
+  # class Largebin < Smallbin
+  #   attr_accessor :fd_nextsize, :bk_nextsize
+  # end
 end
