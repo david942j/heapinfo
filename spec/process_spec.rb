@@ -57,6 +57,11 @@ describe HeapInfo::Process do
       expect(HeapInfo::Process.new(pid).elf.name).to eq @h.elf.name
     end
 
+    it 'x' do
+      expect(@h.x 3, :heap).to eq "0x602000:\t\e[38;5;12m0x0000000000000000\e[0m\t\e[38;5;12m0x0000000000000021\e[0m\n0x602010:\t\e[38;5;12m0x0000000000000000\e[0m"
+      expect(@h.x 2, 'heap+0x20').to eq "0x602020:\t\e[38;5;12m0x0000000000000000\e[0m\t\e[38;5;12m0x0000000000000021\e[0m"
+    end
+
     it 'debug wrapper' do
       @h.instance_variable_set(:@pid, nil)
       # will reload pid

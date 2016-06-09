@@ -10,7 +10,7 @@ module HeapInfo
       return @_main_arena.reload if @_main_arena
       off = main_arena_offset
       return if off.nil?
-      @_main_arena = Arena.new(off + self.base, process.arch, process.send(:dumper))
+      @_main_arena = Arena.new(off + self.base, process.bits, process.send(:dumper))
     end
 
     def self.find(maps, name, process)
@@ -34,7 +34,7 @@ module HeapInfo
       tmp_elf = HeapInfo::TMP_DIR + "/get_arena"
       libc_file = HeapInfo::TMP_DIR + "/libc.so.6"
       ld_file = HeapInfo::TMP_DIR + "/ld.so"
-      flags = "-w #{@process.arch == '32' ? '-m32' : ''}"
+      flags = "-w #{@process.bits == 32 ? '-m32' : ''}"
       %x(cp #{self.name} #{libc_file} && \
          cp #{@process.ld.name} #{ld_file} && \
          chdir #{File.expand_path('../tools', __FILE__)} && \

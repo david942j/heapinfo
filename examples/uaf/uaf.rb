@@ -11,7 +11,7 @@ h = heapinfo('./uaf')
 z.puts 1 # new Benz
 
 h.debug {
-  puts "sizeof(Car) = %#x" % h.dump(:heap, 0x10).to_chunk.real_size # get size of a car
+  puts "sizeof(Car) = %#x" % h.dump(:heap, 0x10).to_chunk.size # get size of a car
   vtable1 = h.dump(:heap, 0x10, 8).unpack("Q*")[0]
   puts "vtable of Benz = %#x" % vtable1
 }

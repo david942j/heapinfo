@@ -6,10 +6,11 @@ module HeapInfo
     # Instantiate a <tt>HeapInfo::Arena</tt> object
     #
     # @param [Integer] base Base address of arena.
-    # @param [String] arch Either '64' or '32'
+    # @param [Integer] bits Either 64 or 32
     # @param [Proc] dumper For dump more data
-    def initialize(base, arch, dumper)
-      @base, @arch, @dumper = base, arch, dumper
+    def initialize(base, bits, dumper)
+      @base, @dumper = base, dumper
+      @size_t = bits / 8
       reload
     end
 
@@ -50,9 +51,7 @@ module HeapInfo
     end
 
   private
-    def size_t
-      @arch == '32' ? 4 : 8
-    end
+    attr_reader :size_t
   end
 
   class Fastbin < Chunk
