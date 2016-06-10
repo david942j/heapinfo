@@ -128,4 +128,22 @@ describe HeapInfo::Process do
       end
     end
   end
+  
+  describe 'no process' do
+    before(:all) do
+      @h = heapinfo('NO_SUCH_PROCESS~~~')
+    end
+    it 'dump like' do
+      expect(@h.dump(:heap).nil?).to be true
+      expect(@h.dump_chunks(:heap).nil?).to be true
+    end
+
+    it 'debug wrapper' do
+      expect(@h.debug{ fail }).to be nil
+    end
+
+    it 'nil chain' do
+      expect(@h.dump(:heap).no_such_method.xdd.nil?).to be true
+    end
+  end
 end

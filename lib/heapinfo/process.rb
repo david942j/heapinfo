@@ -47,7 +47,7 @@ module HeapInfo
     # Note: This method require you have permission of attaching another process. If not, a warning message will present.
     #
     # @param [Mixed] args Will be parsed into <tt>[base, offset, length]</tt>, see Examples for more information.
-    # @return [String, NilClass] The content needed. When the request address is not readable or the process not exists, <tt>nil</tt> is returned.
+    # @return [String, HeapInfo::Nil] The content needed. When the request address is not readable or the process not exists, <tt>HeapInfo::Nil.new</tt> is returned.
     #
     # @example
     #   dump(:heap) # &heap[0, 8]
@@ -62,7 +62,7 @@ module HeapInfo
     #   dump(:meow) # no such segment
     #   dump('heap-1, 64') # not support '-'
     def dump(*args)
-      return unless load?
+      return Nil.new unless load?
       return need_permission unless dumpable?
       mem = Dumper.dump(@status, f = mem_f, *args)
       f.close
@@ -73,10 +73,10 @@ module HeapInfo
     # see <tt>HeapInfo::Chunks</tt> and <tt>HeapInfo::Chunk</tt> for more information.
     #
     # Note: Same as <tt>dump</tt>, need permission of attaching another process.
-    # @return [HeapInfo::Chunks] An array of chunk(s).
+    # @return [HeapInfo::Chunks, HeapInfo::Nil] An array of chunk(s).
     # @param [Mixed] args Same arguments of <tt>#dump</tt>
     def dump_chunks(*args)
-      return unless load?
+      return Nil.new unless load?
       return need_permission unless dumpable?
       base = base_of_dump_commands(*args)
       dump(*args).to_chunks(bits: @status[:bits], base: base)
