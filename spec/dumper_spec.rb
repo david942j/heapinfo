@@ -32,6 +32,26 @@ describe HeapInfo::Dumper do
     expect {dumper.send(:dumpable?)}.to raise_error ArgumentError
   end
 
+  describe 'find' do
+    before(:all) do
+      @dumper = HeapInfo::Dumper.new({elf: HeapInfo::Segment.new(0x400000, ''), bits: 64}, '/proc/self/mem')
+    end
+    it 'simple' do
+      expect(@dumper.find("ELF", :elf, 4)).to eq 0x400001
+      expect(@dumper.find("ELF", :elf, 3)).to be nil
+    end
+    it 'regexp' do
+      addr = @dumper.find(/ru.y/, :elf, 0x1000)
+      expect(@dumper.dump(addr, 4) =~ /ru.y/).to eq 0
+    end
+    it 'invalid' do
+      expect(@dumper.find(nil, :elf, 1)).to be nil
+    end
+    it 'parser' do
+      expect(@dumper.find("ELF", ':elf + 1', 3)).to eq 0x400001
+    end
+  end
+
   describe 'parse_cmd' do
     it 'normal' do
       expect(HeapInfo::Dumper.parse_cmd [0x30]).to eq [0x30, 0, 8]
@@ -49,6 +69,7 @@ describe HeapInfo::Dumper do
       expect(HeapInfo::Dumper.parse_cmd ['heap, 0x33, 10']).to eq [:heap, 51, 10]
       expect(HeapInfo::Dumper.parse_cmd ['heap+0x15, 10']).to eq [:heap, 0x15, 10]
       expect(HeapInfo::Dumper.parse_cmd ['heap + 0x15, 10']).to eq [:heap, 0x15, 10]
+      expect(HeapInfo::Dumper.parse_cmd ['heap +  0x15']).to eq [:heap, 0x15, 8]
     end
     it 'mixed' do
       expect(HeapInfo::Dumper.parse_cmd ['heap+ 0x10', 10]).to eq [:heap, 0x10, 10]

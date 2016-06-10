@@ -14,10 +14,11 @@ module HeapInfo
     end
 
     # A helper for <tt>HeapInfo::Process</tt> to dump memory.
-    # @param [Hash] segments With values of <tt>HeapInfo::Segment</tt>
-    # @param [File] file The memory file, i.e. <tt>/proc/[pid]/mem</tt>
-    # @param [Mixed] args The use input commands, see examples of <tt>HeapInfo::Process#dump</tt>
+    # @param [Mixed] args The use input commands, see examples of <tt>HeapInfo::Process#dump</tt>.
     # @return [String, NilClass] Dump results. If error happend, <tt>nil</tt> is returned.
+    # @example
+    #   p dump(:elf, 4)
+    #   # => "\x7fELF"
     def dump(*args)
       return need_permission unless dumpable?
       base, offset, len = Dumper.parse_cmd(args)
@@ -26,15 +27,15 @@ module HeapInfo
       elsif base.is_a? Integer
         addr = base
       else
-        throw
+        fail # invalid usage
       end
       file = mem_f
       file.pos = addr + offset
-      file.read len
+      mem = file.read len
+      file.close
+      mem
     rescue
-      nil
-    ensure
-      file.close if file
+      nil 
     end
 
     # Return the dump result as chunks.
@@ -50,7 +51,7 @@ module HeapInfo
 
     # Show dump results like in gdb's command <tt>x</tt>.
     #
-    # Details in <tt>HeapInfo:Process#x</tt>
+    # Details are in <tt>HeapInfo:Process#x</tt>
     # @param [Integer] count The number of result need to dump.
     # @param [Mixed] commands Same format as <tt>#dump(*args)</tt>.
     # @param [IO] io <tt>IO</tt> that use for printing.
@@ -92,43 +93,51 @@ module HeapInfo
 
     # Parse the dump command into <tt>[base, offset, length]</tt>
     # @param [Array] args The command, see examples for more information
-    # @return [Array] <tt>[base, offset, length]</tt>, while <tt>base</tt> can be a [Symbol] or a [Fixnum]
+    # @return [Array<Symbol, Integer>] <tt>[base, offset, length]</tt>, while <tt>base</tt> can be a [Symbol] or an [Integer]. <tt>length</tt> has default value equal to <tt>8</tt>.
     # @example
-    #   HeapInfo::Dumper::parse_cmd([:heap, 32, 10])
+    #   HeapInfo::Dumper.parse_cmd([:heap, 32, 10])
     #   # [:heap, 32, 10]
-    #   HeapInfo::Dumper::parse_cmd(['heap+0x10, 10'])
+    #   HeapInfo::Dumper.parse_cmd(['heap+0x10, 10'])
     #   # [:heap, 16, 10]
-    #   HeapInfo::Dumper::parse_cmd([0x400000, 4])
+    #   HeapInfo::Dumper.parse_cmd(['heap+0x10'])
+    #   # [:heap, 16, 8]
+    #   HeapInfo::Dumper.parse_cmd([0x400000, 4])
     #   # [0x400000, 0, 4]
     def self.parse_cmd(args)
       args = split_cmd args
-      return :fail unless args.size.between? 2, 3
-      len = args.size == 2 ? DUMP_BYTES : Integer(args[-1])
+      return :fail unless args.size == 3
+      len = args[2].nil? ? DUMP_BYTES : Integer(args[2])
       offset = Integer(args[1])
       base = args[0]
-      base = base.delete(':').to_sym if base.is_a? String
+      base = Helper.integer?(base) ? Integer(base) : base.delete(':').to_sym
       [base, offset, len]
     end
 
     # Helper for <tt>#parse_cmd</tt>.
     #
-    # Split command if it present as a string.
-    # Insert <tt>offset=0</tt> if <tt>offset</tt> is not given.
+    # Split commands to exactly three parts: <tt>[base, offset, length]</tt>
+    # <tt>length</tt> is <tt>nil</tt> if not present.
     # @param [Array] args
+    # @return [Array<String>] <tt>[base, offset, length]</tt> in string expression.
     # @example
-    #   HeapInfo::Dumper::split_cmd([:heap, 32, 10])
-    #   # [:heap, 32, 10]
-    #   HeapInfo::Dumper::split_cmd(['heap+0x10, 10'])
-    #   # ['heap', '0x10', '10']
-    #   HeapInfo::Dumper::split_cmd([0x400000, 4])
-    #   # [0x400000, 0, 4]
+    #   HeapInfo::Dumper.split_cmd([:heap, 32, 10])
+    #   # ['heap', '32', '10']
+    #   HeapInfo::Dumper.split_cmd([':heap+0x10, 10'])
+    #   # [':heap', '0x10', '10']
+    #   HeapInfo::Dumper.split_cmd([':heap+0x10'])
+    #   # [':heap', '0x10', nil]
+    #   HeapInfo::Dumper.split_cmd([0x400000, 4])
+    #   # ['4194304', 0, '4']
     def self.split_cmd(args)
-      if args[0].is_a? String # 'heap+100, 32'
-        args = args[0].split(/[\+, ]/).reject(&:empty?) + args[1..-1]
-      end
+      args = args.join(',').delete(' ').split(',').reject(&:empty?) # 'heap, 100', 32 => 'heap', '100', '32'
       return [] if args.empty?
-      args.insert(1, 0) if args.size <= 2
-      args
+      if args[0].include? '+' # 'heap+0x1'
+        args.unshift(*args.shift.split('+', 2))
+      elsif args.size <= 2 # no offset given
+        args.insert(1, 0)
+      end
+      args << nil if args.size <= 2 # no length given
+      args[0, 3]
     end
 
   private
@@ -152,7 +161,6 @@ module HeapInfo
       File.open(@filename)
     end
 
-    # TODO: bug if 'heap+0x10'
     def base_of(*args)
       base, offset, _ = Dumper.parse_cmd(args)
       base = @segments[base].base if @segments[base].is_a? Segment

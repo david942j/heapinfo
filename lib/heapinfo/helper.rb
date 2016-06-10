@@ -103,5 +103,21 @@ module HeapInfo
     def self.class_name(obj)
       obj.class.name.split('::').last || obj.class.name
     end
+
+    # For checking a string is actually an integer
+    # @param [String] str String to be checked
+    # @return [Boolean] If <tt>str</tt> can be converted into integer
+    # @example
+    #   Helper.integer? '1234'
+    #   # => true
+    #   Helper.integer? '0x1234'
+    #   # => true
+    #   Helper.integer? '0xheapoverflow'
+    #   # => false
+    def self.integer?(str)
+      !!Integer(str)
+    rescue ArgumentError, TypeError
+      false
+    end
   end
 end
