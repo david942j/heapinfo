@@ -1,5 +1,6 @@
 #encoding: ascii-8bit
 module HeapInfo
+  # Main class of heapinfo.
   class Process
     # The dafault options of libaries,
     # use for matching glibc and ld segments in <tt>/proc/[pid]/maps</tt>
@@ -113,6 +114,30 @@ module HeapInfo
       io.puts str
     end
 
+    # Gdb-like command.
+    #
+    # Search a specific value/string/regexp in memory.
+    # <tt>#find</tt> only return the first matched address, if want to find all adress, use <tt>#find_all</tt> instead.
+    # @param [Integer, String, Regexp] pattern The desired search pattern, can be value(<tt>Integer</tt>), string, or regular expression.
+    # @param [Integer, String, Symbol] from Start address for searching, can be segment(<tt>Symbol</tt>) or segments with offset. See examples for more information.
+    # @param [Integer] length The search length limit, default is unlimited, which will search until pattern found or reach unreadable memory.
+    # @return [Integer, NilClass] The first matched address, <tt>nil</tt> is returned when no such pattern found.
+    # @example
+    #   h.find(0xdeadbeef, :heap)
+    #   h.find(0xdeadbeef, 'heap+0x10', 0x1000)
+    def find(pattern, from, length = :unlimited)
+      return Nil.new unless load?
+      from = base_of_dump_commands(from)
+      length = 1 << 40 if length.is_a? Symbol
+      return find_regexp(pattern, from, length) if pattern.is_a? Regexp
+      return find_string(pattern, from, length) if pattern.is_a? String
+      return find_integer(pattern, from, length) if pattern.is_a? Integer
+      nil
+    end
+
+    # <tt>search</tt> is more intutive to me
+    alias :search :find
+
     # Pretty dump of bins layouts.
     #
     # The request layouts will output to <tt>stdout</tt> by default.
@@ -214,6 +239,29 @@ module HeapInfo
       base, offset, _ = Dumper.parse_cmd(args)
       base = @status[base].base if @status[base].is_a? Segment
       base + offset
+    end
+    def find_integer(value, from, length)
+      find_string([value].pack(size_t == 4 ? "L*" : "Q*"), from, length)
+    end
+    def find_string(string, from ,length)
+      batch_dumper(from, length) {|str| str.index string}
+    end
+    def find_regexp(pattern, from ,length)
+      batch_dumper(from, length) {|str| str =~ pattern}
+    end
+    def batch_dumper(from, remain_size)
+      page_size = 0x1000
+      while remain_size > 0
+        dump_size = [remain_size, page_size].min
+        str = self.dump(from, dump_size)
+        break if str.nil? # unreadable
+        break unless (idx = yield(str)).nil?
+        break if str.length < dump_size # remain is unreadable
+        remain_size -= str.length
+        from += str.length
+      end
+      return if idx.nil?
+      from + idx
     end
   end
 end

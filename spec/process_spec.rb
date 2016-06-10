@@ -75,6 +75,21 @@ describe HeapInfo::Process do
       expect(@h.libc.main_arena.fastbin.size).to eq 7
     end
 
+    describe 'find/search' do
+      it 'faraway' do
+        expect(@h.find('/bin/sh', :libc).is_a? Integer).to be true
+      end
+      it 'value' do
+        expect(@h.search(0xdeadbeef, :heap)).to eq 0x602050
+      end
+      it 'string' do
+        expect(@h.search("\xbe\xad", :heap)).to eq 0x602051
+      end
+      it 'string' do
+        expect(@h.search(/[^\x00]/, :heap)).to eq 0x602008
+      end
+    end
+
     describe 'fastbin' do
       it 'normal' do
         expect(@h.libc.main_arena.fastbin[0].list).to eq [0x602020, 0x602000, nil]
