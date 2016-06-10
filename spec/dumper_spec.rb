@@ -3,23 +3,35 @@ require 'heapinfo'
 describe HeapInfo::Dumper do
   describe 'dump' do
     before(:each) do
-      @mem_f = File.open('/proc/self/mem')
-    end
-    after(:each) do
-      @mem_f.close
+      @mem_filename = '/proc/self/mem'
     end
     it 'simple' do
-      expect(HeapInfo::Dumper.dump(nil, @mem_f, 0x400000, 4)).to eq "\x7fELF"
+      dumper = HeapInfo::Dumper.new(nil, @mem_filename)
+      expect(dumper.dump(0x400000, 4)).to eq "\x7fELF"
     end
     it 'segment' do
       segments = {elf: HeapInfo::Segment.new(0x400000, 'elf')}
-      expect(HeapInfo::Dumper.dump(segments, @mem_f, :elf, 4)).to eq "\x7fELF"
+      dumper = HeapInfo::Dumper.new(segments, @mem_filename)
+      expect(dumper.dump(:elf, 4)).to eq "\x7fELF"
     end
     it 'invalid' do
-      expect(HeapInfo::Dumper.dump({}, @mem_f, :zzz, 1)).to be nil
-      expect(HeapInfo::Dumper.dump({}, @mem_f, 0x12345, 1)).to be nil
+      dumper = HeapInfo::Dumper.new({}, @mem_filename)
+      expect(dumper.dump(:zzz, 1)).to be nil
+      expect(dumper.dump(0x12345, 1)).to be nil
     end
   end
+
+  it 'dumpable?' do
+    dumper = HeapInfo::Dumper.new({}, '/proc/self/mem')
+    expect(dumper.send(:dumpable?)).to be true
+    # a little hack
+    dumper.instance_variable_set(:@filename, '/proc/1/mem')
+    expect(dumper.send(:dumpable?)).to be false
+    expect(dumper.dump).to be nil # show need permission
+    dumper.instance_variable_set(:@filename, '/proc/-1/mem')
+    expect {dumper.send(:dumpable?)}.to raise_error ArgumentError
+  end
+
   describe 'parse_cmd' do
     it 'normal' do
       expect(HeapInfo::Dumper.parse_cmd [0x30]).to eq [0x30, 0, 8]

@@ -22,17 +22,6 @@ describe HeapInfo::Process do
     it 'dump_chunks' do
       expect(@h.dump_chunks(:heap, 0x30).class).to be HeapInfo::Chunks
     end
-
-    it 'dumpable?' do
-      expect(@h.send(:dumpable?)).to be true
-      # a little hack
-      @h.instance_variable_set(:@pid, 1)
-      expect(@h.send(:dumpable?)).to be false
-      expect(@h.dump).to be nil # show need permission
-      @h.instance_variable_set(:@pid, -1)
-      expect {@h.send(:dumpable?)}.to raise_error ArgumentError
-      @h.instance_variable_set(:@pid, 'self')
-    end
   end
 
   describe 'victim' do
@@ -82,10 +71,14 @@ describe HeapInfo::Process do
       it 'value' do
         expect(@h.search(0xdeadbeef, :heap)).to eq 0x602050
       end
+      it 'not found' do
+        expect(@h.search(0xdeadbeef, :heap, 0x4f)).to be nil
+        expect(@h.search(0xdead1234ddddd, :heap)).to be nil
+      end
       it 'string' do
         expect(@h.search("\xbe\xad", :heap)).to eq 0x602051
       end
-      it 'string' do
+      it 'regexp' do
         expect(@h.search(/[^\x00]/, :heap)).to eq 0x602008
       end
     end

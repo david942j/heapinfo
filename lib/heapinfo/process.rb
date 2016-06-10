@@ -20,7 +20,7 @@ module HeapInfo
       @options = DEFAULT_LIB.merge options
       load!
       return unless load?
-      need_permission unless dumpable?
+      @dumper = Dumper.new(@status, mem_filename)
     end
 
     # Use this method to wrapper all HeapInfo methods.
@@ -31,13 +31,13 @@ module HeapInfo
     # which will ignore the block while the victim process is not found.
     #
     # @example
-    #   h = heapinfo('./victim') # such process is not exist
+    #   h = heapinfo('./victim') # such process doesn't exist
     #   libc_base = leak_libc_base_of_victim # normal exploit
     #   h.debug {
     #     # for local to check if exploit correct
     #     fail('libc_base') unless libc_base == h.libc.base
     #   }
-    #   # block of #debug will not execute if h.pid is nil
+    #   # block of #debug will not execute if can't found process
     def debug
       return unless load!
       yield if block_given?
@@ -51,36 +51,31 @@ module HeapInfo
     # @return [String, HeapInfo::Nil] The content needed. When the request address is not readable or the process not exists, <tt>HeapInfo::Nil.new</tt> is returned.
     #
     # @example
-    #   dump(:heap) # &heap[0, 8]
-    #   dump(:heap, 64) # &heap[0, 64]
-    #   dump(:heap, 256, 64) # &heap[256, 64]
-    #   dump('heap+256, 64'  # &heap[256, 64]
-    #   dump('heap+0x100', 64) # &heap[256, 64]
-    #   dump(<segment>, 8) # semgent can be [heap, stack, (program|elf), libc, ld]
-    #   dump(addr, 64) # addr[0, 64]
+    #   h = heapinfo('victim')
+    #   h.dump(:heap) # &heap[0, 8]
+    #   h.dump(:heap, 64) # &heap[0, 64]
+    #   h.dump(:heap, 256, 64) # &heap[256, 64]
+    #   h.dump('heap+256, 64'  # &heap[256, 64]
+    #   h.dump('heap+0x100', 64) # &heap[256, 64]
+    #   h.dump(<segment>, 8) # semgent can be [heap, stack, (program|elf), libc, ld]
+    #   h.dump(addr, 64) # addr[0, 64]
     #
     #   # Invalid usage
     #   dump(:meow) # no such segment
     #   dump('heap-1, 64') # not support '-'
     def dump(*args)
       return Nil.new unless load?
-      return need_permission unless dumpable?
-      mem = Dumper.dump(@status, f = mem_f, *args)
-      f.close
-      mem
+      @dumper.dump(*args)
     end
 
     # Return the dump result as chunks.
-    # see <tt>HeapInfo::Chunks</tt> and <tt>HeapInfo::Chunk</tt> for more information.
+    # see <tt>HeapInfo::Dumper#dump_chunks</tt> for more information.
     #
-    # Note: Same as <tt>dump</tt>, need permission of attaching another process.
     # @return [HeapInfo::Chunks, HeapInfo::Nil] An array of chunk(s).
-    # @param [Mixed] args Same arguments of <tt>#dump</tt>
+    # @param [Mixed] args Same as arguments of <tt>#dump</tt>
     def dump_chunks(*args)
       return Nil.new unless load?
-      return need_permission unless dumpable?
-      base = base_of_dump_commands(*args)
-      dump(*args).to_chunks(bits: @status[:bits], base: base)
+      @dumper.dump_chunks(*args)
     end
 
     # Gdb-like command
@@ -105,13 +100,7 @@ module HeapInfo
     #   # 0x400010:       0x00000001003e0002
     def x(count, *commands, io: $stdout)
       return unless load? and io.respond_to? :puts
-      commands = commands + [count * size_t]
-      base = base_of_dump_commands(*commands)
-      res = dump(*commands).unpack(size_t == 4 ? "L*" : "Q*")
-      str = res.group_by.with_index{|_, i| i / (16 / size_t) }.map do |round, values|
-        "%#x:\t" % (base + round * 16) + values.map{|v| Helper.color "0x%0#{size_t * 2}x" % v}.join("\t")
-      end.join("\n")
-      io.puts str
+      @dumper.x(count, *commands, io: io)
     end
 
     # Gdb-like command.
@@ -127,12 +116,8 @@ module HeapInfo
     #   h.find(0xdeadbeef, 'heap+0x10', 0x1000)
     def find(pattern, from, length = :unlimited)
       return Nil.new unless load?
-      from = base_of_dump_commands(from)
       length = 1 << 40 if length.is_a? Symbol
-      return find_regexp(pattern, from, length) if pattern.is_a? Regexp
-      return find_string(pattern, from, length) if pattern.is_a? String
-      return find_integer(pattern, from, length) if pattern.is_a? Integer
-      nil
+      @dumper.find(pattern, from, length)
     end
 
     # <tt>search</tt> is more intutive to me
@@ -168,6 +153,7 @@ module HeapInfo
     end
 
   private
+    attr_reader :dumper
     def load?
       @pid != nil
     end
@@ -189,18 +175,6 @@ module HeapInfo
       pid
     end
 
-    # use /proc/[pid]/mem for memory dump, must sure have permission
-    def dumpable?
-      mem_f.close
-      true
-    rescue => e
-      if e.is_a? Errno::EACCES
-        false
-      else
-        throw e
-      end
-    end
-
     def load_status(options)
       elf  = Helper.exe_of pid
       maps = Helper.parse_maps Helper.maps_of pid
@@ -216,6 +190,7 @@ module HeapInfo
       @status.keys.each do |m|
         self.class.send(:define_method, m) {@status[m]}
       end
+      @dumper = Dumper.new(@status, mem_filename)
     end
     def match_maps(maps, pattern)
       maps.map{|s| s[3]}.find{|seg| pattern.is_a?(Regexp) ? seg =~ pattern : seg.include?(pattern)}
@@ -223,45 +198,8 @@ module HeapInfo
     def bits_of(elf)
       elf[4] == "\x01" ? 32 : 64
     end
-    def size_t
-      @status[:bits] / 8
-    end
-    def mem_f
-      File.open("/proc/#{pid}/mem")
-    end
-    def need_permission
-      puts Helper.color(%q(Could not attach to process. Check the setting of /proc/sys/kernel/yama/ptrace_scope, or try again as the root user.  For more details, see /etc/sysctl.d/10-ptrace.conf), sev: :fatal)
-    end
-    def dumper
-      Proc.new {|*args| self.dump(*args)}
-    end
-    def base_of_dump_commands(*args)
-      base, offset, _ = Dumper.parse_cmd(args)
-      base = @status[base].base if @status[base].is_a? Segment
-      base + offset
-    end
-    def find_integer(value, from, length)
-      find_string([value].pack(size_t == 4 ? "L*" : "Q*"), from, length)
-    end
-    def find_string(string, from ,length)
-      batch_dumper(from, length) {|str| str.index string}
-    end
-    def find_regexp(pattern, from ,length)
-      batch_dumper(from, length) {|str| str =~ pattern}
-    end
-    def batch_dumper(from, remain_size)
-      page_size = 0x1000
-      while remain_size > 0
-        dump_size = [remain_size, page_size].min
-        str = self.dump(from, dump_size)
-        break if str.nil? # unreadable
-        break unless (idx = yield(str)).nil?
-        break if str.length < dump_size # remain is unreadable
-        remain_size -= str.length
-        from += str.length
-      end
-      return if idx.nil?
-      from + idx
+    def mem_filename
+      "/proc/#{pid}/mem"
     end
   end
 end
