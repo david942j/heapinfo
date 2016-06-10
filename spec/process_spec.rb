@@ -44,6 +44,8 @@ describe HeapInfo::Process do
       exec "setarch `uname -m` -R /bin/sh -c #{@victim}" if pid.nil?
       loop until `pidof #{@victim}` != '' 
       @h = heapinfo(@victim, ld: '/ld')
+      class Cio;def puts(s);s;end;end
+      @io = Cio.new
     end
     after(:all) do
       %x(killall #{@victim})
@@ -58,8 +60,8 @@ describe HeapInfo::Process do
     end
 
     it 'x' do
-      expect(@h.x 3, :heap).to eq "0x602000:\t\e[38;5;12m0x0000000000000000\e[0m\t\e[38;5;12m0x0000000000000021\e[0m\n0x602010:\t\e[38;5;12m0x0000000000000000\e[0m"
-      expect(@h.x 2, 'heap+0x20').to eq "0x602020:\t\e[38;5;12m0x0000000000000000\e[0m\t\e[38;5;12m0x0000000000000021\e[0m"
+      expect(@h.x 3, :heap, io: @io).to eq "0x602000:\t\e[38;5;12m0x0000000000000000\e[0m\t\e[38;5;12m0x0000000000000021\e[0m\n0x602010:\t\e[38;5;12m0x0000000000000000\e[0m"
+      expect(@h.x 2, 'heap+0x20', io: @io).to eq "0x602020:\t\e[38;5;12m0x0000000000000000\e[0m\t\e[38;5;12m0x0000000000000021\e[0m"
     end
 
     it 'debug wrapper' do
@@ -87,7 +89,7 @@ describe HeapInfo::Process do
       end
 
       it 'fastbin' do
-        lay = @h.layouts :fastbin
+        lay = @h.layouts :fastbin, io: @io
         expect(lay).to include '0xdeadbeef'
         expect(lay).to include '(nil)'
         expect(lay).to include '(invalid)'
@@ -106,7 +108,7 @@ describe HeapInfo::Process do
         expect(list).to eq [0x6020f0, base, 0x6020f0]
       end
       it 'layouts' do
-        inspect = @h.layouts :smallbin, :unsorted_bin
+        inspect = @h.layouts :smallbin, :unsorted_bin, io: @io
         expect(inspect).to include "[self]"
         expect(inspect).to include '0x6020f0'
         expect(inspect).to include 'UnsortedBin'

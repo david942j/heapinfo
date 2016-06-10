@@ -89,17 +89,17 @@ h.debug {
 
 #### layouts
 ```ruby
-puts h.layouts :fastbin
+h.layouts :fastbin
 ```
 ![fastbin layouts](https://github.com/david942j/heapinfo/blob/master/examples/fastbin_layouts.png?raw=true)
 
 ```ruby
-puts h.layouts :unsorted_bin, :smallbin
+h.layouts :unsorted_bin, :smallbin
 ```
 ![smallbin layouts](https://github.com/david942j/heapinfo/blob/master/examples/unsorted_smallbin_layouts.png?raw=true)
 
 #### x
 ```ruby
-puts h.x 8, :heap
+h.x 8, :heap
 ```
 ![x/8gx](https://github.com/david942j/heapinfo/blob/master/examples/x8_heap.png?raw=true)

@@ -86,38 +86,44 @@ module HeapInfo
     #
     # Show dump results like in gdb's command <tt>x</tt>,
     # while will auto detect the current elf class to decide using <tt>gx</tt> or <tt>wx</tt>.
+    #
+    # The dump results wrapper with color codes and nice typesetting will output to <tt>stdout</tt> by default.
     # @param [Integer] count The number of result need to dump, see examples for more information
     # @param [Mixed] commands Same format as <tt>#dump(*args)</tt>, see <tt>#dump</tt> for more information
-    # @return [String] The dump results wrapper with color codes and nice typesetting.
+    # @param [IO] io <tt>IO</tt> that use for printing, default is <tt>$stdout</tt>
+    # @return [NilClass] The return value of <tt>io.puts</tt>.
     # @example
-    #   puts h.x 8, :heap
+    #   h.x 8, :heap
     #   # 0x1f0d000:      0x0000000000000000      0x0000000000002011
     #   # 0x1f0d010:      0x00007f892a9f87b8      0x00007f892a9f87b8
     #   # 0x1f0d020:      0x0000000000000000      0x0000000000000000
     #   # 0x1f0d030:      0x0000000000000000      0x0000000000000000 
     # @example
-    #   puts h.x 3, 0x400000
+    #   h.x 3, 0x400000
     #   # 0x400000:       0x00010102464c457f      0x0000000000000000
     #   # 0x400010:       0x00000001003e0002
-    def x(count, *commands)
-      return unless load?
+    def x(count, *commands, io: $stdout)
+      return unless load? and io.respond_to? :puts
       commands = commands + [count * size_t]
       base = base_of_dump_commands(*commands)
       res = dump(*commands).unpack(size_t == 4 ? "L*" : "Q*")
-      res.group_by.with_index{|_, i| i / (16 / size_t) }.map do |round, values|
+      str = res.group_by.with_index{|_, i| i / (16 / size_t) }.map do |round, values|
         "%#x:\t" % (base + round * 16) + values.map{|v| Helper.color "0x%0#{size_t * 2}x" % v}.join("\t")
       end.join("\n")
+      io.puts str
     end
 
     # Pretty dump of bins layouts.
     #
-    # @param [Symbol] args Bin type(s) you want to see.
-    # @return [String] Bin layouts that wrapper with color codes.
+    # The request layouts will output to <tt>stdout</tt> by default.
+    # @param [Array<Symbol>] args Bin type(s) you want to see.
+    # @param [IO] io <tt>IO</tt> that use for printing, default is <tt>$stdout</tt>
+    # @return [NilClass] The return value of <tt>io.puts</tt>.
     # @example
-    #   puts h.layouts :fastbin, :unsorted_bin, :smallbin
-    def layouts(*args)
-      return unless load?
-      self.libc.main_arena.layouts(*args)
+    #   h.layouts :fastbin, :unsorted_bin, :smallbin
+    def layouts(*args, io: $stdout)
+      return unless load? and io.respond_to? :puts
+      io.puts self.libc.main_arena.layouts(*args)
     end
 
     # Show simple information of target process.

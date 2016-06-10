@@ -17,7 +17,7 @@ h.debug {
 }
 
 z.puts 4; z.puts 0 # delete Benz
-puts h.layouts :fastbin # show fastbin
+h.layouts :fastbin # show fastbin
 
 z.puts 2 # new Magic
 

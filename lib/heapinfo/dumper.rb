@@ -39,7 +39,7 @@ module HeapInfo
       len = args.size == 2 ? DUMP_BYTES : Integer(args[-1])
       offset = Integer(args[1])
       base = args[0]
-      base = base.to_sym if base.is_a? String
+      base = base.delete(':').to_sym if base.is_a? String
       [base, offset, len]
     end
 
