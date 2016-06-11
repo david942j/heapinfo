@@ -77,8 +77,12 @@ module HeapInfo
     # @param [Integer] length The length limit for searching.
     # @return [Integer, NilClass] The first matched address, <tt>nil</tt> is returned when no such pattern found.
     # @example
-    #   find(0xdeadbeef, :heap)
-    #   find(0xdeadbeef, 'heap+0x10', 0x1000)
+    #   find(/E.F/, :elf)
+    #   # => 4194305
+    #   find(0x4141414141414141, 'heap+0x10', 0x1000)
+    #   # => 6291472
+    #   find('/bin/sh', :libc)
+    #   # => 140662379588827
     def find(pattern, from, length)
       from = base_of(from)
       length = 1 << 40 if length.is_a? Symbol

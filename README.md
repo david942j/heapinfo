@@ -10,18 +10,26 @@ As pwn lovers, while playing CTF with heap exploitation, we always need a debugg
 
 Implement with ruby because I love ruby :P. But might also implement with Python (if no others did) in the future.
 
-If you prefer pwntools for exploiting, you can still use **heapinfo** in irb/pry as a small debugger.
+If you prefer [pwntools](https://github.com/Gallopsled/pwntools) for exploiting, you can still use **HeapInfo** in irb/pry as a small debugger.
 
-Any suggestion of features is welcome.
+Any suggestion of features or bug issues is welcome.
 
 Relation works are [pwntools-ruby](https://github.com/peter50216/pwntools-ruby) and [gdbpwn](https://github.com/scwuaptx/Pwngdb).
 
+## Install
+**HeapInfo** is still under developing for more features, so the version might change frequently :p
+
+```
+$ gem install heapinfo
+```
+
 ## Features
 * Can use in your ruby exploit script or in irb/pry
-* **heapinfo** will work when the `victim` is being traced! i.e. you can use ltrace/strace/gdb and **heapinfo** simultaneously!
+* **HeapInfo** works when the `victim` is being traced! i.e. you can use ltrace/strace/gdb and **HeapInfo** simultaneously!
 * `dump` - dump arbitrarily address memory.
 * `layouts` - show the current bin layouts, very useful for heap exploitation.
 * `x` - Provide gdb-like commands.
+* `find` - Provide gdb-like commands.
 * More features and details can be found in [RDoc](http://www.rubydoc.info/github/david942j/heapinfo/master/)
 
 ## Usage
@@ -60,14 +68,17 @@ h = heapinfo('remote')
 # Process not found
 h.pid # nil
 h.debug {
-  p h.libc.base # wrapper with `debug` so that no error will be raised when pwning remote service
+  fail unless leak_libc_base == h.libc.base
+  # wrapper with `debug` so that no error will be raised when pwning remote service
 }
 ```
 
 #### Dump
-query content of specific address   
-NOTICE: you MUST have permission of attaching a program, otherwise dump will fail   
-i.e. `/proc/sys/kernel/yama/ptrace_scope` set to 0 or run as root
+Query content of specific address.
+
+NOTICE: you MUST have permission of attaching a program, otherwise dump will fail.
+
+i.e. `/proc/sys/kernel/yama/ptrace_scope` set to 0 or run as root.
 
 ```ruby
 h.debug {
@@ -98,8 +109,22 @@ h.layouts :unsorted_bin, :smallbin
 ```
 ![smallbin layouts](https://github.com/david942j/heapinfo/blob/master/examples/unsorted_smallbin_layouts.png?raw=true)
 
-#### x
+#### x - gdb-like command
 ```ruby
 h.x 8, :heap
 ```
 ![x/8gx](https://github.com/david942j/heapinfo/blob/master/examples/x8_heap.png?raw=true)
+
+#### find - gdb-like command
+Provide a searcher of memory, easier to use than in (naive) gdb.
+
+Support search integer, string, and even regular expression.
+
+```ruby
+h.find(/E.F/, 0x400000, 4)
+# => 4194305 # 0x400001
+h.find(/E.F/, 0x400000, 3)
+# => nil
+sh_offset = h.find('/bin/sh', :libc) - h.libc.base
+# => 1559771 # 0x17ccdb
+```
