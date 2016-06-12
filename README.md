@@ -121,6 +121,8 @@ Provide a searcher of memory, easier to use than in (naive) gdb.
 Support search integer, string, and even regular expression.
 
 ```ruby
+h.find(0xdeadbeef, 'heap+0x10', 0x1000)
+# => 6299664 # 0x602010
 h.find(/E.F/, 0x400000, 4)
 # => 4194305 # 0x400001
 h.find(/E.F/, 0x400000, 3)

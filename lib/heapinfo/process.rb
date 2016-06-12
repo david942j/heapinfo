@@ -106,14 +106,19 @@ module HeapInfo
     # Gdb-like command.
     #
     # Search a specific value/string/regexp in memory.
-    # <tt>#find</tt> only return the first matched address, if want to find all adress, use <tt>#find_all</tt> instead.
     # @param [Integer, String, Regexp] pattern The desired search pattern, can be value(<tt>Integer</tt>), string, or regular expression.
     # @param [Integer, String, Symbol] from Start address for searching, can be segment(<tt>Symbol</tt>) or segments with offset. See examples for more information.
     # @param [Integer] length The search length limit, default is unlimited, which will search until pattern found or reach unreadable memory.
     # @return [Integer, NilClass] The first matched address, <tt>nil</tt> is returned when no such pattern found.
     # @example
-    #   h.find(0xdeadbeef, :heap)
     #   h.find(0xdeadbeef, 'heap+0x10', 0x1000)
+    #   # => 6299664 # 0x602010
+    #   h.find(/E.F/, 0x400000, 4)
+    #   # => 4194305 # 0x400001
+    #   h.find(/E.F/, 0x400000, 3)
+    #   # => nil
+    #   sh_offset = h.find('/bin/sh', :libc) - h.libc.base
+    #   # => 1559771 # 0x17ccdb
     def find(pattern, from, length = :unlimited)
       return Nil.new unless load?
       length = 1 << 40 if length.is_a? Symbol
