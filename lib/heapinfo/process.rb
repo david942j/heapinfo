@@ -161,7 +161,8 @@ module HeapInfo
       @pid != nil
     end
 
-    def load! # force load is not efficient
+    def load! # try to load
+      return if @pid
       @pid = fetch_pid
       return false if @pid.nil? # still can't load
       load_info!
