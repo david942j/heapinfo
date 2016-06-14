@@ -11,13 +11,13 @@ module HeapInfo
     def initialize(base, bits, dumper)
       @base, @dumper = base, dumper
       @size_t = bits / 8
-      reload
+      reload!
     end
 
     # Refresh all attributes
     # Retrive data using <tt>@dumper</tt>, load bins, top chunk etc.
     # @return [HeapInfo::Arena] self
-    def reload
+    def reload!
       top_ptr = Helper.unpack(size_t, @dumper.call(@base + 8 + size_t * 10, size_t))
       @fastbin = []
       return self if top_ptr == 0 # arena not init yet

@@ -1,16 +1,16 @@
 module HeapInfo
   class Libc < Segment
     def main_arena_offset
-      return @_main_arena_offset if @_main_arena_offset
+      return @main_arena_offset if @main_arena_offset
       return nil unless exhaust_search :main_arena
-      @_main_arena_offset
+      @main_arena_offset
     end
 
     def main_arena
-      return @_main_arena.reload if @_main_arena
+      return @main_arena.reload! if @main_arena
       off = main_arena_offset
       return if off.nil?
-      @_main_arena = Arena.new(off + self.base, process.bits, lambda{|*args|process.send(:dumper).dump(*args)})
+      @main_arena = Arena.new(off + self.base, process.bits, lambda{|*args| process.dump(*args)})
     end
 
     def self.find(maps, name, process)
@@ -26,7 +26,7 @@ module HeapInfo
     def exhaust_search(symbol)
       return false if symbol != :main_arena
       # TODO: read from cache
-      @_main_arena_offset = resolve_main_arena_offset
+      @main_arena_offset = resolve_main_arena_offset
       true
     end
 
