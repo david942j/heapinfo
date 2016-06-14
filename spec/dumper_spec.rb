@@ -51,6 +51,10 @@ describe HeapInfo::Dumper do
     it 'parser' do
       expect(@dumper.find("ELF", ':elf + 1', 3)).to eq 0x400001
     end
+    it 'reach end' do
+      # check dumper won't return nil when remain readable memory less than one page
+      expect(@dumper.find("\x00", 0x601010, 0x1000).nil?).to be false
+    end
   end
 
   describe 'parse_cmd' do

@@ -31,7 +31,7 @@ module HeapInfo
       end
       file = mem_f
       file.pos = addr + offset
-      mem = file.read len
+      mem = file.readpartial len
       file.close
       mem
     rescue
