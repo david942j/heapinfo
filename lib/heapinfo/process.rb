@@ -10,7 +10,6 @@ module HeapInfo
     }
     # @return [Fixnum, NilClass] return the pid of process, <tt>nil</tt> if no such process found
     attr_reader :pid
-    attr_reader :status
 
     # Instantiate a <tt>HeapInfo::Process</tt> object
     # @param [String, Fixnum] prog Process name or pid, see <tt>HeapInfo::heapinfo</tt> for more information
@@ -20,7 +19,6 @@ module HeapInfo
       @options = DEFAULT_LIB.merge options
       load!
       return unless load?
-      @dumper = Dumper.new(@status, mem_filename)
     end
 
     # Use this method to wrapper all HeapInfo methods.
@@ -65,7 +63,7 @@ module HeapInfo
     #   dump('heap-1, 64') # not support '-'
     def dump(*args)
       return Nil.new unless load?
-      @dumper.dump(*args)
+      dumper.dump(*args)
     end
 
     # Return the dump result as chunks.
@@ -75,7 +73,7 @@ module HeapInfo
     # @param [Mixed] args Same as arguments of <tt>#dump</tt>
     def dump_chunks(*args)
       return Nil.new unless load?
-      @dumper.dump_chunks(*args)
+      dumper.dump_chunks(*args)
     end
 
     # Gdb-like command
@@ -100,7 +98,7 @@ module HeapInfo
     #   # 0x400010:       0x00000001003e0002
     def x(count, *commands, io: $stdout)
       return unless load? and io.respond_to? :puts
-      @dumper.x(count, *commands, io: io)
+      dumper.x(count, *commands, io: io)
     end
 
     # Gdb-like command.
@@ -122,7 +120,7 @@ module HeapInfo
     def find(pattern, from, length = :unlimited)
       return Nil.new unless load?
       length = 1 << 40 if length.is_a? Symbol
-      @dumper.find(pattern, from, length)
+      dumper.find(pattern, from, length)
     end
 
     # <tt>search</tt> is more intutive to me
@@ -158,7 +156,7 @@ module HeapInfo
     end
 
   private
-    attr_reader :dumper
+    attr_accessor :dumper
     def load?
       @pid != nil
     end
@@ -166,7 +164,7 @@ module HeapInfo
     def load! # force load is not efficient
       @pid = fetch_pid
       return false if @pid.nil? # still can't load
-      load_status @options
+      load_info!
       true
     end
 
@@ -180,28 +178,12 @@ module HeapInfo
       pid
     end
 
-    def load_status(options)
-      elf  = Helper.exe_of pid
-      maps = Helper.parse_maps Helper.maps_of pid
-      @status = {
-        program: Segment.find(maps, File.readlink("/proc/#{pid}/exe")),
-        libc:    Libc.find(maps, match_maps(maps, options[:libc]), self),
-        heap:    Segment.find(maps, '[heap]'),
-        stack:   Segment.find(maps, '[stack]'),
-        ld:      Segment.find(maps, match_maps(maps, options[:ld])),
-        bits:    bits_of(elf),
-      }
-      @status[:elf] = @status[:program] #alias
-      @status.keys.each do |m|
-        self.class.send(:define_method, m) {@status[m]}
+    def load_info!
+      @info = ProcessInfo.new(self)
+      ProcessInfo::EXPORT.each do |m|
+        self.class.send(:define_method, m) {@info.send(m)}
       end
-      @dumper = Dumper.new(@status, mem_filename)
-    end
-    def match_maps(maps, pattern)
-      maps.map{|s| s[3]}.find{|seg| pattern.is_a?(Regexp) ? seg =~ pattern : seg.include?(pattern)}
-    end
-    def bits_of(elf)
-      elf[4] == "\x01" ? 32 : 64
+      @dumper = Dumper.new(@info, mem_filename)
     end
     def mem_filename
       "/proc/#{pid}/mem"

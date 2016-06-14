@@ -65,6 +65,7 @@ end
 
 require 'heapinfo/helper'
 require 'heapinfo/nil'
+require 'heapinfo/process_info'
 require 'heapinfo/process'
 require 'heapinfo/segment'
 require 'heapinfo/libc'

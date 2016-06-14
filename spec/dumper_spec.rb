@@ -10,19 +10,19 @@ describe HeapInfo::Dumper do
       expect(dumper.dump(0x400000, 4)).to eq "\x7fELF"
     end
     it 'segment' do
-      segments = {elf: HeapInfo::Segment.new(0x400000, 'elf')}
-      dumper = HeapInfo::Dumper.new(segments, @mem_filename)
+      class S;def elf; HeapInfo::Segment.new(0x400000, 'elf'); end; end
+      dumper = HeapInfo::Dumper.new(S.new, @mem_filename)
       expect(dumper.dump(:elf, 4)).to eq "\x7fELF"
     end
     it 'invalid' do
-      dumper = HeapInfo::Dumper.new({}, @mem_filename)
+      dumper = HeapInfo::Dumper.new(HeapInfo::Nil.new, @mem_filename)
       expect(dumper.dump(:zzz, 1)).to be nil
       expect(dumper.dump(0x12345, 1)).to be nil
     end
   end
 
   it 'dumpable?' do
-    dumper = HeapInfo::Dumper.new({}, '/proc/self/mem')
+    dumper = HeapInfo::Dumper.new(HeapInfo::Nil.new, '/proc/self/mem')
     expect(dumper.send(:dumpable?)).to be true
     # a little hack
     dumper.instance_variable_set(:@filename, '/proc/1/mem')
@@ -34,7 +34,8 @@ describe HeapInfo::Dumper do
 
   describe 'find' do
     before(:all) do
-      @dumper = HeapInfo::Dumper.new({elf: HeapInfo::Segment.new(0x400000, ''), bits: 64}, '/proc/self/mem')
+      class S;def elf; HeapInfo::Segment.new(0x400000, ''); end; def bits; 64; end; end
+      @dumper = HeapInfo::Dumper.new(S.new, '/proc/self/mem')
     end
     it 'simple' do
       expect(@dumper.find("ELF", :elf, 4)).to eq 0x400001

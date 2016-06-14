@@ -6,10 +6,10 @@ module HeapInfo
 
     # Instantiate a <tt>HeapInfo::Dumper</tt> object
     #
-    # @param [Hash] segments With values <tt>HeapInfo::Segment</tt>
+    # @param [HeapInfo::ProcessInfo] info process info object.
     # @param [String] mem_filename The filename that can be access for dump. Should be <tt>/proc/[pid]/mem</tt>.
-    def initialize(segments, mem_filename)
-      @segments, @filename = segments, mem_filename
+    def initialize(info, mem_filename)
+      @info, @filename = info, mem_filename
       need_permission unless dumpable?
     end
 
@@ -22,8 +22,8 @@ module HeapInfo
     def dump(*args)
       return need_permission unless dumpable?
       base, offset, len = Dumper.parse_cmd(args)
-      if base.instance_of?(Symbol) and @segments[base].instance_of?(Segment)
-        addr = @segments[base].base
+      if base.instance_of?(Symbol) and (segment = @info.send(base)).is_a?(Segment)
+        addr = segment.base
       elsif base.is_a? Integer
         addr = base
       else
@@ -46,7 +46,7 @@ module HeapInfo
     # @param [Mixed] args Same as arguments of <tt>#dump</tt>
     def dump_chunks(*args)
       base = base_of(*args)
-      dump(*args).to_chunks(bits: @segments[:bits], base: base)
+      dump(*args).to_chunks(bits: @info.bits, base: base)
     end
 
     # Show dump results like in gdb's command <tt>x</tt>.
@@ -167,7 +167,7 @@ module HeapInfo
 
     def base_of(*args)
       base, offset, _ = Dumper.parse_cmd(args)
-      base = @segments[base].base if @segments[base].is_a? Segment
+      base = @info.send(base).base if base.instance_of?(Symbol) and @info.send(base).is_a? Segment
       base + offset
     end
 
@@ -198,7 +198,7 @@ module HeapInfo
       from + idx
     end
     def size_t
-      @segments[:bits] / 8
+      @info.bits / 8
     end
   end
 end
