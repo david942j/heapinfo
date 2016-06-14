@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.version     = ::HeapInfo::VERSION
   s.date        = '2016-05-21'
   s.summary     = "HeapInfo - interactive heap exploitation helper"
-  s.description = "create an interactive heap info interface while exploiting binary (with glibc) with ruby"
+  s.description = "create an interactive memory info interface while pwn / exploiting"
   s.authors     = ["david942j"]
   s.email       = ["david942j@gmail.com"]
   s.files       = Dir["lib/**/*.rb"] + Dir["lib/**/tools/*.c"] + %w(README.md)

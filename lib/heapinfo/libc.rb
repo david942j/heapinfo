@@ -37,8 +37,7 @@ module HeapInfo
       flags = "-w #{@process.bits == 32 ? '-m32' : ''}"
       %x(cp #{self.name} #{libc_file} && \
          cp #{@process.ld.name} #{ld_file} && \
-         chdir #{File.expand_path('../tools', __FILE__)} && \
-         gcc #{flags} get_arena.c -o #{tmp_elf} 2>&1 > /dev/null && \
+         gcc #{flags} #{File.expand_path('../tools/get_arena.c', __FILE__)} -o #{tmp_elf} 2>&1 > /dev/null && \
          #{ld_file} --library-path #{HeapInfo::TMP_DIR} #{tmp_elf} && \
          rm #{tmp_elf} #{libc_file} #{ld_file}).to_i(16)
     end
