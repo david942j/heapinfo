@@ -13,13 +13,6 @@ module HeapInfo
   # make sure /tmp is writable
   TMP_DIR = '/tmp/.heapinfo'
 
-  # Directory for caching files.
-  # e.g. HeapInfo will record main_arena_offset for glibc(s)
-  CACHE_DIR = '~/.cache/heapinfo'
-
-  FileUtils.mkdir_p(TMP_DIR)
-  FileUtils.mkdir_p(CACHE_DIR)
-
   # Entry point for using HeapInfo.
   # Show segments info of the process after loaded
   # @param [String, Fixnum] prog The program name of victim. If a number is given, seem as pid (useful when multi-processes exist)
@@ -65,6 +58,7 @@ end
 
 require 'heapinfo/helper'
 require 'heapinfo/nil'
+require 'heapinfo/cache'
 require 'heapinfo/process_info'
 require 'heapinfo/process'
 require 'heapinfo/segment'
