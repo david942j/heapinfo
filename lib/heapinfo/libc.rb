@@ -1,9 +1,14 @@
 module HeapInfo
   class Libc < Segment
+    def initialize(*args)
+      super
+      @offset = {}
+    end
+
     def main_arena_offset
-      return @main_arena_offset if @main_arena_offset
+      return @offset[:main_arena] if @offset[:main_arena]
       return nil unless exhaust_search :main_arena
-      @main_arena_offset
+      @offset[:main_arena]
     end
 
     def main_arena
@@ -25,9 +30,16 @@ module HeapInfo
     # only for searching offset of main_arena now
     def exhaust_search(symbol)
       return false if symbol != :main_arena
-      # TODO: read from cache
-      @main_arena_offset = resolve_main_arena_offset
+      read_main_arena_offset
       true
+    end
+
+    def read_main_arena_offset
+      key = HeapInfo::Cache::key_libc_offset(self.name)
+      @offset = HeapInfo::Cache::read(key) || {}
+      return @offset[:main_arena] if @offset.key? :main_arena
+      @offset[:main_arena] = resolve_main_arena_offset
+      HeapInfo::Cache::write key, @offset
     end
 
     def resolve_main_arena_offset

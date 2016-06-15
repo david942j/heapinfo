@@ -1,3 +1,4 @@
+require 'digest'
 module HeapInfo
 
   # Self implment file-base cache manager.
@@ -6,12 +7,14 @@ module HeapInfo
   module Cache
     # Directory for caching files.
     # e.g. HeapInfo will record main_arena_offset for glibc(s)
-    CACHE_DIR = '~/.cache/heapinfo'
-    begin
-      # To prevent ~/ is not writable.
-      FileUtils.mkdir_p(CACHE_DIR)
-    rescue
-      CACHE_DIR = File.join(HeapInfo::TMP_DIR, 'cache')
+    CACHE_DIR = File.join(ENV['HOME'], '.cache/heapinfo')
+
+    # Get the key for store libc offsets
+    #
+    # @param [String] libc_path The realpath to libc file
+    # @return [String] The key for cache read/write.
+    def self.key_libc_offset(libc_path)
+      File.join('libc', Digest::MD5.hexdigest(IO.binread(libc_path)), 'offset')
     end
 
     # Write cache to file.
@@ -33,7 +36,7 @@ module HeapInfo
     def self.read(key)
       filepath = realpath key
       return unless File.file? filepath
-      Marshal::load filepath
+      Marshal::load IO.binread filepath
     rescue
       nil # handle if file content invalid
     end
@@ -43,5 +46,18 @@ module HeapInfo
       raise ArgumentError.new('Invalid key(file path)') if key =~ /[^\w\/]/
       File.join(CACHE_DIR, key)
     end
+
+    def self.load
+      FileUtils.mkdir_p(CACHE_DIR)
+    rescue
+      # To prevent ~/ is not writable.
+      self.send :remove_const, :CACHE_DIR
+      self.const_set :CACHE_DIR, File.join(HeapInfo::TMP_DIR, '.cache/heapinfo')
+    end
+
+    def self.clear_all
+      FileUtils.rm_rf CACHE_DIR
+    end
+    self.load
   end
 end

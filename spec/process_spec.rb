@@ -26,6 +26,7 @@ describe HeapInfo::Process do
 
   describe 'victim' do
     before(:all) do
+      HeapInfo::Cache.send :clear_all # force cache miss, to make sure coverage
       @victim = HeapInfo::TMP_DIR + '/victim'
       %x(g++ #{File.expand_path('../files/victim.cpp', __FILE__)} -o #{@victim} 2>&1 > /dev/null)
       pid = fork
