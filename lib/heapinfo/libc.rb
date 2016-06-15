@@ -1,29 +1,41 @@
 module HeapInfo
+  # Record libc's base, name, and offsets.
   class Libc < Segment
+
+    # Instantiate a <tt>HeapInfo::Libc</tt> object.
+    #
+    # @param [Mixed] args See <tt>#HeapInfo::Segment.initialize</tt> for more information.
     def initialize(*args)
       super
       @offset = {}
     end
 
+    # Get the offset of <tt>main_arena</tt> in libc.
+    # @return [Integer]
     def main_arena_offset
       return @offset[:main_arena] if @offset[:main_arena]
       return nil unless exhaust_search :main_arena
       @offset[:main_arena]
     end
 
+    # Get the <tt>main_arena</tt> of libc.
+    # @return [HeapInfo::Arena]
     def main_arena
       return @main_arena.reload! if @main_arena
       off = main_arena_offset
       return if off.nil?
-      @main_arena = Arena.new(off + self.base, process.bits, ->(*args) { process.dump(*args) })
+      @main_arena = Arena.new(off + self.base, process.bits, process.method(:dump))
     end
 
+    # @param [Array] maps See <tt>#HeapInfo::Segment.find</tt> for more information.
+    # @param [String] name See <tt>#HeapInfo::Segment.find</tt> for more information.
+    # @param [HeapInfo::Process] process The process.
+    # @return [HeapInfo::Libc] libc segment found in maps.
     def self.find(maps, name, process)
       obj = super(maps, name)
       obj.send(:process=, process)
       obj
     end
-
 
   private
     attr_accessor :process

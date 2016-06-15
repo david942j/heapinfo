@@ -1,9 +1,17 @@
 module HeapInfo
+  # Records status of an arena, including bin(s) and top chunk.
   class Arena
-    attr_reader :fastbin, :unsorted_bin, :smallbin, :top_chunk
+    # @return [Array<HeapInfo::Fastbin>] Fastbins in an array.
+    attr_reader :fastbin
+    # @return [Array<HeapInfo::UnsortedBin>] The unsorted bin (only one).
+    attr_reader :unsorted_bin
+    # @return [Array<HeapInfo::Smallbin>] Smallbins in an array.
+    attr_reader :smallbin
+    # @return [HeapInfo::Chunk] Current top chunk.
+    attr_reader :top_chunk
     # attr_reader :largebin, :last_remainder
 
-    # Instantiate a <tt>HeapInfo::Arena</tt> object
+    # Instantiate a <tt>HeapInfo::Arena</tt> object.
     #
     # @param [Integer] base Base address of arena.
     # @param [Integer] bits Either 64 or 32
@@ -14,7 +22,7 @@ module HeapInfo
       reload!
     end
 
-    # Refresh all attributes
+    # Refresh all attributes.
     # Retrive data using <tt>@dumper</tt>, load bins, top chunk etc.
     # @return [HeapInfo::Arena] self
     def reload!
@@ -54,11 +62,14 @@ module HeapInfo
     attr_reader :size_t
   end
 
+  # Class for record fastbin type chunk.
   class Fastbin < Chunk
+    # @return [Integer]
     attr_reader :fd
+    # @return [Integer]
     attr_accessor :index
     
-    # Instantiate a <tt>HeapInfo::Fastbin</tt> object
+    # Instantiate a <tt>HeapInfo::Fastbin</tt> object.
     #
     # @param [Mixed] args See <tt>HeapInfo::Chunk</tt> for more information.
     def initialize(*args)
@@ -66,18 +77,20 @@ module HeapInfo
       @fd = Helper.unpack(size_t, @data[0, @size_t])
     end
 
-    # Mapping index of fastbin to chunk size
+    # Mapping index of fastbin to chunk size.
     # @return [Integer] size
     def idx_to_size
       index * size_t * 2 + size_t * 4
     end
 
-    # For pretty inspect
-    # @return [String] Title with color codes
+    # For pretty inspect.
+    # @return [String] Title with color codes.
     def title
       "%s%s: " % [Helper.color(Helper.class_name(self), sev: :bin),  index.nil? ? nil : "[#{Helper.color("%#x" % idx_to_size)}]"]
     end
 
+    # Pretty inspect.
+    # @return [String] fastbin layouts wrapper with color codes.
     def inspect
       title + list.map do |ptr|
         next "(#{ptr})\n" if ptr.is_a? Symbol
@@ -105,10 +118,14 @@ module HeapInfo
       ret << nil
     end
 
+    # @param [Integer] ptr Get the <tt>fd</tt> value of chunk at <tt>ptr</tt>.
+    # @return [Integer] The <tt>fd</tt>.
     def fd_of(ptr)
       addr_of(ptr, 2)
     end
 
+    # @param [Integer] ptr Get the <tt>bk</tt> value of chunk at <tt>ptr</tt>.
+    # @return [Integer] The <tt>bk</tt>.
     def bk_of(ptr)
       addr_of(ptr, 3)
     end
@@ -121,21 +138,30 @@ module HeapInfo
     end
   end
 
+  # Class for record unsorted bin type chunk.
   class UnsortedBin < Fastbin
+    # @return [Integer]
     attr_reader :bk
+
+    # Instantiate a <tt>HeapInfo::UnsortedBin</tt> object.
+    #
+    # @param [Mixed] args See <tt>HeapInfo::Chunk</tt> for more information.
     def initialize(*args)
       super
       @bk = Helper.unpack(size_t, @data[@size_t, @size_t])
     end
 
-    # size: at most extend size
-    # size=2: bk, bk, bin, fd, fd
+    # @option [Integer] size At most expand size. For <tt>size = 2</tt>, the expand list would be <tt>bk, bk, bin, fd, fd</tt>.
+    # @return [String] unsorted bin layouts wrapper with color codes.
     def inspect(size: 2)
       list = link_list(size)
       return '' if list.size <= 1 and Helper.class_name(self) != 'UnsortedBin' # bad..
       title + pretty_list(list) + "\n"
     end
 
+    # Wrapper the double-linked list with color codes.
+    # @param [Array<Integer>] list The list from <tt>#link_list</tt>.
+    # @return [String] Wrapper with color codes.
     def pretty_list(list)
       center = nil
       list.map.with_index do |c, idx|
@@ -157,6 +183,11 @@ module HeapInfo
       end.join(" === ")
     end
 
+    # Return the double link list with bin in the center.
+    #
+    # The list will like <tt>[..., bk of bk, bk of bin, bin, fd of bin, fd of fd, ...]</tt>.
+    # @param [Integer] expand_size At most expand size. For <tt>size = 2</tt>, the expand list would be <tt>bk, bk, bin, fd, fd</tt>.
+    # @return [Array<Integer>] The linked list.
     def link_list(expand_size)
       list = [@base]
       # fd
@@ -178,9 +209,10 @@ module HeapInfo
     end
   end
 
+  # Class for record smallbin type chunk.
   class Smallbin < UnsortedBin
 
-    # Mapping index of smallbin to chunk size
+    # Mapping index of smallbin to chunk size.
     # @return [Integer] size
     def idx_to_size
       index * size_t * 2 + size_t * 18

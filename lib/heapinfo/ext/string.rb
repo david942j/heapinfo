@@ -3,12 +3,20 @@ module HeapInfo
     module String
       # Methods to be mixed into String
       module InstanceMethods
+        # Convert string to a <tt>HeapInfo::Chunk</tt>.
+        # @option [Integer] bits 32 or 64 bit of this chunk.
+        # @option [Integer] base Base address will show when print the <tt>Chunk</tt> object.
+        # @return [HeapInfo::Chunk]
         def to_chunk(bits: 64, base: 0)
           size_t = bits / 8
           dumper = ->(addr, len) { self[addr-base, len] }
           Chunk.new(size_t, base, dumper)
         end
 
+        # Convert string to array of <tt>HeapInfo::Chunk</tt>.
+        # @option [Integer] bits 32 or 64 bit of this chunk.
+        # @option [Integer] base Base address will show when print the <tt>Chunk</tt> object.
+        # @return [HeapInfo::Chunks]
         def to_chunks(bits: 64, base: 0)
           size_t = bits / 8
           chunks = Chunks.new

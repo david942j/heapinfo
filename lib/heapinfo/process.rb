@@ -186,6 +186,7 @@ module HeapInfo
       end
       @dumper = Dumper.new(@info, mem_filename)
     end
+
     def mem_filename
       "/proc/#{pid}/mem"
     end

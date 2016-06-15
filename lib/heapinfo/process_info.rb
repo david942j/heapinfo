@@ -8,7 +8,16 @@ module HeapInfo
     # e.g. <tt>process.libc alias to process.info.libc</tt>
     EXPORT = %i(libc ld heap elf program stack bits)
    
-    attr_reader :bits, :program, :stack, :libc, :ld
+    # @return [Integer] 32 or 64.
+    attr_reader :bits
+    # @return [HeapInfo::Segment]
+    attr_reader :program
+    # @return [HeapInfo::Segment]
+    attr_reader :stack
+    # @return [HeapInfo::Libc]
+    attr_reader :libc
+    # @return [HeapInfo::Segment]
+    attr_reader :ld
     alias :elf :program
 
     # Instantiate a <tt>ProcessInfo</tt> object

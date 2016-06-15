@@ -1,4 +1,5 @@
 module HeapInfo
+  # Record the base address and name in maps
   class Segment
 
     # Base address of segment
