@@ -41,12 +41,14 @@ module HeapInfo
       nil # handle if file content invalid
     end
 
-  private
+    # @param [String] key
+    # @return [String] Prepend with <tt>CACHE_DIR</tt>
     def self.realpath(key)
       raise ArgumentError.new('Invalid key(file path)') if key =~ /[^\w\/]/
       File.join(CACHE_DIR, key)
     end
 
+    # @return [Object] Not important.
     def self.load
       FileUtils.mkdir_p(CACHE_DIR)
     rescue
@@ -55,6 +57,8 @@ module HeapInfo
       self.const_set :CACHE_DIR, File.join(HeapInfo::TMP_DIR, '.cache/heapinfo')
     end
 
+    # Clear the cache directory.
+    # @return [Object] Not important.
     def self.clear_all
       FileUtils.rm_rf CACHE_DIR
     end

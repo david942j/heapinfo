@@ -21,16 +21,9 @@ module HeapInfo
     #   # => "\x7fELF"
     def dump(*args)
       return need_permission unless dumpable?
-      base, offset, len = Dumper.parse_cmd(args)
-      if HeapInfo::ProcessInfo::EXPORT.include?(base) and (segment = @info.send(base)).is_a?(Segment)
-        addr = segment.base
-      elsif base.is_a? Integer
-        addr = base
-      else
-        raise ArgumentError.new("Invalid base: #{base}") # invalid usage
-      end
+      base, len = base_len_of(*args)
       file = mem_f
-      file.pos = addr + offset
+      file.pos = base
       mem = file.readpartial len
       file.close
       mem
@@ -166,10 +159,18 @@ module HeapInfo
       File.open(@filename)
     end
 
+    def base_len_of(*args)
+      base, offset, len = Dumper.parse_cmd(args)
+      if HeapInfo::ProcessInfo::EXPORT.include?(base) and (segment = @info.send(base)).is_a? Segment
+        base = segment.base
+      elsif not base.is_a? Integer
+        raise ArgumentError.new("Invalid base: #{base}") # invalid usage
+      end
+      [base + offset, len]
+    end
+
     def base_of(*args)
-      base, offset, _ = Dumper.parse_cmd(args)
-      base = @info.send(base).base if base.instance_of?(Symbol) and @info.send(base).is_a? Segment
-      base + offset
+      base_len_of(*args)[0]
     end
 
     def find_integer(value, from, length)
