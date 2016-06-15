@@ -22,7 +22,7 @@ module HeapInfo
     def dump(*args)
       return need_permission unless dumpable?
       base, offset, len = Dumper.parse_cmd(args)
-      if base.instance_of?(Symbol) and (segment = @info.send(base)).is_a?(Segment)
+      if HeapInfo::ProcessInfo::EXPORT.include?(base) and (segment = @info.send(base)).is_a?(Segment)
         addr = segment.base
       elsif base.is_a? Integer
         addr = base
@@ -34,7 +34,8 @@ module HeapInfo
       mem = file.readpartial len
       file.close
       mem
-    rescue
+    rescue => e
+      raise e if e.is_a? ArgumentError
       nil 
     end
 

@@ -16,7 +16,7 @@ describe HeapInfo::Dumper do
     end
     it 'invalid' do
       dumper = HeapInfo::Dumper.new(HeapInfo::Nil.new, @mem_filename)
-      expect(dumper.dump(:zzz, 1)).to be nil
+      expect {dumper.dump(:zzz, 1)}.to raise_error ArgumentError
       expect(dumper.dump(0x12345, 1)).to be nil
     end
   end
