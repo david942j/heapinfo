@@ -2,7 +2,7 @@
 module HeapInfo
   # Main class of heapinfo.
   class Process
-    # The dafault options of libaries,
+    # The default options of libaries,
     # use for matching glibc and ld segments in <tt>/proc/[pid]/maps</tt>
     DEFAULT_LIB = {
       libc: /libc[^\w]/,
