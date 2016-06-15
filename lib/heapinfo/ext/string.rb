@@ -5,7 +5,7 @@ module HeapInfo
       module InstanceMethods
         def to_chunk(bits: 64, base: 0)
           size_t = bits / 8
-          dumper = lambda{|addr, len| self[addr-base, len]}
+          dumper = ->(addr, len) { self[addr-base, len] }
           Chunk.new(size_t, base, dumper)
         end
 

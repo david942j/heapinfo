@@ -172,8 +172,8 @@ module HeapInfo
           sz += 1
         end
       end
-      work.call(@fd, :fd_of, lambda{|ptr| list << ptr})
-      work.call(@bk, :bk_of, lambda{|ptr| list.unshift ptr})
+      work.call(@fd, :fd_of, ->(ptr) { list << ptr })
+      work.call(@bk, :bk_of, ->(ptr) { list.unshift ptr })
       list
     end
   end

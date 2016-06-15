@@ -17,10 +17,10 @@ module HeapInfo
     # @param [Proc] dumper For dump more information of this chunk
     # @param [Boolean] head For specific if is fake chunk in <tt>arena</tt>. If <tt>head</tt> is <tt>true</tt>, will not load <tt>size</tt> and <tt>prev_size</tt> (since it's meaningless)
     # @example
-    #   HeapInfo::Chunk.new 8, 0x602000, lambda{|addr, len| [0,0x21, 0xda4a].pack("Q*")[addr-0x602000, len]}
+    #   HeapInfo::Chunk.new 8, 0x602000, ->(addr, len) { [0,0x21, 0xda4a].pack("Q*")[addr-0x602000, len] }
     #   # create a chunk with chunk size 0x21
     def initialize(size_t, base, dumper, head: false)
-      fail unless [4, 8].include? size_t 
+      raise ArgumentError.new('size_t can be either 4 or 8') unless [4, 8].include? size_t 
       self.class.send(:define_method, :dump){|*args| dumper.call(*args)}
       @size_t = size_t
       @base = base

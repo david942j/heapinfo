@@ -15,7 +15,7 @@ module HeapInfo
       return @main_arena.reload! if @main_arena
       off = main_arena_offset
       return if off.nil?
-      @main_arena = Arena.new(off + self.base, process.bits, lambda{|*args| process.dump(*args)})
+      @main_arena = Arena.new(off + self.base, process.bits, ->(*args) { process.dump(*args) })
     end
 
     def self.find(maps, name, process)

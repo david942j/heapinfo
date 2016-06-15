@@ -12,6 +12,7 @@ module HeapInfo
   # Directory for writing some tmp files when working,
   # make sure /tmp is writable
   TMP_DIR = '/tmp/.heapinfo'
+  FileUtils.mkdir_p TMP_DIR
 
   # Entry point for using HeapInfo.
   # Show segments info of the process after loaded

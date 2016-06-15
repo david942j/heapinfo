@@ -27,7 +27,7 @@ module HeapInfo
       elsif base.is_a? Integer
         addr = base
       else
-        fail # invalid usage
+        raise ArgumentError.new("Invalid base: #{base}") # invalid usage
       end
       file = mem_f
       file.pos = addr + offset
