@@ -24,7 +24,7 @@ module HeapInfo
       return @main_arena.reload! if @main_arena
       off = main_arena_offset
       return if off.nil?
-      @main_arena = Arena.new(off + self.base, process.bits, process.method(:dump))
+      HeapInfo::Glibc.main_arena = @main_arena = Arena.new(off + self.base, process.bits, process.method(:dump))
     end
 
     # @param [Array] maps See <tt>#HeapInfo::Segment.find</tt> for more information.
@@ -34,6 +34,7 @@ module HeapInfo
     def self.find(maps, name, process)
       obj = super(maps, name)
       obj.send(:process=, process)
+      HeapInfo::Glibc.dumper = process.method(:dump)
       obj
     end
 
