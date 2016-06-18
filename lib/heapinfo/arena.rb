@@ -14,11 +14,10 @@ module HeapInfo
     # Instantiate a <tt>HeapInfo::Arena</tt> object.
     #
     # @param [Integer] base Base address of arena.
-    # @param [Integer] bits Either 64 or 32
+    # @param [Integer] size_t Either 8 or 4
     # @param [Proc] dumper For dump more data
-    def initialize(base, bits, dumper)
-      @base, @dumper = base, dumper
-      @size_t = bits / 8
+    def initialize(base, size_t, dumper)
+      @base, @size_t, @dumper = base, size_t, dumper
       reload!
     end
 
