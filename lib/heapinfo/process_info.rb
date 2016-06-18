@@ -32,8 +32,8 @@ module HeapInfo
       @stack = Segment.find(maps, '[stack]')
       # well.. stack is a strange case because it will grow in runtime..
       # should i detect stack base growing..?
-      @libc = Libc.find(maps, match_maps(maps, options[:libc]), process)
       @ld = Segment.find(maps, match_maps(maps, options[:ld]))
+      @libc = Libc.find(maps, match_maps(maps, options[:libc]), @bits, @ld.name, ->(*args){ process.dump(*args) })
     end
 
     # Heap will not be mmapped if the process not use heap yet, so create a lazy loading method.
