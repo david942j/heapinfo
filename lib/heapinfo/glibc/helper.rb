@@ -10,6 +10,10 @@ module HeapInfo
       dumper.call(p, size_t * 2).to_chunk.flags.include? :mmapped
     end
 
+    def get_max_fast
+      size_t * 16
+    end
+
     # The minimal chunk size.
     # Not the real implmentation, maybe wrong some day?
     # @return [Integer] The size.

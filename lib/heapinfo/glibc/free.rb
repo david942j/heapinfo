@@ -26,12 +26,12 @@ module HeapInfo
     def int_free(av, ptr) # is have_lock important?
       chunk = dumper.call(ptr, size_t * 2).to_chunk
       size = ulong chunk.size
-      return unless invalid_pointer(ptr, size)
-      return unless invalid_size(size)
+      invalid_pointer(ptr, size)
+      invalid_size(size)
       # check_inuse_chunk # off
       if size <= get_max_fast
         int_free_fast(av, ptr)
-      elsif !chunk_is_mmapped(ptr) # Though this has been check in libc_free
+      elsif !chunk_is_mmapped(ptr) # Though this has been checked in #libc_free
         int_free_small(av, ptr)
       else
         munmap_chunk(ptr)
@@ -55,16 +55,16 @@ module HeapInfo
     # TODO: Error events
 
     def invalid_pointer(ptr, size)
+      errmsg = "free(): invalid pointer\n"
       # unsigned compare
-      return false if ptr > ulong(-size)
-      return false if ptr % (size_t * 2) != 0
-      true
+      malloc_assert(ptr <= ulong(-size)) { errmsg + "ptr(0x%x) > -size(0x%x)" % [ptr, ulong(-size)] }
+      malloc_assert(ptr % (size_t * 2) == 0) { errmsg + "ptr(0x%x) % %#x != 0" % [ptr, size_t * 2] }
     end
 
     def invalid_size(size)
-      return false if size < minsize
-      return false if not aligned_ok(size)
-      true
+      errmsg = "free(): invalid size\n"
+      malloc_assert(size >= min_chunk_size) { errmsg + "size(0x%x) < min_chunk_size(0x%x)" % [size, min_chunk_size] }
+      malloc_assert(aligned_ok size) { errmsg + "alignment error: size(0x%x) %% 0x%x != 0" % [size, size_t * 2] }
     end
   end
 end
