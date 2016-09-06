@@ -162,7 +162,7 @@ module HeapInfo
     end
 
     def load! # try to load
-      return if @pid
+      return true if @pid
       @pid = fetch_pid
       return false if @pid.nil? # still can't load
       load_info!
