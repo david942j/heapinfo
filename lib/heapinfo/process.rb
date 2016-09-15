@@ -21,6 +21,17 @@ module HeapInfo
       return unless load?
     end
 
+    # Reload a new process with same program name
+    #
+    # @return [HeapInfo::Process] return <tt>self</tt> for chainable.
+    # @example
+    #   puts h.reload!
+    def reload!
+      @pid = nil
+      load!
+      self
+    end
+
     # Use this method to wrapper all HeapInfo methods.
     #
     # Since <tt>::HeapInfo</tt> is a tool(debugger) for local usage, 

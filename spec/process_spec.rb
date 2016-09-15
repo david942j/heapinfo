@@ -38,7 +38,7 @@ describe HeapInfo::Process do
       @io = Cio.new
     end
     after(:all) do
-      %x(killall #{@victim})
+      `killall #{@victim}`
       FileUtils.rm(@victim)
     end
 
@@ -81,6 +81,19 @@ describe HeapInfo::Process do
       end
       it 'regexp' do
         expect(@h.search(/[^\x00]/, :heap)).to eq 0x602008
+      end
+    end
+
+    describe 'reload' do
+      it 'monkey' do
+        prog = File.readlink('/proc/self/exe')
+        @h = HeapInfo::Process.new(prog)
+        expect(@h.pid.is_a? Integer).to be true
+        pid = @h.pid
+        @h.instance_variable_set(:@prog, 'NO_THIS')
+        expect(@h.reload!.pid).to be nil
+        @h.instance_variable_set(:@prog, prog)
+        expect(@h.reload!.pid).to be pid
       end
     end
 
