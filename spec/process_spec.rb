@@ -154,5 +154,9 @@ describe HeapInfo::Process do
     it 'nil chain' do
       expect(@h.dump(:heap).no_such_method.xdd.nil?).to be true
     end
+
+    it 'info methods' do
+      expect(@h.libc.base.nil?).to be true
+    end
   end
 end

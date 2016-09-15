@@ -164,7 +164,7 @@ module HeapInfo
     def load! # try to load
       return true if @pid
       @pid = fetch_pid
-      return false if @pid.nil? # still can't load
+      return clear_process if @pid.nil? # still can't load
       load_info!
       true
     end
@@ -177,6 +177,13 @@ module HeapInfo
         pid = @prog
       end
       pid
+    end
+
+    def clear_process
+      ProcessInfo::EXPORT.each do |m|
+        self.class.send(:define_method, m) {Nil.new}
+      end
+      false
     end
 
     def load_info!
