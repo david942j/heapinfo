@@ -93,6 +93,16 @@ module HeapInfo
       data.unpack(size_t == 4 ? 'L*' : 'Q*')[0]
     end
 
+    # Convert number in hex format
+    #
+    # @param [Integer] num Non-negative integer.
+    # @return [String] number in hex format.
+    # @example
+    #   HeapInfo::Helper.hex(1000) # => '0x3e8'
+    def self.hex(num)
+      '0x' + num.to_s(16)
+    end
+
     # Retrieve pure class name(without module) of an object
     # @param [Object] obj Any instance
     # @return [String] Class name of <tt>obj</tt>

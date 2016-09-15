@@ -3,12 +3,16 @@ module HeapInfo
   class Arena
     # @return [Array<HeapInfo::Fastbin>] Fastbins in an array.
     attr_reader :fastbin
-    # @return [Array<HeapInfo::UnsortedBin>] The unsorted bin (only one).
+    # @return [HeapInfo::Chunk] Current top chunk.
+    attr_reader :top_chunk
+    # @return [HeapInfo::Chunk] Current last remainder.
+    attr_reader :last_remainder
+    # @return [Array<HeapInfo::UnsortedBin>] The unsorted bin (array size will always be one).
     attr_reader :unsorted_bin
     # @return [Array<HeapInfo::Smallbin>] Smallbins in an array.
     attr_reader :smallbin
-    # @return [HeapInfo::Chunk] Current top chunk.
-    attr_reader :top_chunk
+    # @return [Integer] The <tt>system_mem</tt>
+    attr_reader :system_mem
     # attr_reader :largebin, :last_remainder
 
     # Instantiate a <tt>HeapInfo::Arena</tt> object.
@@ -25,16 +29,19 @@ module HeapInfo
     # Retrive data using <tt>@dumper</tt>, load bins, top chunk etc.
     # @return [HeapInfo::Arena] self
     def reload!
-      top_ptr = Helper.unpack(size_t, @dumper.call(@base + 8 + size_t * 10, size_t))
+      top_ptr_offset = @base + 8 + size_t * 10
+      top_ptr = Helper.unpack(size_t, @dumper.call(top_ptr_offset, size_t))
       @fastbin = []
       return self if top_ptr == 0 # arena not init yet
       @top_chunk = Chunk.new size_t, top_ptr, @dumper
+      @last_remainder = Chunk.new size_t, top_ptr_offset + 8, @dumper
+      @system_mem = Helper.unpack(size_t, @dumper.call(top_ptr_offset + 258 * size_t + 16, size_t))
       @fastbin = Array.new(7) do |idx|
         f = Fastbin.new(size_t, @base + 8 - size_t * 2 + size_t * idx, @dumper, head: true)
         f.index = idx
         f
       end
-      @unsorted_bin = UnsortedBin.new(size_t, @base + 8 + size_t * 10, @dumper, head: true)
+      @unsorted_bin = UnsortedBin.new(size_t, top_ptr_offset, @dumper, head: true)
       @smallbin = Array.new(55) do |idx|
         s = Smallbin.new(size_t, @base + 8 + size_t * (26 + 2 * idx), @dumper, head: true)
         s.index = idx

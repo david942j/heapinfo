@@ -61,6 +61,27 @@ module HeapInfo
       flag
     end
 
+    # Ask if chunk not belongs to main arena.
+    #
+    # @return [Boolean] <tt>true|false</tt> if chunk not belongs to main arena
+    def non_main_arena?
+      flags.include? :non_main_arena
+    end
+
+    # Ask if chunk is mmapped.
+    #
+    # @return [Boolean] <tt>true|false</tt> if chunk is mmapped
+    def mmapped?
+      flags.include? :mmapped
+    end
+
+    # Ask if chunk has set the prev-inuse bit.
+    #
+    # @return [Boolean] <tt>true|false</tt> if the <tt>prev_inuse</tt> bit has been set
+    def prev_inuse?
+      flags.include? :prev_inuse
+    end
+
     # Size of chunk
     # @return [Integer] The chunk size without flag masks
     def size

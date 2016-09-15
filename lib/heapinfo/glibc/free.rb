@@ -11,8 +11,8 @@ module HeapInfo
       return if mem == 0 # free(0) has no effect
       ptr = mem2chunk(mem)
       return munmap_chunk(ptr) if chunk_is_mmapped(ptr)
-      ar = arena_for_chunk(ptr)
-      int_free(ar, ptr)
+      av = arena_for_chunk(ptr)
+      int_free(av, ptr)
     end
     alias :free :libc_free
 
@@ -22,7 +22,7 @@ module HeapInfo
     # 
     # The original method in C is too long, split to multiple methods to match ruby convention.
     # @param [HeapInfo::Arena] av
-    # @param [Integer] ptr Use <tt>ptr</tt> instead of <tt>p</tt> to prevent conflict with ruby native method.
+    # @param [Integer] ptr Use <tt>ptr</tt> instead of <tt>p</tt> to prevent confusing with ruby native method.
     def int_free(av, ptr) # is have_lock important?
       chunk = dumper.call(ptr, size_t * 2).to_chunk
       size = ulong chunk.size
@@ -30,19 +30,20 @@ module HeapInfo
       invalid_size(size)
       # check_inuse_chunk # off
       if size <= get_max_fast
-        int_free_fast(av, ptr)
+        int_free_fast(av, ptr, size)
       elsif !chunk_is_mmapped(ptr) # Though this has been checked in #libc_free
-        int_free_small(av, ptr)
+        int_free_small(av, ptr, size)
       else
         munmap_chunk(ptr)
       end
     end
 
-    def int_free_fast(av, ptr)
+    def int_free_fast(av, ptr, size)
+      invalid_next_size(:fast, av, ptr, size)
       true
     end
 
-    def int_free_small(av, ptr)
+    def int_free_small(av, ptr, size)
       true
     end
 
@@ -52,19 +53,25 @@ module HeapInfo
     end
 
     # Start of checkers
-    # TODO: Error events
 
     def invalid_pointer(ptr, size)
       errmsg = "free(): invalid pointer\n"
       # unsigned compare
       malloc_assert(ptr <= ulong(-size)) { errmsg + "ptr(0x%x) > -size(0x%x)" % [ptr, ulong(-size)] }
-      malloc_assert(ptr % (size_t * 2) == 0) { errmsg + "ptr(0x%x) % %#x != 0" % [ptr, size_t * 2] }
+      malloc_assert(ptr % (size_t * 2) == 0) { errmsg + "ptr(0x%x) %% %d != 0" % [ptr, size_t * 2] }
     end
 
     def invalid_size(size)
       errmsg = "free(): invalid size\n"
       malloc_assert(size >= min_chunk_size) { errmsg + "size(0x%x) < min_chunk_size(0x%x)" % [size, min_chunk_size] }
       malloc_assert(aligned_ok size) { errmsg + "alignment error: size(0x%x) %% 0x%x != 0" % [size, size_t * 2] }
+    end
+
+    def invalid_next_size(type, av, ptr, size)
+      errmsg = "free(): invalid next size (#{type})\n"
+      nxt_chk = dumper.call(ptr + size, size_t * 2).to_chunk(base: ptr + size)
+      malloc_assert(nxt_chk.size > 2 * size_t) { errmsg + "next chunk(0x%x) has size(#{nxt_chk.size}) <=  2 * #{size_t}" % nxt_chk.base }
+      malloc_assert(nxt_chk.size < av.system_mem) { errmsg + "next chunk(0x%x) has size(0x%x) >= av.system_mem(0x%x)" % [nxt_chk.base, nxt_chk.size, av.system_mem] }
     end
   end
 end

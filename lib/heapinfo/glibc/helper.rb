@@ -6,8 +6,9 @@ module HeapInfo
     end
 
     # @return [Boolean]
-    def chunk_is_mmapped(p)
-      dumper.call(p, size_t * 2).to_chunk.flags.include? :mmapped
+    def chunk_is_mmapped(ptr)
+      # TODO: handle memory not accessible
+      dumper.call(ptr, size_t * 2).to_chunk.mmapped?
     end
 
     def get_max_fast
@@ -33,8 +34,10 @@ module HeapInfo
     end
 
     # @return [HeapInfo::Arena]
-    def arena_for_chunk(p)
-      main_arena # not support arena other than initial main_arena
+    def arena_for_chunk(ptr)
+      # not support arena other than initial main_arena
+      return if dumper.call(ptr, size_t * 2).to_chunk.non_main_arena? 
+      main_arena 
     end
 
   end
