@@ -35,7 +35,10 @@ module HeapInfo
       return self if top_ptr == 0 # arena not init yet
       @top_chunk = Chunk.new size_t, top_ptr, @dumper
       @last_remainder = Chunk.new size_t, top_ptr_offset + 8, @dumper
-      @system_mem = Helper.unpack(size_t, @dumper.call(top_ptr_offset + 258 * size_t + 16, size_t))
+      # this offset diff after 2.23
+      @system_mem = 2.times.map do |off|
+        Helper.unpack(size_t, @dumper.call(top_ptr_offset + 258 * size_t + 16 + off * size_t, size_t))
+      end.find { |val| val >= 0x21000 and (val & 0xfff) == 0 }
       @fastbin = Array.new(7) do |idx|
         f = Fastbin.new(size_t, @base + 8 - size_t * 2 + size_t * idx, @dumper, head: true)
         f.index = idx
