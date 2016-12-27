@@ -5,7 +5,7 @@ require 'heapinfo/version'
 Gem::Specification.new do |s|
   s.name        = 'heapinfo'
   s.version     = ::HeapInfo::VERSION
-  s.date        = '2016-12-20'
+  s.date        = '2016-12-28'
   s.summary     = "HeapInfo - interactive heap exploitation helper"
   s.description = "create an interactive memory info interface while pwn / exploiting"
   s.authors     = ["david942j"]
