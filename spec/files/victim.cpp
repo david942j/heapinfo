@@ -28,5 +28,6 @@ int main(int argc, char **argv) {
   v = malloc(152); // let 136 put into smallbin
   malloc(200); // to prevent merge with top_chunk
   free(v); // put into unsorted bin 
-  scanf("%*c");
+  char dummy;
+  read(0, &dummy, 1); // function which not use heap
 }

@@ -1,17 +1,31 @@
 # encoding: ascii-8bit
 require 'heapinfo'
 describe HeapInfo::Dumper do
+  before(:all) do
+    @self_maps = IO.binread('/proc/self/maps').lines.map do |seg|
+      s = seg.split(/\s/)
+      s[0] = s[0].split('-').map { |addr| addr.to_i(16) }
+      [s[0][0], s[0][1], s[1], s[-1]] # start, end, perm, name
+    end
+
+    @get_elf_base = ->() do
+      exe = File.readlink('/proc/self/exe')
+      @self_maps.find { |arr| arr[3] == exe }[0]
+    end
+  end
+
   describe 'dump' do
     before(:each) do
       @mem_filename = '/proc/self/mem'
+      @elf_base = @get_elf_base.call
     end
     it 'simple' do
       dumper = HeapInfo::Dumper.new(nil, @mem_filename)
-      expect(dumper.dump(0x400000, 4)).to eq "\x7fELF"
+      expect(dumper.dump(@elf_base, 4)).to eq "\x7fELF"
     end
     it 'segment' do
-      class S;def elf; HeapInfo::Segment.new(0x400000, 'elf'); end; end
-      dumper = HeapInfo::Dumper.new(S.new, @mem_filename)
+      class S;def initialize(base);@base = base;end; def elf; HeapInfo::Segment.new(@base, 'elf'); end; end
+      dumper = HeapInfo::Dumper.new(S.new(@elf_base), @mem_filename)
       expect(dumper.dump(:elf, 4)).to eq "\x7fELF"
     end
     it 'invalid' do
@@ -34,26 +48,33 @@ describe HeapInfo::Dumper do
 
   describe 'find' do
     before(:all) do
-      class S;def elf; HeapInfo::Segment.new(0x400000, ''); end; def bits; 64; end; end
-      @dumper = HeapInfo::Dumper.new(S.new, '/proc/self/mem')
+      @elf_base = @get_elf_base.call
+      class S; def bits; 64; end; end
+      @dumper = HeapInfo::Dumper.new(S.new(@elf_base), '/proc/self/mem')
+      @end_of_maps = ->() do
+        @self_maps.find.with_index do |seg, i|
+          seg[2].include?('r') and seg[1] != @self_maps[i][0] # incontinuously segment
+        end[1]
+      end
     end
     it 'simple' do
-      expect(@dumper.find("ELF", :elf, 4)).to eq 0x400001
+      expect(@dumper.find("ELF", :elf, 4)).to eq @elf_base + 1
       expect(@dumper.find("ELF", :elf, 3)).to be nil
     end
     it 'regexp' do
-      addr = @dumper.find(/ru.y/, :elf, 0x1000)
-      expect(@dumper.dump(addr, 4) =~ /ru.y/).to eq 0
+      addr = @dumper.find(/lin.x/, :elf, 0x1000)
+      expect(@dumper.dump(addr, 5) =~ /lin.x/).to eq 0
     end
     it 'invalid' do
       expect(@dumper.find(nil, :elf, 1)).to be nil
     end
     it 'parser' do
-      expect(@dumper.find("ELF", ':elf + 1', 3)).to eq 0x400001
+      expect(@dumper.find("ELF", ':elf + 1', 3)).to eq @elf_base + 1
     end
     it 'reach end' do
+      mem = @end_of_maps.call
       # check dumper won't return nil when remain readable memory less than one page
-      expect(@dumper.find("\x00", 0x601010, 0x1000).nil?).to be false
+      expect(@dumper.find("\x00", mem - 0xff0, 0x1000).nil?).to be false
     end
   end
 
