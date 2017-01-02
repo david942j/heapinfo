@@ -1,11 +1,12 @@
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'heapinfo/version'
+require 'date'
 
 Gem::Specification.new do |s|
   s.name        = 'heapinfo'
   s.version     = ::HeapInfo::VERSION
-  s.date        = '2016-12-28'
+  s.date        = Date.today.to_s
   s.summary     = "HeapInfo - interactive heap exploitation helper"
   s.description = "create an interactive memory info interface while pwn / exploiting"
   s.authors     = ["david942j"]
