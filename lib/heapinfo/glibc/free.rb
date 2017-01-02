@@ -47,6 +47,7 @@ module HeapInfo
     end
 
     def int_free_small(av, ptr, size)
+      # TODO: unfinished
       true
     end
 

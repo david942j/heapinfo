@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <unistd.h>
 int main(int argc, char **argv) {
-  if(argc <=1 ) alarm(10);
+  if(argc <= 1) alarm(10);
   void *v, *u;
   int *i, *j;
   
@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
   v = malloc(24); u = malloc(24);
   free(v); free(u);
 
-  // invalid
+  // invalid fd
   i = (int*)malloc(40);
   free(i);
   *i = 0xdeadbeef;

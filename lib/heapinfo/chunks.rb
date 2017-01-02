@@ -6,8 +6,7 @@ module HeapInfo
       @chunks = []
     end
 
-    # Redirect methods to private records.
-    def method_missing(method_sym, *arguments, &block)
+    def method_missing(method_sym, *arguments, &block) # :nodoc:
       return super unless @chunks.respond_to? method_sym
       @chunks.send(method_sym, *arguments, &block)
     end

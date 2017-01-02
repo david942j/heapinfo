@@ -197,7 +197,7 @@ module HeapInfo
       false
     end
 
-    def load_info!
+    def load_info! # :nodoc:
       @info = ProcessInfo.new(self)
       ProcessInfo::EXPORT.each do |m|
         self.class.send(:define_method, m) {@info.send(m)}

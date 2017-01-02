@@ -53,6 +53,23 @@ describe HeapInfo::Libc do
       it 'double free (fastop)' do
         expect { @h.libc.free(@h.heap.base + 0x30) }.to raise_error "double free or corruption (fasttop)\ntop of fastbin[0x20]: 0x602020=0x602020"
       end
+
+      it 'success' do
+        expect(@h.libc.free(@h.heap.base + 0x10)).to be true
+      end
+    end
+
+    describe 'munmap' do
+      it 'success' do
+        mmap_addr = HeapInfo::Helper.unpack(8, @h.dump(:heap, 0x190, 8)) # backdoor of victim.cpp
+        expect(@h.libc.free(mmap_addr)).to be true
+      end
+    end
+
+    describe 'small' do
+      it 'success' do
+        expect(@h.libc.free(@h.heap.base + 0x280)).to be true
+      end
     end
   end
 end

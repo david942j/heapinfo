@@ -73,9 +73,9 @@ module HeapInfo
 
   # Class for record fastbin type chunk.
   class Fastbin < Chunk
-    # @return [Integer]
+    # @return [Integer] fd
     attr_reader :fd
-    # @return [Integer]
+    # @return [Integer] index
     attr_accessor :index
     
     # Instantiate a <tt>HeapInfo::Fastbin</tt> object.
