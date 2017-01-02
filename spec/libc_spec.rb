@@ -49,6 +49,10 @@ describe HeapInfo::Libc do
         @set_memory.call [0, 0x21, 0, 0, 0, 0x21000].pack("Q*")
         expect {@h.libc.free(@fake_mem + 16)}.to raise_error "free(): invalid next size (fast)\nnext chunk(#{HeapInfo::Helper.hex(@fake_mem + 32)}) has size(0x21000) >= av.system_mem(0x21000)"
       end
+
+      it 'double free (fastop)' do
+        expect { @h.libc.free(@h.heap.base + 0x30) }.to raise_error "double free or corruption (fasttop)\ntop of fastbin[0x20]: 0x602020=0x602020"
+      end
     end
   end
 end

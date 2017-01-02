@@ -40,5 +40,9 @@ module HeapInfo
       main_arena 
     end
 
+    # @return [Integer]
+    def fastbin_index(size)
+      (size >> (size_t == 8 ? 4 : 3)) - 2
+    end
   end
 end

@@ -3,7 +3,7 @@
 module HeapInfo
   module Glibc
     # Implmentation of <tt>void __libc_free(void *mem)</tt>.
-    # [Source](https://code.woboq.org/userspace/glibc/malloc/malloc.c.html#__libc_free)
+    # [glibc-2.23](https://github.com/david942j/heapinfo/blob/master/examples/libcdb/libc-2.23/malloc.c#L2934) or [Online Source](https://code.woboq.org/userspace/glibc/malloc/malloc.c.html#__libc_free)
     # @param [Integer] mem Memory address to be free.
     def libc_free(mem)
       # TODO: free_hook
@@ -18,7 +18,7 @@ module HeapInfo
 
   private
     # Implmentation of <tt>void _int_free (mstate av, mchunkptr p, [int have_lock])</tt>.
-    # [Source](https://code.woboq.org/userspace/glibc/malloc/malloc.c.html#_int_free)
+    # [glibc-2.23](https://github.com/david942j/heapinfo/blob/master/examples/libcdb/libc-2.23/malloc.c#L2934) or [Online Source](https://code.woboq.org/userspace/glibc/malloc/malloc.c.html#__libc_free)
     # 
     # The original method in C is too long, split to multiple methods to match ruby convention.
     # @param [HeapInfo::Arena] av
@@ -40,6 +40,9 @@ module HeapInfo
 
     def int_free_fast(av, ptr, size)
       invalid_next_size(:fast, av, ptr, size)
+      idx = fastbin_index(size)
+      old = av.fastbin[idx].fd
+      malloc_assert( old != ptr ) { "double free or corruption (fasttop)\ntop of fastbin[0x%x]: 0x%x=0x%x" % [size & -8, ptr, ptr]   }
       true
     end
 
