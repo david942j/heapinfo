@@ -21,7 +21,6 @@ int main() {
   void *z = malloc(SZ); // prevent p merge with top chunk
   *p = z; // prevent compiler optimize
   free(p); // now *p must be the pointer of the (chunk_ptr) unsorted bin
-  //TODO: check if this offset change in different version glibc
   z = (void*)((*p) - (4 + 4 + SZ * 10 )); // mutex+flags+fastbin[]
   void* a = search_head((size_t)__builtin_return_address(0));
   printf("%p\n", z-a);
