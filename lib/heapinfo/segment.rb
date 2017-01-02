@@ -28,6 +28,7 @@ module HeapInfo
     # @param [Regexp, String] pattern The segment name want to match in maps. If <tt>String</tt> is given, the pattern is matched as a substring.
     # @return [HeapInfo::Segment, NilClass] The request <tt>Segment</tt> object. If the pattern is not matched, <tt>nil</tt> will be returned.
     def self.find(maps, pattern)
+      return Nil.new if pattern.nil?
       needs = maps.select{|m| pattern.is_a?(Regexp) ? m[3] =~ pattern : m[3].include?(pattern)}
       self.new needs.map{|m| m[0]}.min, needs[0][3] unless needs.empty?
     end

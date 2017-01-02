@@ -5,7 +5,7 @@ module HeapInfo
     # The default options of libaries,
     # use for matching glibc and ld segments in <tt>/proc/[pid]/maps</tt>
     DEFAULT_LIB = {
-      libc: /libc[^\w]/,
+      libc: /bc.*\.so/,
       ld:   /\/ld-.+\.so/,
     }
     # @return [Fixnum, NilClass] return the pid of process, <tt>nil</tt> if no such process found

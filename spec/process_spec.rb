@@ -151,6 +151,32 @@ describe HeapInfo::Process do
     end
   end
   
+  describe 'static-link' do
+    before(:all) do
+      @victim = HeapInfo::TMP_DIR + '/victim'
+      %x(g++ -static #{File.expand_path('../files/victim.cpp', __FILE__)} -o #{@victim} 2>&1 > /dev/null)
+      pid = fork
+      # run without ASLR
+      exec "setarch `uname -m` -R /bin/sh -c #{@victim}" if pid.nil?
+      loop until `pidof #{@victim}` != '' 
+      @h = heapinfo(@victim)
+    end
+
+    after(:all) do
+      `killall #{@victim}`
+      FileUtils.rm(@victim)
+    end
+
+    it 'normal' do
+      expect(@h.libc).to be_a HeapInfo::Nil
+      expect(@h.ld).to be_a HeapInfo::Nil
+    end
+
+    it 'dump' do
+      expect(@h.dump :elf, 4).to eq "\x7fELF"
+    end
+  end
+
   describe 'no process' do
     before(:all) do
       @h = heapinfo('NO_SUCH_PROCESS~~~')
