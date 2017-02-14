@@ -7,6 +7,12 @@ Metrics/ClassLength:
 Metrics/MethodLength:
   Enabled: false
 
+Metrics/BlockLength:
+  Enabled: false
+
+Security/MarshalLoad:
+  Enabled: false
+
 Rails:
   Enabled: false
 
