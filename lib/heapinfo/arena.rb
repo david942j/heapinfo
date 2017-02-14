@@ -11,34 +11,36 @@ module HeapInfo
     attr_reader :unsorted_bin
     # @return [Array<HeapInfo::Smallbin>] Smallbins in an array.
     attr_reader :smallbin
-    # @return [Integer] The <tt>system_mem</tt>
+    # @return [Integer] The +system_mem+ in arena.
     attr_reader :system_mem
     # attr_reader :largebin, :last_remainder
 
-    # Instantiate a <tt>HeapInfo::Arena</tt> object.
+    # Instantiate a {HeapInfo::Arena} object.
     #
     # @param [Integer] base Base address of arena.
     # @param [Integer] size_t Either 8 or 4
     # @param [Proc] dumper For dump more data
     def initialize(base, size_t, dumper)
-      @base, @size_t, @dumper = base, size_t, dumper
+      @base = base
+      @size_t = size_t
+      @dumper = dumper
       reload!
     end
 
     # Refresh all attributes.
-    # Retrive data using <tt>@dumper</tt>, load bins, top chunk etc.
+    # Retrive data using +@dumper+, load bins, top chunk etc.
     # @return [HeapInfo::Arena] self
     def reload!
       top_ptr_offset = @base + 8 + size_t * 10
       top_ptr = Helper.unpack(size_t, @dumper.call(top_ptr_offset, size_t))
       @fastbin = []
-      return self if top_ptr == 0 # arena not init yet
+      return self if top_ptr.zero? # arena not init yet
       @top_chunk = Chunk.new size_t, top_ptr, @dumper
       @last_remainder = Chunk.new size_t, top_ptr_offset + 8, @dumper
       # this offset diff after 2.23
-      @system_mem = 2.times.map do |off|
+      @system_mem = Array.new(2) do |off|
         Helper.unpack(size_t, @dumper.call(top_ptr_offset + 258 * size_t + 16 + off * size_t, size_t))
-      end.find { |val| val >= 0x21000 and (val & 0xfff) == 0 }
+      end.find { |val| val >= 0x21000 && (val & 0xfff).zero? }
       @fastbin = Array.new(7) do |idx|
         f = Fastbin.new(size_t, @base + 8 - size_t * 2 + size_t * idx, @dumper, head: true)
         f.index = idx
@@ -67,7 +69,8 @@ module HeapInfo
       res
     end
 
-  private
+    private
+
     attr_reader :size_t
   end
 
@@ -77,10 +80,10 @@ module HeapInfo
     attr_reader :fd
     # @return [Integer] index
     attr_accessor :index
-    
-    # Instantiate a <tt>HeapInfo::Fastbin</tt> object.
+
+    # Instantiate a {HeapInfo::Fastbin} object.
     #
-    # @param [Mixed] args See <tt>HeapInfo::Chunk</tt> for more information.
+    # @param [Mixed] args See {HeapInfo::Chunk} for more information.
     def initialize(*args)
       super
       @fd = Helper.unpack(size_t, @data[0, @size_t])
@@ -95,7 +98,9 @@ module HeapInfo
     # For pretty inspect.
     # @return [String] Title with color codes.
     def title
-      "%s%s: " % [Helper.color(Helper.class_name(self), sev: :bin),  index.nil? ? nil : "[#{Helper.color("%#x" % idx_to_size)}]"]
+      class_name = Helper.color(Helper.class_name(self), sev: :bin)
+      size_str = index.nil? ? nil : "[#{Helper.color(format('%#x', idx_to_size))}]"
+      "#{class_name}#{size_str}: "
     end
 
     # Pretty inspect.
@@ -104,15 +109,15 @@ module HeapInfo
       title + list.map do |ptr|
         next "(#{ptr})\n" if ptr.is_a? Symbol
         next " => (nil)\n" if ptr.nil?
-        " => %s" % Helper.color("%#x" % ptr)
+        format(' => %s', Helper.color(format('%#x', ptr)))
       end.join
     end
 
-    # @return [Array<Integer, Symbol, NilClass>] single link list of <tt>fd</tt> chain.
+    # @return [Array<Integer, Symbol, NilClass>] single link list of +fd+ chain.
     #   Last element will be:
-    #   - <tt>:loop</tt> if loop detectded
-    #   - <tt>:invalid</tt> invalid address detected
-    #   - <tt>nil</tt> end with zero address (normal case)
+    #   - +:loop+ if loop detectded
+    #   - +:invalid+ invalid address detected
+    #   - +nil+ end with zero address (normal case)
     def list
       dup = {}
       ptr = @fd
@@ -127,19 +132,20 @@ module HeapInfo
       ret << nil
     end
 
-    # @param [Integer] ptr Get the <tt>fd</tt> value of chunk at <tt>ptr</tt>.
-    # @return [Integer] The <tt>fd</tt>.
+    # @param [Integer] ptr Get the +fd+ value of chunk at +ptr+.
+    # @return [Integer] The +fd+.
     def fd_of(ptr)
       addr_of(ptr, 2)
     end
 
-    # @param [Integer] ptr Get the <tt>bk</tt> value of chunk at <tt>ptr</tt>.
-    # @return [Integer] The <tt>bk</tt>.
+    # @param [Integer] ptr Get the +bk+ value of chunk at +ptr+.
+    # @return [Integer] The +bk+.
     def bk_of(ptr)
       addr_of(ptr, 3)
     end
 
-  private
+    private
+
     def addr_of(ptr, offset)
       t = dump(ptr + size_t * offset, size_t)
       return nil if t.nil?
@@ -152,63 +158,60 @@ module HeapInfo
     # @return [Integer]
     attr_reader :bk
 
-    # Instantiate a <tt>HeapInfo::UnsortedBin</tt> object.
+    # Instantiate a {HeapInfo::UnsortedBin} object.
     #
-    # @param [Mixed] args See <tt>HeapInfo::Chunk</tt> for more information.
+    # @param [Mixed] args See {HeapInfo::Chunk} for more information.
     def initialize(*args)
       super
       @bk = Helper.unpack(size_t, @data[@size_t, @size_t])
     end
 
-    # @option [Integer] size At most expand size. For <tt>size = 2</tt>, the expand list would be <tt>bk, bk, bin, fd, fd</tt>.
+    # @param [Integer] size
+    #   At most expand size. For +size = 2+, the expand list would be +bk, bk, bin, fd, fd+.
     # @return [String] unsorted bin layouts wrapper with color codes.
     def inspect(size: 2)
       list = link_list(size)
-      return '' if list.size <= 1 and Helper.class_name(self) != 'UnsortedBin' # bad..
+      return '' if list.size <= 1 && Helper.class_name(self) != 'UnsortedBin' # bad..
       title + pretty_list(list) + "\n"
     end
 
     # Wrapper the double-linked list with color codes.
-    # @param [Array<Integer>] list The list from <tt>#link_list</tt>.
+    # @param [Array<Integer>] list The list from +#link_list+.
     # @return [String] Wrapper with color codes.
     def pretty_list(list)
       center = nil
       list.map.with_index do |c, idx|
-        next center = Helper.color("[self]", sev: :bin) if c == @base
+        next center = Helper.color('[self]', sev: :bin) if c == @base
+        color_c = Helper.color(format('%#x', c))
         fwd = fd_of(c)
-        next "%s(invalid)" % Helper.color("%#x" % c) if fwd.nil? # invalid c
+        next "#{color_c}(invalid)" if fwd.nil? # invalid c
         bck = bk_of(c)
         if center.nil? # bk side
-          next Helper.color("%s%s" % [
-            Helper.color("%#x" % c),
-            fwd == list[idx+1] ? nil : "(%#x)" % fwd,
-          ])
-        else #fd side
-          next Helper.color("%s%s" % [
-            bck == list[idx-1] ? nil : "(%#x)" % bck,
-            Helper.color("%#x" % c),
-          ])
+          Helper.color(format('%s%s', color_c, fwd == list[idx + 1] ? nil : format('(%#x)', fwd)))
+        else # fd side
+          Helper.color(format('%s%s', bck == list[idx - 1] ? nil : format('(%#x)', bck), color_c))
         end
-      end.join(" === ")
+      end.join(' === ')
     end
 
     # Return the double link list with bin in the center.
     #
-    # The list will like <tt>[..., bk of bk, bk of bin, bin, fd of bin, fd of fd, ...]</tt>.
-    # @param [Integer] expand_size At most expand size. For <tt>size = 2</tt>, the expand list would be <tt>bk, bk, bin, fd, fd</tt>.
+    # The list will like +[..., bk of bk, bk of bin, bin, fd of bin, fd of fd, ...]+.
+    # @param [Integer] expand_size
+    #   At most expand size. For +size = 2+, the expand list would be +bk, bk, bin, fd, fd+.
     # @return [Array<Integer>] The linked list.
     def link_list(expand_size)
       list = [@base]
       # fd
-      work = Proc.new do |ptr, nxt, append|
+      work = proc do |ptr, nxt, append|
         sz = 0
         dup = {}
-        while ptr != @base and sz < expand_size
+        while ptr != @base && sz < expand_size
           append.call ptr
           break if ptr.nil? # invalid pointer
           break if dup[ptr] # looped
           dup[ptr] = true
-          ptr = self.send(nxt, ptr)
+          ptr = send(nxt, ptr)
           sz += 1
         end
       end
@@ -220,7 +223,6 @@ module HeapInfo
 
   # Class for record smallbin type chunk.
   class Smallbin < UnsortedBin
-
     # Mapping index of smallbin to chunk size.
     # @return [Integer] size
     def idx_to_size

@@ -3,8 +3,17 @@ rvm:
   - 2.1
   - 2.2
   - 2.3
+  - 2.4.0
+  - ruby-head
+branches:
+  only:
+    - master
+matrix:
+  allow_failures:
+    - rvm: ruby-head
 sudo: required
 dist: trusty
-addons:
-    code_climate:
-        repo_token: 98ff7381e904f8857bed270e94b61e1404c27ba3e5e18d1342bf653bfdff905b
+before_install:
+  - gem update --system
+  - gem install bundler
+  - gem --version

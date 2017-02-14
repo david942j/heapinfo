@@ -3,7 +3,7 @@ require 'heapinfo'
 describe HeapInfo::Helper do
   describe 'unpack' do
     it '32bit' do
-      expect(HeapInfo::Helper.unpack(4, "\x15\xCD\x5b\x07")).to eq 123456789
+      expect(HeapInfo::Helper.unpack(4, "\x15\xCD\x5b\x07")).to eq 123_456_789
     end
     it '64bit' do
       expect(HeapInfo::Helper.unpack(8, "\xEF\xCD\xAB\xEF\xBE\xAD\xDE\x00")).to eq 0xdeadbeefabcdef
@@ -20,7 +20,7 @@ describe HeapInfo::Helper do
     end
     it '32bit' do
       maps = IO.binread(@files_dir + '/32bit_maps')
-      expect(HeapInfo::Helper.parse_maps maps).to eq [
+      expect(HeapInfo::Helper.parse_maps(maps)).to eq [
         [0x8048000, 0x8049000, 'r-xp', '/home/heapinfo/examples/uaf/uaf'],
         [0x8049000, 0x804a000, 'r--p', '/home/heapinfo/examples/uaf/uaf'],
         [0x804a000, 0x804b000, 'rw-p', '/home/heapinfo/examples/uaf/uaf'],
@@ -39,11 +39,12 @@ describe HeapInfo::Helper do
         [0xf76de000, 0xf76fe000, 'r-xp', '/lib32/ld-2.19.so'],
         [0xf76fe000, 0xf76ff000, 'r--p', '/lib32/ld-2.19.so'],
         [0xf76ff000, 0xf7700000, 'rw-p', '/lib32/ld-2.19.so'],
-        [0xffdd7000, 0xffdf8000, 'rw-p', '[stack]']]
+        [0xffdd7000, 0xffdf8000, 'rw-p', '[stack]']
+      ]
     end
     it '64bit' do
       maps = IO.binread(@files_dir + '/64bit_maps')
-      expect(HeapInfo::Helper.parse_maps maps).to eq [
+      expect(HeapInfo::Helper.parse_maps(maps)).to eq [
         [0x400000, 0x401000, 'r-xp', '/home/heapinfo/examples/uaf/uaf'],
         [0x600000, 0x601000, 'r--p', '/home/heapinfo/examples/uaf/uaf'],
         [0x601000, 0x602000, 'rw-p', '/home/heapinfo/examples/uaf/uaf'],
@@ -67,7 +68,8 @@ describe HeapInfo::Helper do
         [0x7f65ad5c0000, 0x7f65ad5c1000, 'rw-p', '/lib/x86_64-linux-gnu/ld-2.19.so'],
         [0x7fff3d1e8000, 0x7fff3d209000, 'rw-p', '[stack]'],
         [0x7fff3d309000, 0x7fff3d30b000, 'r-xp', '[vdso]'],
-        [0xffffffffff600000, 0xffffffffff601000, 'r-xp', '[vsyscall]']]
+        [0xffffffffff600000, 0xffffffffff601000, 'r-xp', '[vsyscall]']
+      ]
     end
   end
 end

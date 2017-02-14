@@ -2,15 +2,15 @@ module HeapInfo
   # Record libc's base, name, and offsets.
   class Libc < Segment
     include HeapInfo::Glibc
-    # Instantiate a <tt>HeapInfo::Libc</tt> object.
+    # Instantiate a {HeapInfo::Libc} object.
     #
-    # @param [Mixed] args See <tt>#HeapInfo::Segment.initialize</tt> for more information.
+    # @param [Mixed] args See {HeapInfo::Segment#initialize} for more information.
     def initialize(*args)
       super
       @offset = {}
     end
 
-    # Get the offset of <tt>main_arena</tt> in libc.
+    # Get the offset of +main_arena+ in libc.
     # @return [Integer]
     def main_arena_offset
       return @offset[:main_arena] if @offset[:main_arena]
@@ -18,17 +18,17 @@ module HeapInfo
       @offset[:main_arena]
     end
 
-    # Get the <tt>main_arena</tt> of libc.
+    # Get the +main_arena+ of libc.
     # @return [HeapInfo::Arena]
     def main_arena
       return @main_arena.reload! if @main_arena
       off = main_arena_offset
       return if off.nil?
-      @main_arena = Arena.new(off + self.base, size_t, dumper)
+      @main_arena = Arena.new(off + base, size_t, dumper)
     end
 
-    # @param [Array] maps See <tt>#HeapInfo::Segment.find</tt> for more information.
-    # @param [String] name See <tt>#HeapInfo::Segment.find</tt> for more information.
+    # @param [Array] maps See {HeapInfo::Segment#find} for more information.
+    # @param [String] name See {HeapInfo::Segment#find} for more information.
     # @param [Integer] bits Either 64 or 32.
     # @param [String] ld_name The loader's realpath, will be used for running subprocesses.
     # @param [Proc] dumper The memory dumper for fetch more information.
@@ -41,7 +41,8 @@ module HeapInfo
       obj
     end
 
-  private
+    private
+
     attr_accessor :ld_name
     # only for searching offset of main_arena now
     def exhaust_search(symbol)
@@ -51,23 +52,23 @@ module HeapInfo
     end
 
     def read_main_arena_offset
-      key = HeapInfo::Cache::key_libc_offset(self.name)
-      @offset = HeapInfo::Cache::read(key) || {}
-      return @offset[:main_arena] if @offset.key? :main_arena
+      key = HeapInfo::Cache.key_libc_offset(name)
+      @offset = HeapInfo::Cache.read(key) || {}
+      return @offset[:main_arena] if @offset.key?(:main_arena)
       @offset[:main_arena] = resolve_main_arena_offset
-      HeapInfo::Cache::write key, @offset
+      HeapInfo::Cache.write(key, @offset)
     end
 
     def resolve_main_arena_offset
-      tmp_elf = HeapInfo::TMP_DIR + "/get_arena"
-      libc_file = HeapInfo::TMP_DIR + "/libc.so.6"
-      ld_file = HeapInfo::TMP_DIR + "/ld.so"
+      tmp_elf = HeapInfo::TMP_DIR + '/get_arena'
+      libc_file = HeapInfo::TMP_DIR + '/libc.so.6'
+      ld_file = HeapInfo::TMP_DIR + '/ld.so'
       flags = "-w #{size_t == 4 ? '-m32' : ''}"
-      %x(cp #{self.name} #{libc_file} && \
+      `cp #{name} #{libc_file} && \
          cp #{ld_name} #{ld_file} && \
          gcc #{flags} #{File.expand_path('../tools/get_arena.c', __FILE__)} -o #{tmp_elf} 2>&1 > /dev/null && \
          #{ld_file} --library-path #{HeapInfo::TMP_DIR} #{tmp_elf} && \
-         rm #{tmp_elf} #{libc_file} #{ld_file}).to_i(16)
+         rm #{tmp_elf} #{libc_file} #{ld_file}`.to_i(16)
     end
   end
 end

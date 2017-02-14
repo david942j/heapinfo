@@ -9,10 +9,10 @@ describe String do
   end
 
   it 'to_chunks' do
-    chunks = [0,0x21,0,0,0,0x41].pack("Q*").to_chunks
+    chunks = [0, 0x21, 0, 0, 0, 0x41].pack('Q*').to_chunks
     expect(chunks.size).to be 2
-    chunks.each{|chunk| # test each
+    chunks.each do |chunk| # test each
       expect(chunk.size & 15).to be 0
-    }
+    end
   end
 end

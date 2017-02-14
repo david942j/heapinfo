@@ -10,11 +10,11 @@ describe HeapInfo::Process do
     it 'segments' do
       expect(@h.elf.name).to eq @prog
       expect(@h.libc.class).to eq HeapInfo::Libc
-      expect(@h.respond_to? :heap).to be true
-      expect(@h.respond_to? :ld).to be true
-      expect(@h.respond_to? :stack).to be true
+      expect(@h.respond_to?(:heap)).to be true
+      expect(@h.respond_to?(:ld)).to be true
+      expect(@h.respond_to?(:stack)).to be true
     end
-   
+
     it 'dump' do
       expect(@h.dump(:elf, 4)).to eq "\x7fELF"
     end
@@ -28,13 +28,16 @@ describe HeapInfo::Process do
     before(:all) do
       HeapInfo::Cache.send :clear_all # force cache miss, to make sure coverage
       @victim = HeapInfo::TMP_DIR + '/victim'
-      %x(g++ #{File.expand_path('../files/victim.cpp', __FILE__)} -o #{@victim} 2>&1 > /dev/null)
+      `g++ #{File.expand_path('../files/victim.cpp', __FILE__)} -o #{@victim} 2>&1 > /dev/null`
       pid = fork
       # run without ASLR
       exec "setarch `uname -m` -R /bin/sh -c #{@victim}" if pid.nil?
-      loop until `pidof #{@victim}` != '' 
+      loop until `pidof #{@victim}` != ''
       @h = heapinfo(@victim, ld: '/ld')
-      class Cio;def puts(s);s;end;end
+      class Cio
+        def puts(s); s
+        end
+      end
       @io = Cio.new
     end
     after(:all) do
@@ -45,13 +48,18 @@ describe HeapInfo::Process do
     it 'check process' do
       expect(@h.elf.name).to eq @victim
       pid = @h.pid
-      expect(pid.is_a? Integer).to be true
+      expect(pid.is_a?(Integer)).to be true
       expect(HeapInfo::Process.new(pid).elf.name).to eq @h.elf.name
     end
 
     it 'x' do
-      expect(@h.x 3, :heap, io: @io).to eq "0x602000:\t\e[38;5;12m0x0000000000000000\e[0m\t\e[38;5;12m0x0000000000000021\e[0m\n0x602010:\t\e[38;5;12m0x0000000000000000\e[0m"
-      expect(@h.x 2, 'heap+0x20', io: @io).to eq "0x602020:\t\e[38;5;12m0x0000000000000000\e[0m\t\e[38;5;12m0x0000000000000021\e[0m"
+      expect(@h.x(3, :heap, io: @io)).to eq "0x602000:\t" \
+                                            "\e[38;5;12m0x0000000000000000\e[0m\t" \
+                                            "\e[38;5;12m0x0000000000000021\e[0m\n" \
+                                            "0x602010:\t\e[38;5;12m0x0000000000000000\e[0m"
+      expect(@h.x(2, 'heap+0x20', io: @io)).to eq "0x602020:\t" \
+                                                  "\e[38;5;12m0x0000000000000000\e[0m\t" \
+                                                  "\e[38;5;12m0x0000000000000021\e[0m"
     end
 
     it 'debug wrapper' do
@@ -67,7 +75,7 @@ describe HeapInfo::Process do
 
     describe 'find/search' do
       it 'faraway' do
-        expect(@h.find('/bin/sh', :libc).is_a? Integer).to be true
+        expect(@h.find('/bin/sh', :libc).is_a?(Integer)).to be true
       end
       it 'value' do
         expect(@h.search(0xdeadbeef, :heap)).to eq 0x602050
@@ -88,7 +96,7 @@ describe HeapInfo::Process do
       it 'monkey' do
         prog = File.readlink('/proc/self/exe')
         @h = HeapInfo::Process.new(prog)
-        expect(@h.pid.is_a? Integer).to be true
+        expect(@h.pid.is_a?(Integer)).to be true
         pid = @h.pid
         @h.instance_variable_set(:@prog, 'NO_THIS')
         expect(@h.reload!.pid).to be nil
@@ -131,7 +139,7 @@ describe HeapInfo::Process do
       end
       it 'layouts' do
         inspect = @h.layouts :smallbin, :unsorted_bin, io: @io
-        expect(inspect).to include "[self]"
+        expect(inspect).to include '[self]'
         expect(inspect).to include '0x6020f0'
         expect(inspect).to include 'UnsortedBin'
       end
@@ -140,7 +148,7 @@ describe HeapInfo::Process do
     describe 'chunks' do
       before(:all) do
         mmap_addr = HeapInfo::Helper.unpack(8, @h.dump(:heap, 0x190, 8))
-        @mmap_chunk = @h.dump(mmap_addr-0x10, 0x20).to_chunk(base: mmap_addr-0x10)
+        @mmap_chunk = @h.dump(mmap_addr - 0x10, 0x20).to_chunk(base: mmap_addr - 0x10)
       end
       it 'mmap' do
         expect(@mmap_chunk.base & 0xfff).to be 0
@@ -150,15 +158,15 @@ describe HeapInfo::Process do
       end
     end
   end
-  
+
   describe 'static-link' do
     before(:all) do
       @victim = HeapInfo::TMP_DIR + '/victim'
-      %x(g++ -static #{File.expand_path('../files/victim.cpp', __FILE__)} -o #{@victim} 2>&1 > /dev/null)
+      `g++ -static #{File.expand_path('../files/victim.cpp', __FILE__)} -o #{@victim} 2>&1 > /dev/null`
       pid = fork
       # run without ASLR
       exec "setarch `uname -m` -R /bin/sh -c #{@victim}" if pid.nil?
-      loop until `pidof #{@victim}` != '' 
+      loop until `pidof #{@victim}` != ''
       @h = heapinfo(@victim)
     end
 
@@ -173,7 +181,7 @@ describe HeapInfo::Process do
     end
 
     it 'dump' do
-      expect(@h.dump :elf, 4).to eq "\x7fELF"
+      expect(@h.dump(:elf, 4)).to eq "\x7fELF"
     end
   end
 
@@ -187,7 +195,7 @@ describe HeapInfo::Process do
     end
 
     it 'debug wrapper' do
-      expect(@h.debug{ fail }).to be nil
+      expect(@h.debug { raise }).to be nil
     end
 
     it 'nil chain' do

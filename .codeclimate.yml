@@ -1,2 +1,2 @@
 exclude_paths:
-- "examples/libcdb/**/*"
+  - "examples/libcdb/**/*"

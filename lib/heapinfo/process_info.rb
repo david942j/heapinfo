@@ -1,13 +1,13 @@
-#encoding: ascii-8bit
+# encoding: ascii-8bit
 module HeapInfo
-  # for <tt>Process</tt> to record current info(s)
-  # <tt>Process</tt> has a <tt>process_info</tt> object iff the process found (pid not <tt>nil</tt>).
+  # for {Process} to record current info(s)
+  # {Process} has a +process_info+ object iff the process found (pid not +nil+).
   # Mainly records segments' base.
   class ProcessInfo
-    # Methods to be transparent to <tt>process</tt>.
-    # e.g. <tt>process.libc alias to process.info.libc</tt>
-    EXPORT = %i(libc ld heap elf program stack bits)
-   
+    # Methods to be transparent to +process+.
+    # e.g. +process.libc+ alias to +process.info.libc+.
+    EXPORT = %i(libc ld heap elf program stack bits).freeze
+
     # @return [Integer] 32 or 64.
     attr_reader :bits
     # @return [HeapInfo::Segment]
@@ -18,11 +18,11 @@ module HeapInfo
     attr_reader :libc
     # @return [HeapInfo::Segment]
     attr_reader :ld
-    alias :elf :program
+    alias elf program
 
-    # Instantiate a <tt>ProcessInfo</tt> object
+    # Instantiate a {ProcessInfo} object
     #
-    # @param [HeapInfo::Process] process Load information from maps/memory for <tt>process</tt>
+    # @param [HeapInfo::Process] process Load information from maps/memory for +process+.
     def initialize(process)
       @pid = process.pid
       options = process.instance_variable_get(:@options)
@@ -33,18 +33,19 @@ module HeapInfo
       # well.. stack is a strange case because it will grow in runtime..
       # should i detect stack base growing..?
       @ld = Segment.find(maps, match_maps(maps, options[:ld]))
-      @libc = Libc.find(maps, match_maps(maps, options[:libc]), @bits, @ld.name, ->(*args){ process.dump(*args) })
+      @libc = Libc.find(maps, match_maps(maps, options[:libc]), @bits, @ld.name, ->(*args) { process.dump(*args) })
     end
 
     # Heap will not be mmapped if the process not use heap yet, so create a lazy loading method.
     # Will re-read maps when heap segment not found yet.
     #
-    # @return [HeapInfo::Segment] The <tt>Segment</tt> of heap
+    # @return [HeapInfo::Segment] The {Segment} of heap
     def heap # special handle because heap might not be initialized in the beginning
       @heap ||= Segment.find(maps!, '[heap]')
     end
 
-  private
+    private
+
     attr_reader :maps
 
     # force reload maps
@@ -57,7 +58,7 @@ module HeapInfo
     end
 
     def match_maps(maps, pattern)
-      maps.map{|s| s[3]}.find{|seg| pattern.is_a?(Regexp) ? seg =~ pattern : seg.include?(pattern)}
+      maps.map { |s| s[3] }.find { |seg| pattern.is_a?(Regexp) ? seg =~ pattern : seg.include?(pattern) }
     end
   end
 end

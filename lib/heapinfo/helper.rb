@@ -7,15 +7,15 @@ module HeapInfo
     def self.pidof(prog)
       # plz, don't cmd injection your self :p
       pid = `pidof #{prog}`.strip.to_i
-      return nil if pid == 0 # process not exists yet
-      throw "pidof #{prog} fail" unless pid.between?(2, 65535)
+      return nil if pid.zero? # process not exists yet
+      throw "pidof #{prog} fail" unless pid.between?(2, 65_535)
       pid
-      #TODO: handle when multi processes exists
+      # TODO: handle when multi processes exists
     end
 
     # Create read <tt>/proc/[pid]/*</tt> methods
     %w(exe maps).each do |method|
-      self.define_singleton_method("#{method}_of".to_sym) do |pid|
+      define_singleton_method("#{method}_of".to_sym) do |pid|
         begin
           IO.binread("/proc/#{pid}/#{method}")
         rescue
@@ -23,7 +23,7 @@ module HeapInfo
         end
       end
     end
-    
+
     # Parse the contents of <tt>/proc/[pid]/maps</tt>.
     #
     # @param [String] content The file content of <tt>/proc/[pid]/maps</tt>
@@ -35,15 +35,15 @@ module HeapInfo
     #     7f2788315000-7f2788316000 r--p 00022000 ca:01 402319                     /lib/x86_64-linux-gnu/ld-2.19.so
     #     EOS
     #   )
-    #   # [[0x400000, 0x40b000, 'r-xp', '/bin/cat'], 
-    #   # [0xbc4000, 0xbe5000, 'rw-p', '[heap]'], 
+    #   # [[0x400000, 0x40b000, 'r-xp', '/bin/cat'],
+    #   # [0xbc4000, 0xbe5000, 'rw-p', '[heap]'],
     #   # [0x7f2788315000, 0x7f2788316000, 'r--p', '/lib/x86_64-linux-gnu/ld-2.19.so']]
     def self.parse_maps(content)
       lines = content.split("\n")
       lines.map do |line|
-        s = line.scan(/^([0-9a-f]+)-([0-9a-f]+)\s([rwxp-]{4})[^\/|\[]*([\/|\[].+)$/)[0]
+        s = line.scan(%r{^([0-9a-f]+)-([0-9a-f]+)\s([rwxp-]{4})[^/|\[]*([/|\[].+)$})[0]
         next nil if s.nil?
-        s[0],s[1] = s[0,2].map{|h|h.to_i(16)}
+        s[0], s[1] = s[0, 2].map { |h| h.to_i(16) }
         s
       end.compact
     end
@@ -57,23 +57,19 @@ module HeapInfo
       bin: "\e[38;5;120m", # light green
       klass: "\e[38;5;155m", # pry like
       sym: "\e[38;5;229m", # pry like
-    }
-    # Wrapper color codes for for pretty inspect
+    }.freeze
+    # Wrapper color codes for pretty inspect.
     # @param [String] s Contents for wrapper
-    # @param [Symbol?] sev Specific which kind of color want to use, valid symbols are defined in <tt>#COLOR_CODE</tt>.
-    # If this argument is not present, will detect according to the content of <tt>s</tt>
-    # @return [String] wrapper with color codes. 
+    # @param [Symbol?] sev Specific which kind of color want to use, valid symbols are defined in +#COLOR_CODE+.
+    # If this argument is not present, will detect according to the content of +s+.
+    # @return [String] wrapper with color codes.
     def self.color(s, sev: nil)
       s = s.to_s
-      color = ''
       cc = COLOR_CODE
-      if cc.keys.include?(sev)
-        color = cc[sev]
-      elsif s =~ /^(0x)?[0-9a-f]+$/ # integers
-        color = cc[:integer]
-      else #normal string
-        color = cc[:normal_s]
-      end
+      color = if cc.key?(sev) then cc[sev]
+              elsif s =~ /^(0x)?[0-9a-f]+$/ then cc[:integer] # integers
+              else cc[:normal_s] # normal string
+              end
       "#{color}#{s.sub(cc[:esc_m], color)}#{cc[:esc_m]}"
     end
 
@@ -114,9 +110,9 @@ module HeapInfo
       obj.class.name.split('::').last || obj.class.name
     end
 
-    # For checking a string is actually an integer
-    # @param [String] str String to be checked
-    # @return [Boolean] If <tt>str</tt> can be converted into integer
+    # For checking a string is actually an integer.
+    # @param [String] str String to be checked.
+    # @return [Boolean] If +str+ can be converted into integer.
     # @example
     #   Helper.integer? '1234'
     #   # => true
@@ -125,7 +121,7 @@ module HeapInfo
     #   Helper.integer? '0xheapoverflow'
     #   # => false
     def self.integer?(str)
-      !!Integer(str)
+      true if Integer(str)
     rescue ArgumentError, TypeError
       false
     end

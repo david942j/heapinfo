@@ -10,24 +10,24 @@ module HeapInfo
     # @return [Integer] Base address of this chunk
     attr_reader :base
 
-    # Instantiate a <tt>HeapInfo::Chunk</tt> object
+    # Instantiate a {HeapInfo::Chunk} object
     #
     # @param [Integer] size_t 4 or 8
     # @param [Integer] base Start address of this chunk
     # @param [Proc] dumper For dump more information of this chunk
-    # @param [Boolean] head For specific if is fake chunk in <tt>arena</tt>. If <tt>head</tt> is <tt>true</tt>, will not load <tt>size</tt> and <tt>prev_size</tt> (since it's meaningless)
+    # @param [Boolean] head
+    #   For specific if is fake chunk in +arena+.
+    #   If +head+ is +true+, will not load +size+ and +prev_size+ (since it's meaningless)
     # @example
-    #   HeapInfo::Chunk.new 8, 0x602000, ->(addr, len) { [0,0x21, 0xda4a].pack("Q*")[addr-0x602000, len] }
+    #   HeapInfo::Chunk.new 8, 0x602000, ->(addr, len) { [0,0x21, 0xda4a].pack('Q*')[addr-0x602000, len] }
     #   # create a chunk with chunk size 0x21
     def initialize(size_t, base, dumper, head: false)
-      raise ArgumentError.new('size_t can be either 4 or 8') unless [4, 8].include? size_t 
-      self.class.send(:define_method, :dump){|*args| dumper.call(*args)}
+      raise ArgumentError, 'size_t can be either 4 or 8' unless [4, 8].include?(size_t)
+      self.class.send(:define_method, :dump) { |*args| dumper.call(*args) }
       @size_t = size_t
       @base = base
       sz = dump(@base, size_t * 2)
-      if head # no need to read size if is bin
-        return @data = dump(@base + size_t * 2, size_t * 4)
-      end
+      return @data = dump(@base + size_t * 2, size_t * 4) if head # no need to read size if is bin
       @prev_size = Helper.unpack(size_t, sz[0, size_t])
       @size = Helper.unpack(size_t, sz[size_t..-1])
       r_size = [size - size_t * 2, size_t * 4].min # don't read too much data
@@ -35,14 +35,14 @@ module HeapInfo
       @data = dump(@base + size_t * 2, r_size)
     end
 
-    # Hook <tt>#to_s</tt> for pretty printing
+    # Hook +#to_s+ for pretty printing
     # @return [String]
     def to_s
-      ret = Helper.color("#<%s:%#x>\n" % [self.class.to_s, @base], sev: :klass) +
-      "flags = [#{flags.map{|f|Helper.color(":#{f}", sev: :sym)}.join(',')}]\n" +
-      "size = #{Helper.color "%#x" % size} (#{bintype})\n"
-      ret += "prev_size = #{Helper.color "%#x" % @prev_size}\n" unless flags.include? :prev_inuse
-      ret += "data = #{Helper.color @data.inspect}#{'...' if @data.length < size - size_t * 2}\n"
+      ret = Helper.color(format("#<%s:%#x>\n", self.class.to_s, @base), sev: :klass)
+      ret += "flags = [#{flags.map { |f| Helper.color(":#{f}", sev: :sym) }.join(',')}]\n"
+      ret += "size = #{Helper.color(format('%#x', size))} (#{bintype})\n"
+      ret += "prev_size = #{Helper.color(format('%#x', @prev_size))}\n" unless flags.include? :prev_inuse
+      ret += "data = #{Helper.color(@data.inspect)}#{'...' if @data.length < size - size_t * 2}\n"
       ret
     end
 
@@ -55,29 +55,29 @@ module HeapInfo
     def flags
       mask = @size - size
       flag = []
-      flag << :non_main_arena unless mask & 4 == 0
-      flag << :mmapped unless mask & 2 == 0
-      flag << :prev_inuse unless mask & 1 == 0
+      flag << :non_main_arena unless (mask & 4).zero?
+      flag << :mmapped unless (mask & 2).zero?
+      flag << :prev_inuse unless (mask & 1).zero?
       flag
     end
 
     # Ask if chunk not belongs to main arena.
     #
-    # @return [Boolean] <tt>true|false</tt> if chunk not belongs to main arena
+    # @return [Boolean] +true|false+ if chunk not belongs to main arena
     def non_main_arena?
       flags.include? :non_main_arena
     end
 
     # Ask if chunk is mmapped.
     #
-    # @return [Boolean] <tt>true|false</tt> if chunk is mmapped
+    # @return [Boolean] +true|false+ if chunk is mmapped
     def mmapped?
       flags.include? :mmapped
     end
 
     # Ask if chunk has set the prev-inuse bit.
     #
-    # @return [Boolean] <tt>true|false</tt> if the <tt>prev_inuse</tt> bit has been set
+    # @return [Boolean] +true|false+ if the +prev_inuse+ bit has been set
     def prev_inuse?
       flags.include? :prev_inuse
     end
@@ -89,7 +89,7 @@ module HeapInfo
     end
 
     # Bin type of this chunk
-    # @return [Symbol] Bin type is simply determined according to <tt>#size</tt>
+    # @return [Symbol] Bin type is simply determined according to +#size+
     # @example
     #   [c.size, c.size_t]
     #   # => [80, 8]
@@ -110,8 +110,8 @@ module HeapInfo
       return :unknown if sz < @size_t * 4
       return :fast if sz <= @size_t * 16
       return :small if sz <= @size_t * 0x7e
-      return :large if sz <= @size_t * 0x3ffe # is this correct? 
-      return :mmap
+      return :large if sz <= @size_t * 0x3ffe # is this correct?
+      :mmap
     end
   end
 end

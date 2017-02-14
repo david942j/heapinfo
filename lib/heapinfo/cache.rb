@@ -1,9 +1,8 @@
 require 'digest'
 module HeapInfo
-
   # Self implment file-base cache manager.
   #
-  # Values are recorded in files based on <tt>Marshal</tt>
+  # Values are recorded in files based on <tt>Marshal</tt>.
   module Cache
     # Directory for caching files.
     # e.g. HeapInfo will record main_arena_offset for glibc(s)
@@ -24,8 +23,8 @@ module HeapInfo
     # @return [Boolean] true
     def self.write(key, value)
       filepath = realpath key
-      FileUtils.mkdir_p(File.dirname filepath)
-      IO.binwrite(filepath, Marshal::dump(value))
+      FileUtils.mkdir_p(File.dirname(filepath))
+      IO.binwrite(filepath, Marshal.dump(value))
       true
     end
 
@@ -35,8 +34,8 @@ module HeapInfo
     # @return [Object, NilClass] value that recorded, return <tt>nil</tt> when cache miss.
     def self.read(key)
       filepath = realpath key
-      return unless File.file? filepath
-      Marshal::load IO.binread filepath
+      return unless File.file?(filepath)
+      Marshal.load(IO.binread(filepath))
     rescue
       nil # handle if file content invalid
     end
@@ -44,24 +43,24 @@ module HeapInfo
     # @param [String] key
     # @return [String] Prepend with <tt>CACHE_DIR</tt>
     def self.realpath(key)
-      raise ArgumentError.new('Invalid key(file path)') if key =~ /[^\w\/]/
+      raise ArgumentError, 'Invalid key(file path)' if key =~ %r{[^\w/]}
       File.join(CACHE_DIR, key)
     end
 
-    # @return [Object] Not important.
-    def self.load
+    # @return [void]
+    def self.init
       FileUtils.mkdir_p(CACHE_DIR)
     rescue
       # To prevent ~/ is not writable.
-      self.send :remove_const, :CACHE_DIR
-      self.const_set :CACHE_DIR, File.join(HeapInfo::TMP_DIR, '.cache/heapinfo')
+      send(:remove_const, :CACHE_DIR)
+      const_set(:CACHE_DIR, File.join(HeapInfo::TMP_DIR, '.cache/heapinfo'))
     end
 
     # Clear the cache directory.
-    # @return [Object] Not important.
+    # @return [void]
     def self.clear_all
       FileUtils.rm_rf CACHE_DIR
     end
-    self.load
+    init
   end
 end

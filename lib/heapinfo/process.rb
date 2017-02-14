@@ -1,4 +1,4 @@
-#encoding: ascii-8bit
+# encoding: ascii-8bit
 module HeapInfo
   # Main class of heapinfo.
   class Process
@@ -6,8 +6,8 @@ module HeapInfo
     # use for matching glibc and ld segments in <tt>/proc/[pid]/maps</tt>
     DEFAULT_LIB = {
       libc: /bc.*\.so/,
-      ld:   /\/ld-.+\.so/,
-    }
+      ld:   %r{/ld-.+\.so}
+    }.freeze
     # @return [Fixnum, NilClass] return the pid of process, <tt>nil</tt> if no such process found
     attr_reader :pid
 
@@ -34,7 +34,7 @@ module HeapInfo
 
     # Use this method to wrapper all HeapInfo methods.
     #
-    # Since <tt>::HeapInfo</tt> is a tool(debugger) for local usage, 
+    # Since <tt>::HeapInfo</tt> is a tool(debugger) for local usage,
     # while exploiting remote service, all methods will not work properly.
     # So I suggest to wrapper all methods inside <tt>#debug</tt>,
     # which will ignore the block while the victim process is not found.
@@ -54,10 +54,13 @@ module HeapInfo
 
     # Dump the content of specific memory address.
     #
-    # Note: This method require you have permission of attaching another process. If not, a warning message will present.
+    # Note: This method require you have permission of attaching another process.
+    # If not, a warning message will present.
     #
     # @param [Mixed] args Will be parsed into <tt>[base, offset, length]</tt>, see Examples for more information.
-    # @return [String, HeapInfo::Nil] The content needed. When the request address is not readable or the process not exists, <tt>HeapInfo::Nil.new</tt> is returned.
+    # @return [String, HeapInfo::Nil]
+    #   The content needed. When the request address is not readable or the process not exists,
+    #   <tt>HeapInfo::Nil.new</tt> is returned.
     #
     # @example
     #   h = heapinfo('victim')
@@ -102,22 +105,27 @@ module HeapInfo
     #   # 0x1f0d000:      0x0000000000000000      0x0000000000002011
     #   # 0x1f0d010:      0x00007f892a9f87b8      0x00007f892a9f87b8
     #   # 0x1f0d020:      0x0000000000000000      0x0000000000000000
-    #   # 0x1f0d030:      0x0000000000000000      0x0000000000000000 
+    #   # 0x1f0d030:      0x0000000000000000      0x0000000000000000
     # @example
     #   h.x 3, 0x400000
     #   # 0x400000:       0x00010102464c457f      0x0000000000000000
     #   # 0x400010:       0x00000001003e0002
     def x(count, *commands, io: $stdout)
-      return unless load? and io.respond_to? :puts
+      return unless load? && io.respond_to?(:puts)
       dumper.x(count, *commands, io: io)
     end
 
     # Gdb-like command.
     #
     # Search a specific value/string/regexp in memory.
-    # @param [Integer, String, Regexp] pattern The desired search pattern, can be value(<tt>Integer</tt>), string, or regular expression.
-    # @param [Integer, String, Symbol] from Start address for searching, can be segment(<tt>Symbol</tt>) or segments with offset. See examples for more information.
-    # @param [Integer] length The search length limit, default is unlimited, which will search until pattern found or reach unreadable memory.
+    # @param [Integer, String, Regexp] pattern
+    #   The desired search pattern, can be value(<tt>Integer</tt>), string, or regular expression.
+    # @param [Integer, String, Symbol] from
+    #   Start address for searching, can be segment(<tt>Symbol</tt>) or segments with offset.
+    #   See examples for more information.
+    # @param [Integer] length
+    #   The search length limit, default is unlimited,
+    #   which will search until pattern found or reach unreadable memory.
     # @return [Integer, NilClass] The first matched address, <tt>nil</tt> is returned when no such pattern found.
     # @example
     #   h.find(0xdeadbeef, 'heap+0x10', 0x1000)
@@ -134,8 +142,8 @@ module HeapInfo
       dumper.find(pattern, from, length)
     end
 
-    # <tt>search</tt> is more intutive to me
-    alias :search :find
+    # +search+ is more intutive to me
+    alias search find
 
     # Pretty dump of bins layouts.
     #
@@ -146,8 +154,8 @@ module HeapInfo
     # @example
     #   h.layouts :fastbin, :unsorted_bin, :smallbin
     def layouts(*args, io: $stdout)
-      return unless load? and io.respond_to? :puts
-      io.puts self.libc.main_arena.layouts(*args)
+      return unless load? && io.respond_to?(:puts)
+      io.puts libc.main_arena.layouts(*args)
     end
 
     # Show simple information of target process.
@@ -157,16 +165,17 @@ module HeapInfo
     # @example
     #   puts h
     def to_s
-      return "Process not found" unless load?
+      return 'Process not found' unless load?
       "Program: #{Helper.color program.name} PID: #{Helper.color pid}\n" +
-      program.to_s +
-      heap.to_s + 
-      stack.to_s +
-      libc.to_s +
-      ld.to_s
+        program.to_s +
+        heap.to_s +
+        stack.to_s +
+        libc.to_s +
+        ld.to_s
     end
 
-  private
+    private
+
     attr_accessor :dumper
     def load?
       @pid != nil
@@ -192,7 +201,7 @@ module HeapInfo
 
     def clear_process
       ProcessInfo::EXPORT.each do |m|
-        self.class.send(:define_method, m) {Nil.new}
+        self.class.send(:define_method, m) { Nil.new }
       end
       false
     end
@@ -200,7 +209,7 @@ module HeapInfo
     def load_info! # :nodoc:
       @info = ProcessInfo.new(self)
       ProcessInfo::EXPORT.each do |m|
-        self.class.send(:define_method, m) {@info.send(m)}
+        self.class.send(:define_method, m) { @info.send(m) }
       end
       @dumper = Dumper.new(@info, mem_filename)
     end
