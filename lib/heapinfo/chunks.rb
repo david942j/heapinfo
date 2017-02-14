@@ -11,6 +11,10 @@ module HeapInfo
       @chunks.send(method_sym, *arguments, &block)
     end
 
+    def respond_to_missing?(*)
+      super
+    end
+
     # Hook <tt>#to_s</tt> for pretty printing.
     # @return [String]
     def to_s

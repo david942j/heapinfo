@@ -1,5 +1,5 @@
 module HeapInfo
-  # To define heap-related functions in glibc.
+  # Define errors.
   module Glibc
     # @abstract Exceptions raised by HeapInfo inherit from Error
     class Error < StandardError; end

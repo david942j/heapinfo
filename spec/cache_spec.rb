@@ -14,7 +14,7 @@ describe HeapInfo::Cache do
     FileUtils.mkdir_p no
     File.chmod 0444, no # no write permission
     HeapInfo::Cache.const_set :CACHE_DIR, no + '/.cache'
-    HeapInfo::Cache.send :load
+    HeapInfo::Cache.send :init
     expect(HeapInfo::Cache::CACHE_DIR).to eq HeapInfo::TMP_DIR + '/.cache/heapinfo'
     HeapInfo::Cache.send :remove_const, :CACHE_DIR
     HeapInfo::Cache.const_set :CACHE_DIR, org

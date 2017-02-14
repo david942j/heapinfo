@@ -16,3 +16,6 @@ Metrics/LineLength:
 
 Style/FileName:
   Enabled: false
+
+Style/MultilineBlockChain:
+  Enabled: false

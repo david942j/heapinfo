@@ -16,7 +16,7 @@ module HeapInfo
     def max_fast
       size_t * 16
     end
-    alias max_fast get_max_fast
+    alias get_max_fast max_fast
 
     # The minimal chunk size.
     # Not the real implmentation, maybe wrong some day?
