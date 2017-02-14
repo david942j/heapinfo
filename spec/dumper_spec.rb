@@ -2,6 +2,17 @@
 require 'heapinfo'
 describe HeapInfo::Dumper do
   before(:all) do
+    class S
+      def initialize(base); @base = base
+      end
+
+      def elf; HeapInfo::Segment.new(@base, 'elf')
+      end
+
+      def bits; 64
+      end
+    end
+
     @self_maps = IO.binread('/proc/self/maps').lines.map do |seg|
       s = seg.split(/\s/)
       s[0] = s[0].split('-').map { |addr| addr.to_i(16) }
@@ -24,13 +35,6 @@ describe HeapInfo::Dumper do
       expect(dumper.dump(@elf_base, 4)).to eq "\x7fELF"
     end
     it 'segment' do
-      class S
-        def initialize(base); @base = base
-        end
-
-        def elf; HeapInfo::Segment.new(@base, 'elf')
-        end
-      end
       dumper = HeapInfo::Dumper.new(S.new(@elf_base), @mem_filename)
       expect(dumper.dump(:elf, 4)).to eq "\x7fELF"
     end
@@ -55,10 +59,6 @@ describe HeapInfo::Dumper do
   describe 'find' do
     before(:all) do
       @elf_base = @get_elf_base.call
-      class S
-        def bits; 64
-        end
-      end
       @dumper = HeapInfo::Dumper.new(S.new(@elf_base), '/proc/self/mem')
       @end_of_maps = lambda do
         @self_maps.find.with_index do |seg, i|

@@ -5,7 +5,6 @@ task default: %i(rubocop spec)
 
 RuboCop::RakeTask.new(:rubocop) do |task|
   task.patterns = ['lib/**/*.rb', 'spec/**/*.rb']
-  task.formatters = ['files']
 end
 
 RSpec::Core::RakeTask.new(:spec) do |task|

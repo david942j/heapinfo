@@ -10,6 +10,6 @@ describe HeapInfo::Nil do
     expect(@nil.xdd.oao.no_method).to be @nil
   end
   it 'puts' do
-    expect(puts @nil).to be nil
+    expect(puts(@nil)).to be nil
   end
 end
