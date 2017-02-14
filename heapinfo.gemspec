@@ -12,8 +12,13 @@ Gem::Specification.new do |s|
   s.authors     = ["david942j"]
   s.email       = ["david942j@gmail.com"]
   s.files       = Dir["lib/**/*.rb"] + Dir["lib/**/tools/*.c"] + %w(README.md)
-  s.test_files  = Dir['spec/**/*']
   s.homepage    = 'https://github.com/david942j/heapinfo'
   s.license     = 'MIT'
   s.required_ruby_version = '>= 2.1.0'
+
+  s.add_development_dependency 'rspec', '~> 3.5'
+  s.add_development_dependency 'rubocop', '~> 0.46'
+  s.add_development_dependency 'rake', '~> 12.0'
+  s.add_development_dependency 'simplecov', '~> 0.13.0'
+  s.add_development_dependency 'codeclimate-test-reporter', '~> 0.6'
 end

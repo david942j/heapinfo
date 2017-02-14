@@ -1,8 +1,14 @@
-require "rspec/core/rake_task"
+require 'rspec/core/rake_task'
+require 'rubocop/rake_task'
 
-RSpec::Core::RakeTask.new(:spec) do |task|
-  task.pattern = "./spec/**/*_spec.rb"
-  task.rspec_opts = ['--color']
+task default: %i(rubocop spec)
+
+RuboCop::RakeTask.new(:rubocop) do |task|
+  task.patterns = ['lib/**/*.rb', 'spec/**/*.rb']
+  task.formatters = ['files']
 end
 
-task :default => [:spec]
+RSpec::Core::RakeTask.new(:spec) do |task|
+  task.pattern = './spec/**/*_spec.rb'
+  task.rspec_opts = ['--color', '--require spec_helper', '--order rand']
+end
