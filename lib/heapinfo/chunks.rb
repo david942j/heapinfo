@@ -1,21 +1,28 @@
 module HeapInfo
   # Self-defined array for collecting chunk(s)
   class Chunks
-    # Instantiate a <tt>HeapInfo::Chunks</tt> object
+    include Enumerable
+    # Instantiate a <tt>HeapInfo::Chunks</tt> object.
     def initialize
       @chunks = []
     end
 
-    def method_missing(method_sym, *arguments, &block) # :nodoc:
-      return super unless @chunks.respond_to? method_sym
-      @chunks.send(method_sym, *arguments, &block)
+    # @return [void]
+    def <<(val)
+      @chunks << val
     end
 
-    def respond_to_missing?(*)
-      super
+    # @return [Integer]
+    def size
+      @chunks.size
     end
 
-    # Hook <tt>#to_s</tt> for pretty printing.
+    # @return [void]
+    def each(&block)
+      @chunks.each(&block)
+    end
+
+    # Hook +#to_s+ for pretty printing.
     # @return [String]
     def to_s
       @chunks.map(&:to_s).join("\n")

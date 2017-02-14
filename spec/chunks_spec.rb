@@ -18,6 +18,5 @@ describe HeapInfo::Chunks do
   end
   it 'size' do
     expect(@chunks.size).to eq @chunks.instance_variable_get(:@chunks).size
-    expect(@chunks.length).to eq @chunks.instance_variable_get(:@chunks).length
   end
 end
