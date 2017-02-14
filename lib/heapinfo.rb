@@ -11,12 +11,13 @@ require 'fileutils'
 module HeapInfo
   # Directory for writing some tmp files when working,
   # make sure /tmp is writable
-  TMP_DIR = '/tmp/.heapinfo'
-  FileUtils.mkdir_p TMP_DIR
+  TMP_DIR = '/tmp/.heapinfo'.freeze
+  FileUtils.mkdir_p(TMP_DIR)
 
-  # Entry point for using HeapInfo.
-  # Show segments info of the process after loaded
-  # @param [String, Fixnum] prog The program name of victim. If a number is given, seem as pid (useful when multi-processes exist)
+  # Entry point for using {HeapInfo}.
+  # Show segments info of the process after loaded.
+  # @param [String, Fixnum] prog
+  #   The program name of victim. If a number is given, seem as pid (useful when multi-processes exist).
   # @param [Hash] options Give library's file name.
   # @option options [String, Regexp] :libc file name of glibc, default is <tt>/libc[^\w]/</tt>
   # @option options [String, Regexp] :ld file name of dynamic linker/loader, default is <tt>/\/ld-.+\.so/</tt>
@@ -34,7 +35,7 @@ module HeapInfo
   #   # => "/lib/x86_64-linux-gnu/libc-2.19.so"
   #   p h.ld.name
   #   # => "/lib/x86_64-linux-gnu/ld-2.19.so"
-  #  
+  #
   # @example
   #   h = heapinfo(27605, libc: 'libc.so.6', ld: 'ld-linux-x86-64.so.2')
   #   # pid 27605 is run by custom loader
@@ -53,9 +54,8 @@ end
 # @return [HeapInfo::Process]
 # @param [Mixed] args see #HeapInfo::heapinfo for more information
 def heapinfo(*args)
-  ::HeapInfo::heapinfo(*args)
+  ::HeapInfo.heapinfo(*args)
 end
- 
 
 require 'heapinfo/helper'
 require 'heapinfo/nil'
