@@ -56,7 +56,7 @@ module HeapInfo
       # @param [Boolean] on Enable or not.
       # @return [void]
       def toggle_color(on: false)
-        @enable_color = on
+        @disable_color = !on
       end
 
       # Color codes for pretty print
@@ -76,7 +76,7 @@ module HeapInfo
       # @return [String] wrapper with color codes.
       def color(s, sev: nil)
         s = s.to_s
-        return s unless @enable_color
+        return s if @disable_color
         cc = COLOR_CODE
         color = if cc.key?(sev) then cc[sev]
                 elsif integer?(s) then cc[:integer] # integers
