@@ -1,3 +1,5 @@
+require 'dentaku'
+
 module HeapInfo
   # Some helper functions
   module Helper
@@ -77,7 +79,7 @@ module HeapInfo
         return s unless @enable_color
         cc = COLOR_CODE
         color = if cc.key?(sev) then cc[sev]
-                elsif s =~ /^(0x)?[0-9a-f]+$/ then cc[:integer] # integers
+                elsif integer?(s) then cc[:integer] # integers
                 else cc[:normal_s] # normal string
                 end
         "#{color}#{s.sub(cc[:esc_m], color)}#{cc[:esc_m]}"
@@ -134,6 +136,15 @@ module HeapInfo
         true if Integer(str)
       rescue ArgumentError, TypeError
         false
+      end
+
+      def evaluate(formula, store: [])
+        calc = Dentaku::Calculator.new
+        formula = formula.delete(':')
+        formula.gsub!(/0x[\da-z]+/) do |s|
+          s.to_i(16).to_s
+        end
+        calc.store(store).evaluate(formula)
       end
     end
 

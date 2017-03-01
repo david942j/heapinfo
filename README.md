@@ -87,8 +87,10 @@ h.debug {
   # => "\x7FELF\x02\x01\x01\x00"
   p h.dump(:heap, 16)
   # => "\x00\x00\x00\x00\x00\x00\x00\x00\x31\x00\x00\x00\x00\x00\x00\x00"
-  p h.dump('heap+0x30, 16') # support offset!
+  p h.dump('heap+0x30', 16) # support offset!
   # => "\x00\x00\x00\x00\x00\x00\x00\x00\x81\x00\x00\x00\x00\x00\x00\x00"
+  p h.dump('heap+0x30 * 3 + 0x8', 16) # and even complex formula.
+  # => "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
   p h.dump(:elf, 8)
   # => "\x7FELF\x02\x01\x01\x00"
   p h.dump(0x400000, 8) # or simply give addr
@@ -96,7 +98,6 @@ h.debug {
 }
 # invalid examples:
 # h.dump('meow') # no such segment
-# h.dump('heap-1, 64') # not support `-`
 ```
 
 #### layouts

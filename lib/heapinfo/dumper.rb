@@ -48,7 +48,7 @@ module HeapInfo
     #
     # Details are in {HeapInfo:Process#x}.
     # @param [Integer] count The number of result need to dump.
-    # @param [Mixed] commands Same format as +#dump(*args)+.
+    # @param [Mixed] commands Same format as {#dump}.
     # @return [void]
     # @example
     #   x 3, 0x400000
@@ -59,7 +59,7 @@ module HeapInfo
       base = base_of(*commands)
       res = dump(*commands).unpack(size_t == 4 ? 'L*' : 'Q*')
       str = res.group_by.with_index { |_, i| i / (16 / size_t) }.map do |round, values|
-        format("%#x:\t", (base + round * 16)) +
+        Helper.hex(base + round * 16) + ":\t" +
           values.map { |v| Helper.color(format("0x%0#{size_t * 2}x", v)) }.join("\t")
       end.join("\n")
       puts str
@@ -91,57 +91,6 @@ module HeapInfo
       end
     end
 
-    # Parse the dump command into +[base, offset, length]+
-    # @param [Array] args The command, see examples for more information
-    # @return [Array<Symbol, Integer>]
-    #   +[base, offset, length]+, while +base+ can be a +Symbol+ or an +Integer+.
-    #   +length+ has default value equals to +8+.
-    # @example
-    #   HeapInfo::Dumper.parse_cmd([:heap, 32, 10])
-    #   # [:heap, 32, 10]
-    #   HeapInfo::Dumper.parse_cmd(['heap+0x10, 10'])
-    #   # [:heap, 16, 10]
-    #   HeapInfo::Dumper.parse_cmd(['heap+0x10'])
-    #   # [:heap, 16, 8]
-    #   HeapInfo::Dumper.parse_cmd([0x400000, 4])
-    #   # [0x400000, 0, 4]
-    def self.parse_cmd(args)
-      args = split_cmd args
-      return :fail unless args.size == 3
-      len = args[2].nil? ? DUMP_BYTES : Integer(args[2])
-      offset = Integer(args[1])
-      base = args[0]
-      base = Helper.integer?(base) ? Integer(base) : base.delete(':').to_sym
-      [base, offset, len]
-    end
-
-    # Helper for +#parse_cmd+.
-    #
-    # Split commands to exactly three parts: +[base, offset, length]+.
-    # +length+ is +nil+ if not present.
-    # @param [Array] args
-    # @return [Array<String>] +[base, offset, length]+ in string expression.
-    # @example
-    #   HeapInfo::Dumper.split_cmd([:heap, 32, 10])
-    #   # ['heap', '32', '10']
-    #   HeapInfo::Dumper.split_cmd([':heap+0x10, 10'])
-    #   # [':heap', '0x10', '10']
-    #   HeapInfo::Dumper.split_cmd([':heap+0x10'])
-    #   # [':heap', '0x10', nil]
-    #   HeapInfo::Dumper.split_cmd([0x400000, 4])
-    #   # ['4194304', 0, '4']
-    def self.split_cmd(args)
-      args = args.join(',').delete(' ').split(',').reject(&:empty?) # 'heap, 100', 32 => 'heap', '100', '32'
-      return [] if args.empty?
-      if args[0].include? '+' # 'heap+0x1'
-        args.unshift(*args.shift.split('+', 2))
-      elsif args.size <= 2 # no offset given
-        args.insert(1, 0)
-      end
-      args << nil if args.size <= 2 # no length given
-      args[0, 3]
-    end
-
     private
 
     def need_permission
@@ -168,14 +117,28 @@ module HeapInfo
       File.open(@filename)
     end
 
-    def base_len_of(*args)
-      base, offset, len = Dumper.parse_cmd(args)
-      if HeapInfo::ProcessInfo::EXPORT.include?(base) && (segment = @info.send(base)).is_a?(Segment)
-        base = segment.base
-      elsif !base.is_a?(Integer)
-        raise ArgumentError, "Invalid base: #{base}" # invalid usage
-      end
-      [base + offset, len]
+    # Get the base address and length.
+    #
+    # @param [Integer, Symbol, String] arg The base address, see examples.
+    # @param [Integer] len An integer.
+    # @example
+    #   base_len_of(123, 321) #=> [123, 321]
+    #   base_len_of(123) #=> [123, DUMP_BYTES]
+    #   base_len_of(:heap, 10) #=> [0x603000, 10] # assume heap base @ 0x603000
+    #   base_len_of('heap+0x30', 10) #=> [0x603030, 10]
+    #   base_len_of('elf+0x3*2-1') #=> [0x400005, DUMP_BYTES]
+    def base_len_of(arg, len = DUMP_BYTES)
+      values = HeapInfo::ProcessInfo::EXPORT.map do |seg|
+        segment = @info.respond_to?(seg) && @info.send(seg)
+        [seg, segment.base] if segment.is_a?(Segment)
+      end.compact.to_h
+      base = case arg
+             when Integer then arg
+             when Symbol then values[arg]
+             when String then Helper.evaluate(arg, store: values)
+             end
+      raise ArgumentError, "Invalid base: #{arg.inspect}" unless base.is_a?(Integer) # invalid usage
+      [base, len]
     end
 
     def base_of(*args)

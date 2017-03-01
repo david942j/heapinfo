@@ -71,7 +71,7 @@ describe HeapInfo::Libc do
 
     describe 'munmap' do
       it 'success' do
-        mmap_addr = HeapInfo::Helper.unpack(8, @h.dump(:heap, 0x190, 8)) # backdoor of victim.cpp
+        mmap_addr = HeapInfo::Helper.unpack(8, @h.dump(':heap+0x190', 8)) # backdoor of victim.cpp
         expect(@h.libc.free(mmap_addr)).to be true
       end
     end

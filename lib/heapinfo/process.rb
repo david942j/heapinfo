@@ -57,24 +57,23 @@ module HeapInfo
     # Note: This method require you have permission of attaching another process.
     # If not, a warning message will present.
     #
-    # @param [Mixed] args Will be parsed into <tt>[base, offset, length]</tt>, see Examples for more information.
+    # @param [Mixed] args Will be parsed into +[base, length]+, see Examples for more information.
     # @return [String, HeapInfo::Nil]
     #   The content needed. When the request address is not readable or the process not exists,
-    #   <tt>HeapInfo::Nil.new</tt> is returned.
+    #   instance of {HeapInfo::Nil} is returned.
     #
     # @example
     #   h = heapinfo('victim')
-    #   h.dump(:heap) # &heap[0, 8]
-    #   h.dump(:heap, 64) # &heap[0, 64]
-    #   h.dump(:heap, 256, 64) # &heap[256, 64]
-    #   h.dump('heap+256, 64'  # &heap[256, 64]
-    #   h.dump('heap+0x100', 64) # &heap[256, 64]
+    #   h.dump(:heap) # heap[0, 8]
+    #   h.dump(:heap, 64) # heap[0, 64]
+    #   h.dump('heap+256', 64)  # heap[256, 64]
+    #   h.dump('heap+0x100', 64) # heap[256, 64]
+    #   h.dump('heap+0x100 * 2 + 0x300', 64) # heap[1024, 64]
     #   h.dump(<segment>, 8) # semgent can be [heap, stack, (program|elf), libc, ld]
     #   h.dump(addr, 64) # addr[0, 64]
     #
     #   # Invalid usage
     #   dump(:meow) # no such segment
-    #   dump('heap-1, 64') # not support '-'
     def dump(*args)
       return Nil.new unless load?
       dumper.dump(*args)

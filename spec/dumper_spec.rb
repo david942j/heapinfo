@@ -87,28 +87,24 @@ describe HeapInfo::Dumper do
     end
   end
 
-  describe 'parse_cmd' do
+  describe 'base_len_of' do
+    before(:all) do
+      @elf_base = @get_elf_base.call
+      @dumper = HeapInfo::Dumper.new(S.new(@elf_base), '/proc/self/mem')
+    end
+
     it 'normal' do
-      expect(HeapInfo::Dumper.parse_cmd([0x30])).to eq [0x30, 0, 8]
-      expect(HeapInfo::Dumper.parse_cmd([0x30, 3])).to eq [0x30, 0, 3]
-      expect(HeapInfo::Dumper.parse_cmd([0x30, 2, 3])).to eq [0x30, 2, 3]
+      expect(@dumper.send(:base_len_of, 123, 321)).to eq [123, 321]
+      expect(@dumper.send(:base_len_of, 123)).to eq [123, 8]
     end
-    it 'symbol' do
-      expect(HeapInfo::Dumper.parse_cmd([:heap])).to eq [:heap, 0, 8]
-      expect(HeapInfo::Dumper.parse_cmd([:heap, 10])).to eq [:heap, 0, 10]
-      expect(HeapInfo::Dumper.parse_cmd([:heap, 3, 10])).to eq [:heap, 3, 10]
+
+    it 'segment' do
+      expect(@dumper.send(:base_len_of, :elf, 10)).to eq [@elf_base, 10]
     end
-    it 'string' do
-      expect(HeapInfo::Dumper.parse_cmd(['heap'])).to eq [:heap, 0, 8]
-      expect(HeapInfo::Dumper.parse_cmd(['heap, 10'])).to eq [:heap, 0, 10]
-      expect(HeapInfo::Dumper.parse_cmd(['heap, 0x33, 10'])).to eq [:heap, 51, 10]
-      expect(HeapInfo::Dumper.parse_cmd(['heap+0x15, 10'])).to eq [:heap, 0x15, 10]
-      expect(HeapInfo::Dumper.parse_cmd(['heap + 0x15, 10'])).to eq [:heap, 0x15, 10]
-      expect(HeapInfo::Dumper.parse_cmd(['heap +  0x15'])).to eq [:heap, 0x15, 8]
-    end
-    it 'mixed' do
-      expect(HeapInfo::Dumper.parse_cmd(['heap+ 0x10', 10])).to eq [:heap, 0x10, 10]
-      expect(HeapInfo::Dumper.parse_cmd(['heap', 10])).to eq [:heap, 0, 10]
+
+    it 'eval' do
+      expect(@dumper.send(:base_len_of, 'elf+0x30', 10)).to eq [@elf_base + 48, 10]
+      expect(@dumper.send(:base_len_of, 'elf+0x3*2 - 1', 10)).to eq [@elf_base + 5, 10]
     end
   end
 end

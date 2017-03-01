@@ -148,7 +148,7 @@ Smallbin[0x90]: 0x6020f0 === [self] === 0x6020f0
 
     describe 'chunks' do
       before(:all) do
-        mmap_addr = HeapInfo::Helper.unpack(8, @h.dump(:heap, 0x190, 8))
+        mmap_addr = HeapInfo::Helper.unpack(8, @h.dump(':heap+0x190', 8))
         @mmap_chunk = @h.dump(mmap_addr - 0x10, 0x20).to_chunk(base: mmap_addr - 0x10)
       end
       it 'mmap' do
