@@ -7,7 +7,7 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](http://choosealicense.com/licenses/mit/)
 
 ## HeapInfo
-As pwn lovers, while playing CTF with heap exploitation, we always need a debugger (e.g. gdb) for tracking memory layout. But we don't really need a debugger if we just want to see whether the heap layout same as our imagine or not. Hope this small tool helps us exploit easier ;).
+As pwn lovers, while playing CTF with heap exploitation, we always need a debugger (e.g. gdb) for tracking memory layout. But we don't really need gdb if we want to see whether the heap layout same as our imagine or not. Hope this small tool helps us exploit easier ;).
 
 Implement with ruby because I love ruby :P. But might also implement with Python (if no others did) in the future.
 
@@ -15,7 +15,7 @@ If you prefer [pwntools](https://github.com/Gallopsled/pwntools) for exploiting,
 
 Any suggestion of features or bug issues is welcome.
 
-Relation works are [pwntools-ruby](https://github.com/peter50216/pwntools-ruby) and [gdbpwn](https://github.com/scwuaptx/Pwngdb).
+Related works are [pwntools-ruby](https://github.com/peter50216/pwntools-ruby) and [gdbpwn](https://github.com/scwuaptx/Pwngdb).
 
 ## Install
 **HeapInfo** is still under developing for more features, so the version might change frequently :p
@@ -27,11 +27,14 @@ $ gem install heapinfo
 ## Features
 * Can use in your ruby exploit script or in irb/pry
 * **HeapInfo** works when the `victim` is being traced! i.e. you can use ltrace/strace/gdb and **HeapInfo** simultaneously!
-* `dump` - dump arbitrarily address memory.
-* `layouts` - show the current bin layouts, very useful for heap exploitation.
+* `dump` - Dump arbitrarily address memory.
+* `layouts` - Show the current bin layouts, very useful for heap exploitation.
 * `x` - Provide gdb-like commands.
 * `find` - Provide gdb-like commands.
 * More features and details can be found in [RDoc](http://www.rubydoc.info/github/david942j/heapinfo/master/)
+
+### Under developing
+* `free` - Show what will happend when `free` an address.
 
 ## Usage
 
