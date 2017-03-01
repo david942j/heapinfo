@@ -34,12 +34,9 @@ describe HeapInfo::Process do
       exec "setarch `uname -m` -R /bin/sh -c #{@victim}" if pid.nil?
       loop until `pidof #{@victim}` != ''
       @h = heapinfo(@victim, ld: '/ld')
-      class Cio
-        def puts(s); s
-        end
-      end
-      @io = Cio.new
+      HeapInfo::Helper.toggle_color(on: false)
     end
+
     after(:all) do
       `killall #{@victim}`
       FileUtils.rm(@victim)
@@ -53,13 +50,13 @@ describe HeapInfo::Process do
     end
 
     it 'x' do
-      expect(@h.x(3, :heap, io: @io)).to eq "0x602000:\t" \
-                                            "\e[38;5;12m0x0000000000000000\e[0m\t" \
-                                            "\e[38;5;12m0x0000000000000021\e[0m\n" \
-                                            "0x602010:\t\e[38;5;12m0x0000000000000000\e[0m"
-      expect(@h.x(2, 'heap+0x20', io: @io)).to eq "0x602020:\t" \
-                                                  "\e[38;5;12m0x0000000000000000\e[0m\t" \
-                                                  "\e[38;5;12m0x0000000000000021\e[0m"
+      expect { @h.x(3, :heap) }.to output(<<-'EOS').to_stdout
+0x602000:	0x0000000000000000	0x0000000000000021
+0x602010:	0x0000000000000000
+      EOS
+      expect { @h.x(2, 'heap+0x20') }.to output(<<-'EOS').to_stdout
+0x602020:	0x0000000000000000	0x0000000000000021
+      EOS
     end
 
     it 'debug wrapper' do
@@ -119,11 +116,15 @@ describe HeapInfo::Process do
       end
 
       it 'fastbin' do
-        lay = @h.layouts :fastbin, io: @io
-        expect(lay).to include '0xdeadbeef'
-        expect(lay).to include '(nil)'
-        expect(lay).to include '(invalid)'
-        expect(lay).to include '(loop)'
+        expect { @h.layouts(:fastbin) }.to output(<<-'EOS').to_stdout
+Fastbin[0x20]:  => 0x602020 => 0x602000 => (nil)
+Fastbin[0x30]:  => 0x602040 => 0xdeadbeef(invalid)
+Fastbin[0x40]:  => 0x602070 => 0x6020b0 => 0x602070(loop)
+Fastbin[0x50]:  => (nil)
+Fastbin[0x60]:  => (nil)
+Fastbin[0x70]:  => (nil)
+Fastbin[0x80]:  => (nil)
+        EOS
       end
     end
 
@@ -138,10 +139,10 @@ describe HeapInfo::Process do
         expect(list).to eq [0x6020f0, base, 0x6020f0]
       end
       it 'layouts' do
-        inspect = @h.layouts :smallbin, :unsorted_bin, io: @io
-        expect(inspect).to include '[self]'
-        expect(inspect).to include '0x6020f0'
-        expect(inspect).to include 'UnsortedBin'
+        expect { @h.layouts(:smallbin, :unsorted_bin) }.to output(<<-'EOS').to_stdout
+UnsortedBin: 0x6021d0 === [self] === 0x6021d0
+Smallbin[0x90]: 0x6020f0 === [self] === 0x6020f0
+				EOS
       end
     end
 

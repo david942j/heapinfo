@@ -49,13 +49,12 @@ module HeapInfo
     # Details are in {HeapInfo:Process#x}.
     # @param [Integer] count The number of result need to dump.
     # @param [Mixed] commands Same format as +#dump(*args)+.
-    # @param [IO] io +IO+ that use for printing.
-    # @return [NilClass] The return value of +io.puts+.
+    # @return [void]
     # @example
     #   x 3, 0x400000
     #   # 0x400000:       0x00010102464c457f      0x0000000000000000
     #   # 0x400010:       0x00000001003e0002
-    def x(count, *commands, io: $stdout)
+    def x(count, *commands)
       commands += [count * size_t]
       base = base_of(*commands)
       res = dump(*commands).unpack(size_t == 4 ? 'L*' : 'Q*')
@@ -63,7 +62,7 @@ module HeapInfo
         format("%#x:\t", (base + round * 16)) +
           values.map { |v| Helper.color(format("0x%0#{size_t * 2}x", v)) }.join("\t")
       end.join("\n")
-      io.puts str
+      puts str
     end
 
     # Search a specific value/string/regexp in memory.

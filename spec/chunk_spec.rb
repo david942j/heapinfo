@@ -5,6 +5,7 @@ describe HeapInfo::Chunk do
     before(:all) do
       @fast = [0, 0x47, 0x1337].pack('L*').to_chunk(bits: 32)
       @small = [0, 0x48, 0xabcdef].pack('L*').to_chunk(bits: 32)
+      HeapInfo::Helper.toggle_color(on: false)
     end
     it 'basic' do
       expect(@fast.size_t).to be 4
@@ -16,10 +17,13 @@ describe HeapInfo::Chunk do
     end
 
     it 'to_s' do
-      expect(@small.to_s).to eq "\e[38;5;155m#<HeapInfo::Chunk:0>\n" \
-                                "\e[0mflags = []\nsize = \e[38;5;12m0x48\e[0m (small)\n" \
-                                "prev_size = \e[38;5;12m0\e[0m\n" \
-                                "data = \e[38;5;1m\"\\xEF\\xCD\\xAB\\x00\"\e[0m...\n"
+      expect(@small.to_s).to eq(<<-EOS)
+#<HeapInfo::Chunk:0>
+flags = []
+size = 0x48 (small)
+prev_size = 0
+data = "\\xEF\\xCD\\xAB\\x00\"...
+      EOS
     end
   end
 
@@ -27,7 +31,9 @@ describe HeapInfo::Chunk do
     before(:all) do
       @fast = [0, 0x87, 0x1337].pack('Q*').to_chunk # default 64bits
       @small = [0, 0x90, 0xdead].pack('Q*').to_chunk
+      HeapInfo::Helper.toggle_color(on: false)
     end
+
     it 'basic' do
       expect(@fast.size_t).to be 8
       expect(@fast.size).to be 0x80
@@ -36,11 +42,15 @@ describe HeapInfo::Chunk do
       expect(@fast.data).to eq [0x1337].pack('Q*')
       expect(@small.bintype).to eq :small
     end
+
     it 'to_s' do
-      expect(@small.to_s).to eq "\e[38;5;155m#<HeapInfo::Chunk:0>\n" \
-                                "\e[0mflags = []\nsize = \e[38;5;12m0x90\e[0m (small)\n" \
-                                "prev_size = \e[38;5;12m0\e[0m\n" \
-                                "data = \e[38;5;1m\"\\xAD\\xDE\\x00\\x00\\x00\\x00\\x00\\x00\"\e[0m...\n"
+      expect(@small.to_s).to eq <<-EOS
+#<HeapInfo::Chunk:0>
+flags = []
+size = 0x90 (small)
+prev_size = 0
+data = "\\xAD\\xDE\\x00\\x00\\x00\\x00\\x00\\x00\"...
+      EOS
     end
   end
 end

@@ -71,5 +71,11 @@ describe HeapInfo::Helper do
         [0xffffffffff600000, 0xffffffffff601000, 'r-xp', '[vsyscall]']
       ]
     end
+
+    it 'color' do
+      HeapInfo::Helper.toggle_color(on: true)
+      expect(HeapInfo::Helper.color('0x1234')).to eq "\e[38;5;12m0x1234\e[0m"
+      expect(HeapInfo::Helper.color('OAO')).to eq "\e[38;5;1mOAO\e[0m"
+    end
   end
 end

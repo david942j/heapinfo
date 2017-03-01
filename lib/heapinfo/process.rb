@@ -95,11 +95,10 @@ module HeapInfo
     # Show dump results like in gdb's command <tt>x</tt>,
     # while will auto detect the current elf class to decide using <tt>gx</tt> or <tt>wx</tt>.
     #
-    # The dump results wrapper with color codes and nice typesetting will output to <tt>stdout</tt> by default.
-    # @param [Integer] count The number of result need to dump, see examples for more information
-    # @param [Mixed] commands Same format as <tt>#dump(*args)</tt>, see <tt>#dump</tt> for more information
-    # @param [IO] io <tt>IO</tt> that use for printing, default is <tt>$stdout</tt>
-    # @return [NilClass] The return value of <tt>io.puts</tt>.
+    # The dump results wrapper with color codes and nice typesetting will output to +stdout+.
+    # @param [Integer] count The number of result need to dump, see examples for more information.
+    # @param [Mixed] commands Same format as {#dump(*args)}, see {#dump} for more information.
+    # @return [void]
     # @example
     #   h.x 8, :heap
     #   # 0x1f0d000:      0x0000000000000000      0x0000000000002011
@@ -110,9 +109,9 @@ module HeapInfo
     #   h.x 3, 0x400000
     #   # 0x400000:       0x00010102464c457f      0x0000000000000000
     #   # 0x400010:       0x00000001003e0002
-    def x(count, *commands, io: $stdout)
-      return unless load? && io.respond_to?(:puts)
-      dumper.x(count, *commands, io: io)
+    def x(count, *commands)
+      return unless load?
+      dumper.x(count, *commands)
     end
 
     # Gdb-like command.
@@ -149,13 +148,12 @@ module HeapInfo
     #
     # The request layouts will output to <tt>stdout</tt> by default.
     # @param [Array<Symbol>] args Bin type(s) you want to see.
-    # @param [IO] io <tt>IO</tt> that use for printing, default is <tt>$stdout</tt>
-    # @return [NilClass] The return value of <tt>io.puts</tt>.
+    # @return [void]
     # @example
     #   h.layouts :fastbin, :unsorted_bin, :smallbin
-    def layouts(*args, io: $stdout)
-      return unless load? && io.respond_to?(:puts)
-      io.puts libc.main_arena.layouts(*args)
+    def layouts(*args)
+      return unless load?
+      puts libc.main_arena.layouts(*args)
     end
 
     # Show simple information of target process.
