@@ -37,8 +37,8 @@ module HeapInfo
         int_free_fast(av, ptr, size)
       elsif !chunk_is_mmapped(ptr) # Though this has been checked in #libc_free
         int_free_small(av, ptr, size)
-      else
-        munmap_chunk(ptr)
+        # else # never reached block, redundant code in glibc.
+        # munmap_chunk(ptr)
       end
     end
 
