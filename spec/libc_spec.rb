@@ -4,14 +4,8 @@ describe HeapInfo::Libc do
   describe 'free' do
     before(:all) do
       HeapInfo::Cache.send :clear_all # force cache miss, to make sure coverage
-      @victim = HeapInfo::TMP_DIR + '/victim'
-      cwd = File.expand_path('../files', __FILE__)
-      `cd #{cwd} && make victim LIB_VER=2.23 BIT=64 OUTFILE=#{@victim} 2>&1 > /dev/null`
-      pid = fork
-      # run without ASLR
-      exec "setarch `uname -m` -R /bin/sh -c #{@victim}" if pid.nil?
-      loop until `pidof #{@victim}` != ''
-      @h = HeapInfo::Process.new(@victim, ld: '/ld')
+      victim = @compile_and_run.call(bit: 64, lib_ver: '2.23')
+      @h = HeapInfo::Process.new(victim, ld: '/ld')
       @fake_mem = 0x13371000
       @helper = HeapInfo::Helper
       @set_memory = lambda do |str|
@@ -23,10 +17,6 @@ describe HeapInfo::Libc do
           end
         end)
       end
-    end
-    after(:all) do
-      `killall #{@victim}`
-      FileUtils.rm(@victim)
     end
 
     describe 'invalid' do

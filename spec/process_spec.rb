@@ -27,19 +27,9 @@ describe HeapInfo::Process do
   describe 'victim' do
     before(:all) do
       HeapInfo::Cache.send :clear_all # force cache miss, to make sure coverage
-      @victim = HeapInfo::TMP_DIR + '/victim'
-      `g++ #{File.expand_path('../files/victim.cpp', __FILE__)} -o #{@victim} 2>&1 > /dev/null`
-      pid = fork
-      # run without ASLR
-      exec "setarch `uname -m` -R /bin/sh -c #{@victim}" if pid.nil?
-      loop until `pidof #{@victim}` != ''
+      @victim = @compile_and_run.call(bit: 64, lib_ver: '2.23')
       @h = heapinfo(@victim, ld: '/ld')
       HeapInfo::Helper.toggle_color(on: false)
-    end
-
-    after(:all) do
-      `killall #{@victim}`
-      FileUtils.rm(@victim)
     end
 
     it 'check process' do
@@ -162,18 +152,8 @@ Smallbin[0x90]: 0x6020f0 === [self] === 0x6020f0
 
   describe 'static-link' do
     before(:all) do
-      @victim = HeapInfo::TMP_DIR + '/victim'
-      `g++ -static #{File.expand_path('../files/victim.cpp', __FILE__)} -o #{@victim} 2>&1 > /dev/null`
-      pid = fork
-      # run without ASLR
-      exec "setarch `uname -m` -R /bin/sh -c #{@victim}" if pid.nil?
-      loop until `pidof #{@victim}` != ''
-      @h = heapinfo(@victim)
-    end
-
-    after(:all) do
-      `killall #{@victim}`
-      FileUtils.rm(@victim)
+      victim = @compile_and_run.call(bit: 64, lib_ver: '2.23', flags: '-static')
+      @h = heapinfo(victim)
     end
 
     it 'normal' do
