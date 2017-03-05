@@ -7,8 +7,7 @@ SimpleCov.start do
   add_filter '/spec/'
 end
 
-require 'heapinfo'
-require 'tempfile'
+require 'heapinfo/helper'
 
 RSpec.configure do |config|
   module Victims
@@ -30,7 +29,7 @@ RSpec.configure do |config|
   config.before(:all) do
     # return the absolute path of exectuable file.
     @compile_and_run = lambda do |bit: 64, lib_ver: '2.23', flags: ''|
-      victim = Dir::Tmpname.create('victim', HeapInfo::TMP_DIR) {}
+      victim = HeapInfo::Helper.tempfile('victim')
       cwd = File.expand_path('../files', __FILE__)
       `cd #{cwd} && make victim OUTFILE=#{victim} BIT=#{bit} LIB_VER=#{lib_ver} CFLAGS=#{flags} 2>&1 > /dev/null`
       pid = fork

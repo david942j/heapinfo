@@ -114,6 +114,8 @@ describe HeapInfo::Process do
     it 'main_arena' do
       @hs.each do |h|
         expect(h.libc.main_arena.top_chunk.size_t).to eq 8
+        expect(h.libc.main_arena.top_chunk.base).to eq 0x602340
+        expect(h.libc.main_arena.system_mem).to eq 0x21000
         expect(h.libc.main_arena.fastbin.size).to eq 7
       end
     end

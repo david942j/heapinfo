@@ -60,9 +60,9 @@ module HeapInfo
     end
 
     def resolve_main_arena_offset
-      tmp_elf = HeapInfo::TMP_DIR + '/get_arena'
+      tmp_elf = HeapInfo::Helper.tempfile('get_arena')
       libc_file = HeapInfo::TMP_DIR + '/libc.so.6'
-      ld_file = HeapInfo::TMP_DIR + '/ld.so'
+      ld_file = HeapInfo::Helper.tempfile('ld.so')
       flags = "-w #{size_t == 4 ? '-m32' : ''}"
       `cp #{name} #{libc_file} && \
          cp #{ld_name} #{ld_file} && \

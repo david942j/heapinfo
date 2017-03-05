@@ -48,14 +48,14 @@ module HeapInfo
     #
     # Details are in {HeapInfo:Process#x}.
     # @param [Integer] count The number of result need to dump.
-    # @param [Mixed] commands Same format as {#dump}.
+    # @param [Symbol, String, Integer] address The base address to be dumped.
     # @return [void]
     # @example
     #   x 3, 0x400000
     #   # 0x400000:       0x00010102464c457f      0x0000000000000000
     #   # 0x400010:       0x00000001003e0002
-    def x(count, *commands)
-      commands += [count * size_t]
+    def x(count, address)
+      commands = [address, count * size_t]
       base = base_of(*commands)
       res = dump(*commands).unpack(size_t == 4 ? 'L*' : 'Q*')
       str = res.group_by.with_index { |_, i| i / (16 / size_t) }.map do |round, values|

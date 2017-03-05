@@ -138,13 +138,24 @@ module HeapInfo
         false
       end
 
-      def evaluate(formula, store: [])
+      # Safe-eval using dentaku.
+      # @param [String] formula Formula to be eval.
+      # @param [Hash{Symbol => Integer}] store Predefined values.
+      # @return [Integer] Evaluate result.
+      def evaluate(formula, store: {})
         calc = Dentaku::Calculator.new
         formula = formula.delete(':')
         formula.gsub!(/0x[\da-z]+/) do |s|
           s.to_i(16).to_s
         end
         calc.store(store).evaluate(formula)
+      end
+
+      # Get temp filename.
+      # @param [String] name Filename.
+      # @return [String] Temp filename.
+      def tempfile(name)
+        Dir::Tmpname.create(name, HeapInfo::TMP_DIR) {}
       end
     end
 

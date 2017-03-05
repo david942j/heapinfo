@@ -13,7 +13,7 @@ module HeapInfo
     attr_reader :smallbin
     # @return [Integer] The +system_mem+ in arena.
     attr_reader :system_mem
-    # attr_reader :largebin, :last_remainder
+    # attr_reader :largebin
 
     # Instantiate a {HeapInfo::Arena} object.
     #
@@ -60,12 +60,13 @@ module HeapInfo
     # @param [Symbol] args Bin type(s) you want to see.
     # @return [String] Bin layouts that wrapper with color codes.
     # @example
-    #   puts h.libc.main_arena.layouts :fastbin, :unsorted_bin, :smallbin
+    #   puts h.libc.main_arena.layouts(:fast, :unsorted, :small)
     def layouts(*args)
+      args = args.map(&:to_s).join('|')
       res = ''
-      res += fastbin.map(&:inspect).join if args.include? :fastbin
-      res += unsorted_bin.inspect if args.include? :unsorted_bin
-      res += smallbin.map(&:inspect).join if args.include? :smallbin
+      res += fastbin.map(&:inspect).join if args.include?('fast')
+      res += unsorted_bin.inspect if args.include?('unsort')
+      res += smallbin.map(&:inspect).join if args.include?('small')
       res
     end
 

@@ -2,18 +2,18 @@
 module HeapInfo
   # Main class of heapinfo.
   class Process
-    # The default options of libaries,
-    # use for matching glibc and ld segments in <tt>/proc/[pid]/maps</tt>
+    # The default options of libraries,
+    # use for matching glibc and ld segments in +/proc/[pid]/maps+.
     DEFAULT_LIB = {
       libc: /bc[^a-z]*\.so/,
       ld:   %r{/ld-.+\.so}
     }.freeze
-    # @return [Fixnum, NilClass] return the pid of process, <tt>nil</tt> if no such process found
+    # @return [Fixnum, NilClass] return the pid of process, +nil+ if no such process found
     attr_reader :pid
 
-    # Instantiate a <tt>HeapInfo::Process</tt> object
-    # @param [String, Fixnum] prog Process name or pid, see <tt>HeapInfo::heapinfo</tt> for more information
-    # @param [Hash] options libraries' filename, see <tt>HeapInfo::heapinfo</tt> for more information
+    # Instantiate a {HeapInfo::Process} object.
+    # @param [String, Fixnum] prog Process name or pid, see {HeapInfo::heapinfo} for more information
+    # @param [Hash{Symbol => RegExp, String}] options libraries' filename, see {HeapInfo::heapinfo} for more information
     def initialize(prog, options = {})
       @prog = prog
       @options = DEFAULT_LIB.merge options
@@ -23,7 +23,7 @@ module HeapInfo
 
     # Reload a new process with same program name
     #
-    # @return [HeapInfo::Process] return <tt>self</tt> for chainable.
+    # @return [HeapInfo::Process] return +self+ for chainable.
     # @example
     #   puts h.reload!
     def reload!
@@ -34,9 +34,9 @@ module HeapInfo
 
     # Use this method to wrapper all HeapInfo methods.
     #
-    # Since <tt>::HeapInfo</tt> is a tool(debugger) for local usage,
+    # Since {HeapInfo} is a tool(debugger) for local usage,
     # while exploiting remote service, all methods will not work properly.
-    # So I suggest to wrapper all methods inside <tt>#debug</tt>,
+    # So I suggest to wrapper all methods inside {#debug},
     # which will ignore the block while the victim process is not found.
     #
     # @example
@@ -80,10 +80,10 @@ module HeapInfo
     end
 
     # Return the dump result as chunks.
-    # see <tt>HeapInfo::Dumper#dump_chunks</tt> for more information.
+    # see {HeapInfo::Dumper#dump_chunks} for more information.
     #
     # @return [HeapInfo::Chunks, HeapInfo::Nil] An array of chunk(s).
-    # @param [Mixed] args Same as arguments of <tt>#dump</tt>
+    # @param [Mixed] args Same as arguments of {#dump}.
     def dump_chunks(*args)
       return Nil.new unless load?
       dumper.dump_chunks(*args)
@@ -91,12 +91,13 @@ module HeapInfo
 
     # Gdb-like command
     #
-    # Show dump results like in gdb's command <tt>x</tt>,
-    # while will auto detect the current elf class to decide using <tt>gx</tt> or <tt>wx</tt>.
+    # Show dump results like gdb's command +x+.
+    # While will auto detect the current elf class to decide using +gx+ or +wx+.
     #
     # The dump results wrapper with color codes and nice typesetting will output to +stdout+.
     # @param [Integer] count The number of result need to dump, see examples for more information.
-    # @param [Mixed] commands Same format as {#dump(*args)}, see {#dump} for more information.
+    # @param [String, Symbol, Integer] address The base address to be dumped.
+    #   Same format as {#dump(*args)}, see {#dump} for more information.
     # @return [void]
     # @example
     #   h.x 8, :heap
@@ -108,23 +109,23 @@ module HeapInfo
     #   h.x 3, 0x400000
     #   # 0x400000:       0x00010102464c457f      0x0000000000000000
     #   # 0x400010:       0x00000001003e0002
-    def x(count, *commands)
+    def x(count, address)
       return unless load?
-      dumper.x(count, *commands)
+      dumper.x(count, address)
     end
 
     # Gdb-like command.
     #
     # Search a specific value/string/regexp in memory.
     # @param [Integer, String, Regexp] pattern
-    #   The desired search pattern, can be value(<tt>Integer</tt>), string, or regular expression.
+    #   The desired search pattern, can be value(+Integer+), string, or regular expression.
     # @param [Integer, String, Symbol] from
-    #   Start address for searching, can be segment(<tt>Symbol</tt>) or segments with offset.
+    #   Start address for searching, can be segment(+Symbol+) or segments with offset.
     #   See examples for more information.
     # @param [Integer] length
     #   The search length limit, default is unlimited,
     #   which will search until pattern found or reach unreadable memory.
-    # @return [Integer, NilClass] The first matched address, <tt>nil</tt> is returned when no such pattern found.
+    # @return [Integer, NilClass] The first matched address, +nil+ is returned when no such pattern found.
     # @example
     #   h.find(0xdeadbeef, 'heap+0x10', 0x1000)
     #   # => 6299664 # 0x602010
@@ -145,11 +146,11 @@ module HeapInfo
 
     # Pretty dump of bins layouts.
     #
-    # The request layouts will output to <tt>stdout</tt> by default.
+    # The request layouts will output to +stdout+.
     # @param [Array<Symbol>] args Bin type(s) you want to see.
     # @return [void]
     # @example
-    #   h.layouts :fastbin, :unsorted_bin, :smallbin
+    #   h.layouts(:fast, :unsorted, :small)
     def layouts(*args)
       return unless load?
       puts libc.main_arena.layouts(*args)
