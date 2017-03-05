@@ -135,3 +135,9 @@ h.find(/E.F/, 0x400000, 3)
 sh_offset = h.find('/bin/sh', :libc) - h.libc.base
 # => 1559771 # 0x17ccdb
 ```
+
+## Tests
+**HeapInfo** currently only run tests on ubuntu, followings are tested glibc versions:
+* libc-2.19
+* libc-2.23
+* libc-2.24

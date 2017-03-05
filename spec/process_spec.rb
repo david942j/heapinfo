@@ -55,11 +55,6 @@ describe HeapInfo::Process do
       expect(@h.debug { @h.to_s }).to eq @h.to_s
     end
 
-    it 'main_arena' do
-      expect(@h.libc.main_arena.top_chunk.size_t).to eq 8
-      expect(@h.libc.main_arena.fastbin.size).to eq 7
-    end
-
     describe 'find/search' do
       it 'faraway' do
         expect(@h.find('/bin/sh', :libc).is_a?(Integer)).to be true
@@ -92,50 +87,6 @@ describe HeapInfo::Process do
       end
     end
 
-    describe 'fastbin' do
-      it 'normal' do
-        expect(@h.libc.main_arena.fastbin[0].list).to eq [0x602020, 0x602000, nil]
-      end
-
-      it 'invalid' do
-        expect(@h.libc.main_arena.fastbin[1].list).to eq [0x602040, 0xdeadbeef, :invalid]
-      end
-
-      it 'loop' do
-        expect(@h.libc.main_arena.fastbin[2].list).to eq [0x602070, 0x6020b0, 0x602070, :loop]
-      end
-
-      it 'fastbin' do
-        expect { @h.layouts(:fastbin) }.to output(<<-'EOS').to_stdout
-Fastbin[0x20]:  => 0x602020 => 0x602000 => (nil)
-Fastbin[0x30]:  => 0x602040 => 0xdeadbeef(invalid)
-Fastbin[0x40]:  => 0x602070 => 0x6020b0 => 0x602070(loop)
-Fastbin[0x50]:  => (nil)
-Fastbin[0x60]:  => (nil)
-Fastbin[0x70]:  => (nil)
-Fastbin[0x80]:  => (nil)
-        EOS
-      end
-    end
-
-    describe 'otherbin' do
-      it 'unsorted' do
-        list = @h.libc.main_arena.unsorted_bin.link_list 1
-        expect(list).to eq [0x6021d0, @h.libc.main_arena.unsorted_bin.base, 0x6021d0]
-      end
-      it 'normal' do
-        list = @h.libc.main_arena.smallbin[0].link_list 1
-        base = @h.libc.main_arena.smallbin[0].base
-        expect(list).to eq [0x6020f0, base, 0x6020f0]
-      end
-      it 'layouts' do
-        expect { @h.layouts(:smallbin, :unsorted_bin) }.to output(<<-'EOS').to_stdout
-UnsortedBin: 0x6021d0 === [self] === 0x6021d0
-Smallbin[0x90]: 0x6020f0 === [self] === 0x6020f0
-				EOS
-      end
-    end
-
     describe 'chunks' do
       before(:all) do
         mmap_addr = HeapInfo::Helper.unpack(8, @h.dump(':heap+0x190', 8))
@@ -146,6 +97,82 @@ Smallbin[0x90]: 0x6020f0 === [self] === 0x6020f0
         expect(@mmap_chunk.bintype).to eq :mmap
         expect(@mmap_chunk.flags).to eq [:mmapped]
         expect(@mmap_chunk.to_s).to include ':mmapped'
+      end
+    end
+  end
+
+  # Test on all glibc versions since these features are so important.
+  describe 'heap layouts' do
+    before(:all) do
+      HeapInfo::Cache.send :clear_all # force cache miss, to make sure coverage
+      @hs = %w(2.19 2.23 2.24).map do |ver|
+        HeapInfo::Process.new(@compile_and_run.call(bit: 64, lib_ver: ver), ld: '/ld')
+      end
+      HeapInfo::Helper.toggle_color(on: false)
+    end
+
+    it 'main_arena' do
+      @hs.each do |h|
+        expect(h.libc.main_arena.top_chunk.size_t).to eq 8
+        expect(h.libc.main_arena.fastbin.size).to eq 7
+      end
+    end
+
+    describe 'fastbin' do
+      it 'normal' do
+        @hs.each do |h|
+          expect(h.libc.main_arena.fastbin[0].list).to eq [0x602020, 0x602000, nil]
+        end
+      end
+
+      it 'invalid' do
+        @hs.each do |h|
+          expect(h.libc.main_arena.fastbin[1].list).to eq [0x602040, 0xdeadbeef, :invalid]
+        end
+      end
+
+      it 'loop' do
+        @hs.each do |h|
+          expect(h.libc.main_arena.fastbin[2].list).to eq [0x602070, 0x6020b0, 0x602070, :loop]
+        end
+      end
+
+      it 'fastbin' do
+        @hs.each do |h|
+          expect { h.layouts(:fastbin) }.to output(<<-'EOS').to_stdout
+Fastbin[0x20]:  => 0x602020 => 0x602000 => (nil)
+Fastbin[0x30]:  => 0x602040 => 0xdeadbeef(invalid)
+Fastbin[0x40]:  => 0x602070 => 0x6020b0 => 0x602070(loop)
+Fastbin[0x50]:  => (nil)
+Fastbin[0x60]:  => (nil)
+Fastbin[0x70]:  => (nil)
+Fastbin[0x80]:  => (nil)
+          EOS
+        end
+      end
+    end
+
+    describe 'otherbin' do
+      it 'unsorted' do
+        @hs.each do |h|
+          list = h.libc.main_arena.unsorted_bin.link_list 1
+          expect(list).to eq [0x6021d0, h.libc.main_arena.unsorted_bin.base, 0x6021d0]
+        end
+      end
+      it 'normal' do
+        @hs.each do |h|
+          list = h.libc.main_arena.smallbin[0].link_list 1
+          base = h.libc.main_arena.smallbin[0].base
+          expect(list).to eq [0x6020f0, base, 0x6020f0]
+        end
+      end
+      it 'layouts' do
+        @hs.each do |h|
+          expect { h.layouts(:smallbin, :unsorted_bin) }.to output(<<-'EOS').to_stdout
+UnsortedBin: 0x6021d0 === [self] === 0x6021d0
+Smallbin[0x90]: 0x6020f0 === [self] === 0x6020f0
+          EOS
+        end
       end
     end
   end
