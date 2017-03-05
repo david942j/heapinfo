@@ -5,7 +5,8 @@ describe HeapInfo::Libc do
     before(:all) do
       HeapInfo::Cache.send :clear_all # force cache miss, to make sure coverage
       @victim = HeapInfo::TMP_DIR + '/victim'
-      `g++ #{File.expand_path('../files/victim.cpp', __FILE__)} -o #{@victim} 2>&1 > /dev/null`
+      cwd = File.expand_path('../files', __FILE__)
+      `cd #{cwd} && make victim LIB_VER=2.23 BIT=64 OUTFILE=#{@victim} 2>&1 > /dev/null`
       pid = fork
       # run without ASLR
       exec "setarch `uname -m` -R /bin/sh -c #{@victim}" if pid.nil?
