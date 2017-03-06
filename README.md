@@ -25,8 +25,8 @@ $ gem install heapinfo
 ```
 
 ## Features
-* Can use in your ruby exploit script or in irb/pry
-* **HeapInfo** works when the `victim` is being traced! i.e. you can use ltrace/strace/gdb and **HeapInfo** simultaneously!
+* Can use in your ruby exploit script or in irb/pry.
+* **HeapInfo** works when `victim` is being traced! i.e. you can use ltrace/strace/gdb and **HeapInfo** simultaneously!
 * `dump` - Dump arbitrarily address memory.
 * `layouts` - Show the current bin layouts, very useful for heap exploitation.
 * `offset` - Show the offset between given address and segment. Very useful for calculating relative offset.
@@ -72,35 +72,35 @@ NOTICE: While the process is not found, most methods will return `nil`. One way 
 h = heapinfo('remote')
 # Process not found
 h.pid # nil
-h.debug {
-  fail unless leak_libc_base == h.libc.base
-  # wrapper with `debug` so that no error will be raised when pwning remote service
-}
+
+# wrapper with `debug` so that no error will be raised when pwning remote service
+h.debug { fail unless leak_libc_base == h.libc.base }
 ```
 
 #### Dump
 Query content of specific address.
 
-NOTICE: you MUST have permission of attaching a program, otherwise dump will fail.
+NOTICE: You MUST have permission of attaching a program, otherwise dump will fail.
 
 i.e. `/proc/sys/kernel/yama/ptrace_scope` set to 0 or run as root.
 
 ```ruby
-h.debug {
+h.debug do
   p h.dump(:libc, 8)
   # => "\x7FELF\x02\x01\x01\x00"
   p h.dump(:heap, 16)
   # => "\x00\x00\x00\x00\x00\x00\x00\x00\x31\x00\x00\x00\x00\x00\x00\x00"
   p h.dump('heap+0x30', 16) # support offset!
   # => "\x00\x00\x00\x00\x00\x00\x00\x00\x81\x00\x00\x00\x00\x00\x00\x00"
-  p h.dump('heap+0x30 * 3 + 0x8', 16) # and even complex formula.
+  p h.dump('heap+0x30 * 3 + 0x8', 16) # and even complex formula!
   # => "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-  p h.dump(:elf, 8)
+  p h.dump(:program, 8)
   # => "\x7FELF\x02\x01\x01\x00"
-  p h.dump(0x400000, 8) # or simply give addr
+  p h.dump(0x400000, 8) # or simply give address
   # => "\x7FELF\x02\x01\x01\x00"
-}
-# invalid examples:
+end
+
+# invalid example:
 # h.dump('meow') # no such segment
 ```
 
@@ -144,8 +144,8 @@ h.find(/E.F/, 0x400000, 4)
 # => 4194305 # 0x400001
 h.find(/E.F/, 0x400000, 3)
 # => nil
-sh_offset = h.find('/bin/sh', :libc) - h.libc.base
-# => 1559771 # 0x17ccdb
+h.offset(h.find('/bin/sh', :libc))
+# 0x18c177 after libc
 ```
 
 ## Tests
