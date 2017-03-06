@@ -3,7 +3,7 @@ require 'heapinfo'
 describe HeapInfo::Libc do
   describe 'free' do
     before(:all) do
-      HeapInfo::Cache.send :clear_all # force cache miss, to make sure coverage
+      HeapInfo::Cache.clear_all # force cache miss, to make sure coverage
       victim = @compile_and_run.call(bit: 64, lib_ver: '2.23')
       @h = HeapInfo::Process.new(victim, ld: '/ld')
       @fake_mem = 0x13371000

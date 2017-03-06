@@ -26,7 +26,7 @@ describe HeapInfo::Process do
 
   describe 'victim' do
     before(:all) do
-      HeapInfo::Cache.send :clear_all # force cache miss, to make sure coverage
+      HeapInfo::Cache.clear_all # force cache miss, to make sure coverage
       @victim = @compile_and_run.call(bit: 64, lib_ver: '2.23')
       @h = heapinfo(@victim, ld: '/ld')
       HeapInfo::Helper.toggle_color(on: false)
@@ -104,7 +104,7 @@ describe HeapInfo::Process do
   # Test on all glibc versions since these features are so important.
   describe 'heap layouts' do
     before(:all) do
-      HeapInfo::Cache.send :clear_all # force cache miss, to make sure coverage
+      HeapInfo::Cache.clear_all # force cache miss, to make sure coverage
       @hs = %w(2.19 2.23 2.24).map do |ver|
         HeapInfo::Process.new(@compile_and_run.call(bit: 64, lib_ver: ver), ld: '/ld')
       end
