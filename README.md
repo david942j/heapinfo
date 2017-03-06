@@ -29,6 +29,7 @@ $ gem install heapinfo
 * **HeapInfo** works when the `victim` is being traced! i.e. you can use ltrace/strace/gdb and **HeapInfo** simultaneously!
 * `dump` - Dump arbitrarily address memory.
 * `layouts` - Show the current bin layouts, very useful for heap exploitation.
+* `offset` - Show the offset between given address and segment. Very useful for calculating relative offset.
 * `x` - Provide gdb-like commands.
 * `find` - Provide gdb-like commands.
 * More features and details can be found in [RDoc](http://www.rubydoc.info/github/david942j/heapinfo/master/)
@@ -105,14 +106,25 @@ h.debug {
 
 #### layouts
 ```ruby
-h.layouts :fastbin
+h.layouts :fast
 ```
 ![fastbin layouts](https://github.com/david942j/heapinfo/blob/master/examples/fastbin_layouts.png?raw=true)
 
 ```ruby
-h.layouts :unsorted_bin, :smallbin
+h.layouts :unsorted, :small
 ```
 ![smallbin layouts](https://github.com/david942j/heapinfo/blob/master/examples/unsorted_smallbin_layouts.png?raw=true)
+
+#### offset
+```ruby
+h.offset(0x7fda86fe8670)
+# 0xf6670 after libc
+h.offset(0x1839cd0, :heap) # specific segment name
+# 0x20cd0 after heap
+h.offset(0x1839cd0)
+# 0x20cd0 after heap
+```
+![offset](https://github.com/david942j/heapinfo/blob/master/examples/offset.png?raw=true)
 
 #### x - gdb-like command
 ```ruby

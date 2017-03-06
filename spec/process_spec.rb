@@ -22,6 +22,16 @@ describe HeapInfo::Process do
     it 'dump_chunks' do
       expect(@h.dump_chunks(:heap, 0x30).class).to be HeapInfo::Chunks
     end
+
+    it 'offset' do
+      libc_base = @h.libc.base
+      heap_base = @h.heap.base
+      expect { @h.offset(libc_base + 0x12345, :libc) }.to output("0x12345 after libc\n").to_stdout
+      expect { @h.offset(libc_base + 0x12345) }.to output("0x12345 after libc\n").to_stdout
+      expect { @h.offset(libc_base - 0xdeadbeef, :libc) }.to output("-0xdeadbeef after libc\n").to_stdout
+      expect { @h.offset(heap_base) }.to output("0x0 after heap\n").to_stdout
+      expect { @h.offset(0x123) }.to output("Invalid address 0x123\n").to_stdout
+    end
   end
 
   describe 'victim' do
@@ -29,7 +39,6 @@ describe HeapInfo::Process do
       HeapInfo::Cache.clear_all # force cache miss, to make sure coverage
       @victim = @compile_and_run.call(bit: 64, lib_ver: '2.23')
       @h = heapinfo(@victim, ld: '/ld')
-      HeapInfo::Helper.toggle_color(on: false)
     end
 
     it 'check process' do
@@ -108,7 +117,6 @@ describe HeapInfo::Process do
       @hs = %w(2.19 2.23 2.24).map do |ver|
         HeapInfo::Process.new(@compile_and_run.call(bit: 64, lib_ver: ver), ld: '/ld')
       end
-      HeapInfo::Helper.toggle_color(on: false)
     end
 
     it 'main_arena' do

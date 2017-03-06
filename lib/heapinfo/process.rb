@@ -89,6 +89,35 @@ module HeapInfo
       dumper.dump_chunks(*args)
     end
 
+    # Show the offset in pretty way between the segment.
+    # Very useful in pwn when leak some address,
+    # see examples for more details.
+    # @param [Integer] addr The leaked address.
+    # @param [Symbol] sym
+    #   The segement symbol to be calculated offset.
+    #   If this parameter not given, will loop segments
+    #   and find the most close one. See examples for more details.
+    # @return [void] Offset will show to stdout.
+    # @example
+    #   h.offset(0x7f11f6ae1670, :libc)
+    #   #=> 0xf6670 after libc
+    #   h.offset(0x5559edc057a0, :heap)
+    #   #=> 0x9637a0 after heap
+    #   h.offset(0x7f11f6ae1670)
+    #   #=> 0xf6670 after :libc
+    #   h.offset(0x5559edc057a0)
+    #   #=> 0x9637a0 after :heap
+    def offset(addr, sym = nil)
+      return unless load?
+      segment = @info.send(sym) if HeapInfo::ProcessInfo::EXPORT.include?(sym)
+      segment = nil unless segment.is_a?(HeapInfo::Segment)
+      if segment.nil?
+        sym, segment = @info.segments.select { |_, seg| seg.base <= addr }.min_by { |_, seg| addr - seg.base }
+      end
+      return puts "Invalid address #{Helper.hex(addr)}" if segment.nil?
+      puts Helper.color(Helper.hex(addr - segment.base)) + ' after ' + Helper.color(sym, sev: :sym)
+    end
+
     # Gdb-like command
     #
     # Show dump results like gdb's command +x+.

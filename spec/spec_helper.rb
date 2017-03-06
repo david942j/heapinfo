@@ -27,6 +27,7 @@ RSpec.configure do |config|
   end
 
   config.before(:all) do
+    HeapInfo::Helper.toggle_color(on: false)
     # return the absolute path of exectuable file.
     @compile_and_run = lambda do |bit: 64, lib_ver: '2.23', flags: ''|
       victim = HeapInfo::Helper.tempfile('victim')

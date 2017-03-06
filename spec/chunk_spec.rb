@@ -5,7 +5,6 @@ describe HeapInfo::Chunk do
     before(:all) do
       @fast = [0, 0x47, 0x1337].pack('L*').to_chunk(bits: 32)
       @small = [0, 0x48, 0xabcdef].pack('L*').to_chunk(bits: 32)
-      HeapInfo::Helper.toggle_color(on: false)
     end
     it 'basic' do
       expect(@fast.size_t).to be 4
@@ -32,7 +31,6 @@ data = "\\xEF\\xCD\\xAB\\x00\"...
     before(:all) do
       @fast = [0, 0x87, 0x1337].pack('Q*').to_chunk # default 64bits
       @small = [0, 0x90, 0xdead].pack('Q*').to_chunk
-      HeapInfo::Helper.toggle_color(on: false)
     end
 
     it 'basic' do

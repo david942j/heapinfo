@@ -108,7 +108,8 @@ module HeapInfo
       # @example
       #   HeapInfo::Helper.hex(1000) # => '0x3e8'
       def hex(num)
-        '0x' + num.to_s(16)
+        return format('0x%x', num) if num >= 0
+        format('-0x%x', -num)
       end
 
       # Retrieve pure class name(without module) of an object

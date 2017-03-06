@@ -6,7 +6,7 @@ module HeapInfo
   class ProcessInfo
     # Methods to be transparent to +process+.
     # e.g. +process.libc+ alias to +process.info.libc+.
-    EXPORT = %i(libc ld heap elf program stack bits).freeze
+    EXPORT = %i(libc ld heap program elf stack bits).freeze
 
     # @return [Integer] 32 or 64.
     attr_reader :bits
@@ -20,14 +20,14 @@ module HeapInfo
     attr_reader :ld
     alias elf program
 
-    # Instantiate a {ProcessInfo} object
+    # Instantiate a {ProcessInfo} object.
     #
     # @param [HeapInfo::Process] process Load information from maps/memory for +process+.
     def initialize(process)
       @pid = process.pid
       options = process.instance_variable_get(:@options)
       maps!
-      @bits = bits_of Helper.exe_of @pid
+      @bits = bits_of(Helper.exe_of(@pid))
       @elf = @program = Segment.find(maps, File.readlink("/proc/#{@pid}/exe"))
       @stack = Segment.find(maps, '[stack]')
       # well.. stack is a strange case because it will grow in runtime..
@@ -39,9 +39,18 @@ module HeapInfo
     # Heap will not be mmapped if the process not use heap yet, so create a lazy loading method.
     # Will re-read maps when heap segment not found yet.
     #
-    # @return [HeapInfo::Segment] The {Segment} of heap
+    # @return [HeapInfo::Segment] The {Segment} of heap.
     def heap # special handle because heap might not be initialized in the beginning
       @heap ||= Segment.find(maps!, '[heap]')
+    end
+
+    # Return segemnts load currently.
+    # @return [Hash{Symbol => Segment}] The segments in hash format.
+    def segments
+      EXPORT.map do |sym|
+        seg = send(sym)
+        [sym, seg] if seg.is_a?(Segment)
+      end.compact.to_h
     end
 
     private
@@ -50,7 +59,7 @@ module HeapInfo
 
     # force reload maps
     def maps!
-      @maps = Helper.parse_maps Helper.maps_of @pid
+      @maps = Helper.parse_maps(Helper.maps_of(@pid))
     end
 
     def bits_of(elf)
