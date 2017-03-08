@@ -74,8 +74,8 @@ describe HeapInfo::Helper do
 
     it 'color' do
       HeapInfo::Helper.toggle_color(on: true)
-      expect(HeapInfo::Helper.color('0x1234')).to eq "\e[38;5;12m0x1234\e[0m"
-      expect(HeapInfo::Helper.color('OAO')).to eq "\e[38;5;1mOAO\e[0m"
+      expect(HeapInfo::Helper.color('0x1234')).to eq "\e[1m\e[34m0x1234\e[0m"
+      expect(HeapInfo::Helper.color('OAO')).to eq "\e[31mOAO\e[0m"
     end
   end
 end

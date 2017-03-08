@@ -62,12 +62,12 @@ module HeapInfo
       # Color codes for pretty print
       COLOR_CODE = {
         esc_m: "\e[0m",
-        normal_s: "\e[38;5;1m", # red
-        integer: "\e[38;5;12m", # light blue
+        normal_s: "\e[31m", # red
+        integer: "\e[1m\e[34m", # light blue
         fatal: "\e[38;5;197m", # dark red
         bin: "\e[38;5;120m", # light green
         klass: "\e[38;5;155m", # pry like
-        sym: "\e[38;5;229m", # pry like
+        sym: "\e[33m", # pry like
       }.freeze
       # Wrapper color codes for pretty inspect.
       # @param [String] s Contents for wrapper
