@@ -238,7 +238,9 @@ module HeapInfo
       ProcessInfo::EXPORT.each do |m|
         self.class.send(:define_method, m) { @info.send(m) }
       end
-      @dumper = Dumper.new(@info, mem_filename)
+      @dumper = Dumper.new(mem_filename) do |sym|
+        @info.send(sym) if @info.respond_to?(sym)
+      end
     end
 
     def mem_filename

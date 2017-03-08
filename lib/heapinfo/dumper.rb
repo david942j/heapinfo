@@ -6,11 +6,13 @@ module HeapInfo
 
     # Instantiate a {HeapInfo::Dumper} object
     #
-    # @param [HeapInfo::ProcessInfo] info process info object.
     # @param [String] mem_filename The filename that can be access for dump. Should be +/proc/[pid]/mem+.
-    def initialize(info, mem_filename)
-      @info = info
+    # @param [Proc] block
+    #   Use for get segment info.
+    #   See {Dumper#base_len_of} for more information.
+    def initialize(mem_filename, &block)
       @filename = mem_filename
+      @info = block || ->(*) { HeapInfo::Nil.new }
       need_permission unless dumpable?
     end
 
@@ -41,7 +43,7 @@ module HeapInfo
     # @param [Mixed] args Same as arguments of {#dump}.
     def dump_chunks(*args)
       base = base_of(*args)
-      dump(*args).to_chunks(bits: @info.bits, base: base)
+      dump(*args).to_chunks(bits: @info[:bits], base: base)
     end
 
     # Show dump results like in gdb's command +x+.
@@ -119,6 +121,8 @@ module HeapInfo
 
     # Get the base address and length.
     #
+    # +@info+ will be used for getting the segment base,
+    # so we can support use symbol as base address.
     # @param [Integer, Symbol, String] arg The base address, see examples.
     # @param [Integer] len An integer.
     # @example
@@ -128,14 +132,14 @@ module HeapInfo
     #   base_len_of('heap+0x30', 10) #=> [0x603030, 10]
     #   base_len_of('elf+0x3*2-1') #=> [0x400005, DUMP_BYTES]
     def base_len_of(arg, len = DUMP_BYTES)
-      values = HeapInfo::ProcessInfo::EXPORT.map do |seg|
-        segment = @info.respond_to?(seg) && @info.send(seg)
-        [seg, segment.base] if segment.is_a?(Segment)
-      end.compact.to_h
+      segments = @info.call(:segments) || {}
+      segments = segments.each_with_object({}) do |(k, seg), memo|
+        memo[k] = seg.base
+      end
       base = case arg
              when Integer then arg
-             when Symbol then values[arg]
-             when String then Helper.evaluate(arg, store: values)
+             when Symbol then segments[arg]
+             when String then Helper.evaluate(arg, store: segments)
              end
       raise ArgumentError, "Invalid base: #{arg.inspect}" unless base.is_a?(Integer) # invalid usage
       [base, len]
@@ -173,7 +177,7 @@ module HeapInfo
     end
 
     def size_t
-      @info.bits / 8
+      @info[:bits] / 8
     end
   end
 end

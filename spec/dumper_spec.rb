@@ -2,17 +2,14 @@
 require 'heapinfo'
 describe HeapInfo::Dumper do
   before(:all) do
-    class S
-      def initialize(base); @base = base
-      end
-
-      def elf; HeapInfo::Segment.new(@base, 'elf')
-      end
-
-      def bits; 64
-      end
+    @get_block = lambda do |base|
+      methods = {
+        elf: HeapInfo::Segment.new(base, 'elf'),
+        bits: 64
+      }
+      methods[:segments] = { elf: methods[:elf] }
+      ->(sym) { methods[sym] }
     end
-
     @self_maps = IO.binread('/proc/self/maps').lines.map do |seg|
       s = seg.split(/\s/)
       s[0] = s[0].split('-').map { |addr| addr.to_i(16) }
@@ -31,22 +28,22 @@ describe HeapInfo::Dumper do
       @elf_base = @get_elf_base.call
     end
     it 'simple' do
-      dumper = HeapInfo::Dumper.new(nil, @mem_filename)
+      dumper = HeapInfo::Dumper.new(@mem_filename)
       expect(dumper.dump(@elf_base, 4)).to eq "\x7fELF"
     end
     it 'segment' do
-      dumper = HeapInfo::Dumper.new(S.new(@elf_base), @mem_filename)
+      dumper = HeapInfo::Dumper.new(@mem_filename, &@get_block.call(@elf_base))
       expect(dumper.dump(:elf, 4)).to eq "\x7fELF"
     end
     it 'invalid' do
-      dumper = HeapInfo::Dumper.new(HeapInfo::Nil.new, @mem_filename)
+      dumper = HeapInfo::Dumper.new(@mem_filename)
       expect { dumper.dump(:zzz, 1) }.to raise_error ArgumentError
       expect(dumper.dump(0x12345, 1)).to be nil
     end
   end
 
   it 'dumpable?' do
-    dumper = HeapInfo::Dumper.new(HeapInfo::Nil.new, '/proc/self/mem')
+    dumper = HeapInfo::Dumper.new('/proc/self/mem')
     expect(dumper.send(:dumpable?)).to be true
     # a little hack
     dumper.instance_variable_set(:@filename, '/proc/1/mem')
@@ -59,7 +56,7 @@ describe HeapInfo::Dumper do
   describe 'find' do
     before(:all) do
       @elf_base = @get_elf_base.call
-      @dumper = HeapInfo::Dumper.new(S.new(@elf_base), '/proc/self/mem')
+      @dumper = HeapInfo::Dumper.new('/proc/self/mem', &@get_block.call(@elf_base))
       @end_of_maps = lambda do
         @self_maps.find.with_index do |seg, i|
           seg[2].include?('r') && seg[1] != @self_maps[i][0] # incontinuously segment
@@ -90,7 +87,7 @@ describe HeapInfo::Dumper do
   describe 'base_len_of' do
     before(:all) do
       @elf_base = @get_elf_base.call
-      @dumper = HeapInfo::Dumper.new(S.new(@elf_base), '/proc/self/mem')
+      @dumper = HeapInfo::Dumper.new('/proc/self/mem', &@get_block.call(@elf_base))
     end
 
     it 'normal' do
