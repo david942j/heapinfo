@@ -39,6 +39,12 @@ RSpec.configure do |config|
       loop until `pidof #{victim}` != ''
       Victims.push(victim)
     end
+    @all_libs_heapinfo = lambda do |bit|
+      # TODO: use glob.
+      %w(2.19 2.23 2.24).map do |ver|
+        HeapInfo::Process.new(@compile_and_run.call(bit: bit, lib_ver: ver), ld: '/ld')
+      end
+    end
   end
 
   config.after(:all) do
