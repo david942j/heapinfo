@@ -26,9 +26,9 @@ module HeapInfo
     def initialize(process)
       @pid = process.pid
       options = process.instance_variable_get(:@options)
-      maps!
+      maps = load_maps
       @bits = bits_of(Helper.exe_of(@pid))
-      @elf = @program = Segment.find(maps, File.readlink("/proc/#{@pid}/exe"))
+      @program = Segment.find(maps, File.readlink("/proc/#{@pid}/exe"))
       @stack = Segment.find(maps, '[stack]')
       # well.. stack is a strange case because it will grow in runtime..
       # should i detect stack base growing..?
@@ -41,7 +41,7 @@ module HeapInfo
     #
     # @return [HeapInfo::Segment] The {Segment} of heap.
     def heap # special handle because heap might not be initialized in the beginning
-      @heap ||= Segment.find(maps!, '[heap]')
+      @heap ||= Segment.find(load_maps, '[heap]')
     end
 
     # Return segemnts load currently.
@@ -55,11 +55,8 @@ module HeapInfo
 
     private
 
-    attr_reader :maps
-
-    # force reload maps
-    def maps!
-      @maps = Helper.parse_maps(Helper.maps_of(@pid))
+    def load_maps
+      Helper.parse_maps(Helper.maps_of(@pid))
     end
 
     def bits_of(elf)
