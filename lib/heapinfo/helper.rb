@@ -1,9 +1,10 @@
 require 'dentaku'
+require 'shellwords'
 
 module HeapInfo
-  # Some helper functions
+  # Some helper functions.
   module Helper
-    # Create read +/proc/[pid]/*+ methods
+    # Create read +/proc/[pid]/*+ methods.
     %w(exe maps).each do |method|
       define_singleton_method("#{method}_of".to_sym) do |pid|
         begin
@@ -17,20 +18,22 @@ module HeapInfo
     # Define class methods here.
     module ClassMethods
       # Get the process id from program name.
-      # @param [String] prog The request process name
-      # @return [Integer] process id
+      #
+      # When multiple processes exist, the one with lastest start time would be returned.
+      # @param [String] prog The request process name.
+      # @return [Integer] Process id.
       def pidof(prog)
-        # plz, don't cmd injection your self :p
-        pid = `pidof #{prog}`.strip.to_i
-        return nil if pid.zero? # process not exists yet
-        throw "pidof #{prog} fail" unless pid.between?(2, 65_535)
-        pid
-        # TODO: handle when multi processes exists
+        info = %x(ps -o pid=,lstart= --pid `pidof #{Shellwords.escape(prog)}` 2>/dev/null).lines.map do |l|
+          pid, time = l.split(' ', 2)
+          [Time.parse(time), pid.to_i]
+        end
+        return nil if info.empty? # process not exists yet
+        info.max_by(&:first).last
       end
 
       # Parse the contents of <tt>/proc/[pid]/maps</tt>.
       #
-      # @param [String] content The file content of <tt>/proc/[pid]/maps</tt>
+      # @param [String] content The file content of <tt>/proc/[pid]/maps</tt>.
       # @return [Array] In form of <tt>[[start, end, permission, name], ...]</tt>. See examples.
       # @example
       #   HeapInfo::Helper.parse_maps(<<EOS
@@ -59,7 +62,7 @@ module HeapInfo
         @disable_color = !on
       end
 
-      # Color codes for pretty print
+      # Color codes for pretty print.
       COLOR_CODE = {
         esc_m: "\e[0m",
         normal_s: "\e[31m", # red
@@ -70,9 +73,10 @@ module HeapInfo
         sym: "\e[33m", # pry like
       }.freeze
       # Wrapper color codes for pretty inspect.
-      # @param [String] s Contents for wrapper
-      # @param [Symbol?] sev Specific which kind of color want to use, valid symbols are defined in +#COLOR_CODE+.
-      # If this argument is not present, will detect according to the content of +s+.
+      # @param [String] s Contents for wrapper.
+      # @param [Symbol?] sev
+      #   Specific which kind of color want to use, valid symbols are defined in +#COLOR_CODE+.
+      #   If this argument is not present, will detect according to the content of +s+.
       # @return [String] wrapper with color codes.
       def color(s, sev: nil)
         s = s.to_s
@@ -101,7 +105,7 @@ module HeapInfo
         data.unpack(size_t == 4 ? 'L*' : 'Q*')[0]
       end
 
-      # Convert number in hex format
+      # Convert number in hex format.
       #
       # @param [Integer] num Non-negative integer.
       # @return [String] number in hex format.
@@ -112,9 +116,9 @@ module HeapInfo
         format('-0x%x', -num)
       end
 
-      # Retrieve pure class name(without module) of an object
-      # @param [Object] obj Any instance
-      # @return [String] Class name of <tt>obj</tt>
+      # Retrieve pure class name(without module) of an object.
+      # @param [Object] obj Any instance.
+      # @return [String] Class name of +obj+.
       # @example
       #   # suppose obj is an instance of HeapInfo::Chunk
       #   Helper.class_name(obj)
