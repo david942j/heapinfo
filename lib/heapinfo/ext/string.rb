@@ -1,11 +1,13 @@
 module HeapInfo
+  # Define extensions of naive objects.
   module Ext
+    # Extension of +String+ class.
     module String
       # Methods to be mixed into String
       module InstanceMethods
-        # Convert string to a <tt>HeapInfo::Chunk</tt>.
+        # Convert string to a {HeapInfo::Chunk}.
         # @option [Integer] bits 32 or 64 bit of this chunk.
-        # @option [Integer] base Base address will show when print the <tt>Chunk</tt> object.
+        # @option [Integer] base Base address will show when print the {Chunk} object.
         # @return [HeapInfo::Chunk]
         def to_chunk(bits: 64, base: 0)
           size_t = bits / 8
@@ -13,9 +15,9 @@ module HeapInfo
           Chunk.new(size_t, base, dumper)
         end
 
-        # Convert string to array of <tt>HeapInfo::Chunk</tt>.
+        # Convert string to array of {HeapInfo::Chunk}.
         # @option [Integer] bits 32 or 64 bit of this chunk.
-        # @option [Integer] base Base address will show when print the <tt>Chunk</tt> object.
+        # @option [Integer] base Base address will show when print the {Chunk} object.
         # @return [HeapInfo::Chunks]
         def to_chunks(bits: 64, base: 0)
           size_t = bits / 8

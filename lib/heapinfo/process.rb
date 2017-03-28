@@ -8,12 +8,12 @@ module HeapInfo
       libc: /bc[^a-z]*\.so/,
       ld:   %r{/ld-.+\.so}
     }.freeze
-    # @return [Fixnum, NilClass] return the pid of process, +nil+ if no such process found
+    # @return [Integer, nil] return the pid of process, +nil+ if no such process found
     attr_reader :pid
 
     # Instantiate a {HeapInfo::Process} object.
-    # @param [String, Fixnum] prog Process name or pid, see {HeapInfo::heapinfo} for more information
-    # @param [Hash{Symbol => RegExp, String}] options libraries' filename, see {HeapInfo::heapinfo} for more information
+    # @param [String, Integer] prog Process name or pid, see {HeapInfo::heapinfo} for more information
+    # @param [Hash{Symbol => Regexp, String}] options libraries' filename, see {HeapInfo::heapinfo} for more information
     def initialize(prog, options = {})
       @prog = prog
       @options = DEFAULT_LIB.merge options
@@ -126,7 +126,7 @@ module HeapInfo
     # The dump results wrapper with color codes and nice typesetting will output to +stdout+.
     # @param [Integer] count The number of result need to dump, see examples for more information.
     # @param [String, Symbol, Integer] address The base address to be dumped.
-    #   Same format as {#dump(*args)}, see {#dump} for more information.
+    #   Same format as {#dump}, see {#dump} for more information.
     # @return [void]
     # @example
     #   h.x 8, :heap
@@ -154,7 +154,7 @@ module HeapInfo
     # @param [Integer] length
     #   The search length limit, default is unlimited,
     #   which will search until pattern found or reach unreadable memory.
-    # @return [Integer, NilClass] The first matched address, +nil+ is returned when no such pattern found.
+    # @return [Integer, nil] The first matched address, +nil+ is returned when no such pattern found.
     # @example
     #   h.find(0xdeadbeef, 'heap+0x10', 0x1000)
     #   # => 6299664 # 0x602010

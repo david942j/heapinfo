@@ -5,7 +5,7 @@ module HeapInfo
     attr_reader :base
     # Name of segment
     attr_reader :name
-    # Instantiate a <tt>HeapInfo::Segment</tt> object
+    # Instantiate a {HeapInfo::Segment} object
     # @param [Integer] base Base address
     # @param [String] name Name of segment
     def initialize(base, name)
@@ -23,10 +23,10 @@ module HeapInfo
     #
     # Search the specific <tt>pattern</tt> in <tt>maps</tt> and return a {HeapInfo::Segment} object.
     #
-    # @param [Array] maps <tt>maps</tt> is in the form of the return value of <tt>HeapInfo::Helper.parse_maps</tt>.
+    # @param [Array] maps <tt>maps</tt> is in form of the return value of {Helper::ClassMethods#parse_maps}.
     # @param [Regexp, String] pattern
     #   The segment name want to match in maps. If +String+ is given, the pattern is matched as a substring.
-    # @return [HeapInfo::Segment, NilClass]
+    # @return [HeapInfo::Segment, nil]
     #   The request {HeapInfo::Segment} object. If the pattern is not matched, <tt>nil</tt> will be returned.
     def self.find(maps, pattern)
       return Nil.new if pattern.nil?

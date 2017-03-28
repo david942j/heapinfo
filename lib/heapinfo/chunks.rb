@@ -1,8 +1,8 @@
 module HeapInfo
-  # Self-defined array for collecting chunk(s)
+  # Self-defined array for collecting chunk(s).
   class Chunks
     include Enumerable
-    # Instantiate a <tt>HeapInfo::Chunks</tt> object.
+    # Instantiate a {HeapInfo::Chunks} object.
     def initialize
       @chunks = []
     end

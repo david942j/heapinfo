@@ -16,9 +16,9 @@ module HeapInfo
 
     # Define class methods here.
     module ClassMethods
-      # Get the process id of a process
+      # Get the process id from program name.
       # @param [String] prog The request process name
-      # @return [Fixnum] process id
+      # @return [Integer] process id
       def pidof(prog)
         # plz, don't cmd injection your self :p
         pid = `pidof #{prog}`.strip.to_i

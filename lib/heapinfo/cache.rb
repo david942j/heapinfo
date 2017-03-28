@@ -33,7 +33,7 @@ module HeapInfo
       # Read cache from file.
       #
       # @param [String] key In file path format, only accept +[\w\/]+ to prevent horrible things.
-      # @return [Object, NilClass] Value that recorded, return +nil+ when cache miss.
+      # @return [Object, nil] Value that recorded, return +nil+ when cache miss.
       def read(key)
         filepath = realpath(key)
         return unless File.file?(filepath)

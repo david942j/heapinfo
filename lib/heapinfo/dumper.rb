@@ -18,7 +18,7 @@ module HeapInfo
 
     # A helper for {HeapInfo::Process} to dump memory.
     # @param [Mixed] args The use input commands, see examples of {HeapInfo::Process#dump}.
-    # @return [String, NilClass] Dump results. If error happend, +nil+ is returned.
+    # @return [String, nil] Dump results. If error happend, +nil+ is returned.
     # @example
     #   p dump(:elf, 4)
     #   # => "\x7fELF"
@@ -48,7 +48,7 @@ module HeapInfo
 
     # Show dump results like in gdb's command +x+.
     #
-    # Details are in {HeapInfo:Process#x}.
+    # Details are in {HeapInfo::Process#x}.
     # @param [Integer] count The number of result need to dump.
     # @param [Symbol, String, Integer] address The base address to be dumped.
     # @return [void]
@@ -75,7 +75,7 @@ module HeapInfo
     #   Start address for searching, can be segment(+Symbol+)
     #   or segments with offset. See examples for more information.
     # @param [Integer] length The length limit for searching.
-    # @return [Integer, NilClass] The first matched address, +nil+ is returned when no such pattern found.
+    # @return [Integer, nil] The first matched address, +nil+ is returned when no such pattern found.
     # @example
     #   find(/E.F/, :elf)
     #   # => 4194305

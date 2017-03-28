@@ -114,7 +114,7 @@ module HeapInfo
       end.join
     end
 
-    # @return [Array<Integer, Symbol, NilClass>] single link list of +fd+ chain.
+    # @return [Array<Integer, Symbol, nil>] single link list of +fd+ chain.
     #   Last element will be:
     #   - +:loop+ if loop detectded
     #   - +:invalid+ invalid address detected
@@ -168,8 +168,8 @@ module HeapInfo
     end
 
     # @param [Integer] size
-    #   At most expand size. For +size = 2+, the expand list would be +bk, bk, bin, fd, fd+.
-    # @return [String] unsorted bin layouts wrapper with color codes.
+    #   At most expand size. For +size = 2+, the expand list would be <tt>bk, bk, bin, fd, fd</tt>.
+    # @return [String] Unsorted bin layouts wrapper with color codes.
     def inspect(size: 2)
       list = link_list(size)
       return '' if list.size <= 1 && Helper.class_name(self) != 'UnsortedBin' # bad..
@@ -177,7 +177,7 @@ module HeapInfo
     end
 
     # Wrapper the double-linked list with color codes.
-    # @param [Array<Integer>] list The list from +#link_list+.
+    # @param [Array<Integer>] list The list from {#link_list}.
     # @return [String] Wrapper with color codes.
     def pretty_list(list)
       center = nil
@@ -199,7 +199,7 @@ module HeapInfo
     #
     # The list will like +[..., bk of bk, bk of bin, bin, fd of bin, fd of fd, ...]+.
     # @param [Integer] expand_size
-    #   At most expand size. For +size = 2+, the expand list would be +bk, bk, bin, fd, fd+.
+    #   At most expand size. For +size = 2+, the expand list would be <tt>bk, bk, bin, fd, fd</tt>.
     # @return [Array<Integer>] The linked list.
     def link_list(expand_size)
       list = [@base]
