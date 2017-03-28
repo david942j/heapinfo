@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    heapinfo (1.0.0)
+    heapinfo (1.0.1)
       dentaku (~> 2)
 
 GEM
@@ -58,4 +58,4 @@ DEPENDENCIES
   simplecov (~> 0.13.0)
 
 BUNDLED WITH
-   1.14.4
+   1.14.6
