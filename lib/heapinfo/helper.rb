@@ -5,7 +5,7 @@ module HeapInfo
   # Some helper functions.
   module Helper
     # Create read +/proc/[pid]/*+ methods.
-    %w(exe maps).each do |method|
+    %w(exe maps auxv).each do |method|
       define_singleton_method("#{method}_of".to_sym) do |pid|
         begin
           IO.binread("/proc/#{pid}/#{method}")

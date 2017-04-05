@@ -18,6 +18,8 @@ module HeapInfo
     attr_reader :libc
     # @return [HeapInfo::Segment]
     attr_reader :ld
+    # @return [Hash{Symbol => Integer}] The parsed auxv hash.
+    attr_reader :auxv
     alias elf program
 
     # Instantiate a {ProcessInfo} object.
@@ -32,8 +34,11 @@ module HeapInfo
       @stack = Segment.find(maps, '[stack]')
       # well.. stack is a strange case because it will grow in runtime..
       # should i detect stack base growing..?
+
+      # TODO: fetch interpreter base from auxv
       @ld = Segment.find(maps, match_maps(maps, options[:ld]))
       @libc = Libc.find(maps, match_maps(maps, options[:libc]), @bits, @ld.name, ->(*args) { process.dump(*args) })
+      @auxv = parse_auxv(Helper.auxv_of(@pid))
     end
 
     # Heap will not be mmapped if the process not use heap yet, so create a lazy loading method.
@@ -57,6 +62,22 @@ module HeapInfo
 
     def load_maps
       Helper.parse_maps(Helper.maps_of(@pid))
+    end
+
+    def parse_auxv(str)
+      auxv = {}
+      sio = StringIO.new(str)
+      fetch = ->() { Helper.unpack(@bits / 8, sio.read(@bits / 8)) }
+      loop do
+        type = fetch.call
+        val = fetch.call
+        case type
+        when 7 then auxv[:ld_base] = val # AT_BASE
+        when 25 then auxv[:random] = val # AT_RANDOM
+        end
+        break if type.zero?
+      end
+      auxv
     end
 
     def bits_of(elf)

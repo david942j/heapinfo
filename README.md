@@ -30,6 +30,7 @@ $ gem install heapinfo
 * `dump` - Dump arbitrarily address memory.
 * `layouts` - Show the current bin layouts, very useful for heap exploitation.
 * `offset` - Show the offset between given address and segment. Very useful for calculating relative offset.
+* `canary` - Fetch the value of stack guard!
 * `x` - Provide gdb-like commands.
 * `find` - Provide gdb-like commands.
 * More features and details can be found in [RDoc](http://www.rubydoc.info/github/david942j/heapinfo/master/)
@@ -125,6 +126,12 @@ h.offset(0x1839cd0)
 # 0x20cd0 after heap
 ```
 ![offset](https://github.com/david942j/heapinfo/blob/master/examples/offset.png?raw=true)
+
+#### canary
+```ruby
+h.canary.to_s(16)
+#=> 9d695e921adc9700
+```
 
 #### x - gdb-like command
 ```ruby

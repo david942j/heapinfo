@@ -201,6 +201,26 @@ module HeapInfo
         ld.to_s
     end
 
+    # Get the value of stack guard.
+    #
+    # @return [Integer]
+    # @example
+    #   h.canary
+    #   #=> 11342701118118205184 # 0x9d695e921adc9700
+    # @todo Show in #to_s but need check if __stack_chk_fail exists.
+    def canary
+      return Nil.new unless load?
+      addr = @info.auxv[:random]
+      Helper.unpack(bits / 8, @dumper.dump(addr, bits / 8)) & 0xffffffffffffff00
+    end
+
+    # Make pry not so verbose.
+    #
+    # @return [nil]
+    def inspect
+      nil
+    end
+
     private
 
     attr_accessor :dumper

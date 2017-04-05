@@ -33,6 +33,11 @@ describe HeapInfo::Process do
       expect { @h.offset(heap_base) }.to output("0x0 after heap\n").to_stdout
       expect { @h.offset(0x123) }.to output("Invalid address 0x123\n").to_stdout
     end
+
+    it 'canary' do
+      # well.. how to check exactly value?
+      expect(@h.canary & 0xff).to be_zero
+    end
   end
 
   describe 'victim' do
