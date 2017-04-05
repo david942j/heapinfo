@@ -20,7 +20,6 @@ module HeapInfo
   #   The program name of victim. If a number is given, seem as pid (useful when multi-processes exist).
   # @param [Hash] options Give library's file name.
   # @option options [String, Regexp] :libc file name of glibc, default is +/bc[^a-z]*\.so/+.
-  # @option options [String, Regexp] :ld file name of dynamic linker/loader, default is +/\/ld-.+\.so/+.
   # @return [HeapInfo::Process] The object for further usage
   # @example
   #   h = heapinfo './victim'
@@ -37,7 +36,7 @@ module HeapInfo
   #   # => "/lib/x86_64-linux-gnu/ld-2.19.so"
   #
   # @example
-  #   h = heapinfo(27605, libc: 'libc.so.6', ld: 'ld-linux-x86-64.so.2')
+  #   h = heapinfo(27605, libc: 'libc.so.6')
   #   # pid 27605 is run by custom loader
   #   p h.libc.name
   #   # => "/home/heapinfo/libc.so.6"

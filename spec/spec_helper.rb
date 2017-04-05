@@ -42,7 +42,7 @@ RSpec.configure do |config|
     @all_libs_heapinfo = lambda do |bit|
       # TODO: use glob.
       %w(2.19 2.23 2.24).map do |ver|
-        HeapInfo::Process.new(@compile_and_run.call(bit: bit, lib_ver: ver), ld: '/ld')
+        HeapInfo::Process.new(@compile_and_run.call(bit: bit, lib_ver: ver))
       end
     end
   end

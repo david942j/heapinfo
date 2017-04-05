@@ -5,8 +5,7 @@ module HeapInfo
     # The default options of libraries,
     # use for matching glibc and ld segments in +/proc/[pid]/maps+.
     DEFAULT_LIB = {
-      libc: /bc[^a-z]*\.so/,
-      ld:   %r{/ld-.+\.so}
+      libc: /bc[^a-z]*\.so/
     }.freeze
     # @return [Integer, nil] return the pid of process, +nil+ if no such process found
     attr_reader :pid

@@ -31,14 +31,13 @@ module HeapInfo
       maps = load_maps
       @bits = bits_of(Helper.exe_of(@pid))
       @program = Segment.find(maps, File.readlink("/proc/#{@pid}/exe"))
-      @stack = Segment.find(maps, '[stack]')
       # well.. stack is a strange case because it will grow in runtime..
       # should i detect stack base growing..?
-
-      # TODO: fetch interpreter base from auxv
-      @ld = Segment.find(maps, match_maps(maps, options[:ld]))
-      @libc = Libc.find(maps, match_maps(maps, options[:libc]), @bits, @ld.name, ->(*args) { process.dump(*args) })
+      @stack = Segment.find(maps, '[stack]')
       @auxv = parse_auxv(Helper.auxv_of(@pid))
+      ld_seg = maps.find { |m| m[0] == @auxv[:ld_base] } # nil if static-linked elf
+      @ld = ld_seg.nil? ? Nil.new : Segment.new(@auxv[:ld_base], ld_seg.last)
+      @libc = Libc.find(maps, match_maps(maps, options[:libc]), @bits, @ld.name, ->(*args) { process.dump(*args) })
     end
 
     # Heap will not be mmapped if the process not use heap yet, so create a lazy loading method.

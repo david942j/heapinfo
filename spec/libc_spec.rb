@@ -5,7 +5,7 @@ describe HeapInfo::Libc do
     before(:all) do
       HeapInfo::Cache.clear_all # force cache miss, to make sure coverage
       victim = @compile_and_run.call(bit: 64, lib_ver: '2.23')
-      @h = HeapInfo::Process.new(victim, ld: '/ld')
+      @h = HeapInfo::Process.new(victim)
       @fake_mem = 0x13371000
       @helper = HeapInfo::Helper
       @set_memory = lambda do |str|
