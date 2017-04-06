@@ -92,19 +92,19 @@ module HeapInfo
     # @return [Symbol] Bin type is simply determined according to +#size+
     # @example
     #   [c.size, c.size_t]
-    #   # => [80, 8]
+    #   #=> [80, 8]
     #   c.bintype
-    #   # => :fast
+    #   #=> :fast
     # @example
     #   [c.size, c.size_t]
-    #   # => [80, 4]
+    #   #=> [80, 4]
     #   c.bintype
-    #   # => :small
+    #   #=> :small
     # @example
     #   c.size
-    #   # => 135168
+    #   #=> 135168
     #   c.bintype
-    #   # => :mmap
+    #   #=> :mmap
     def bintype
       sz = size
       return :unknown if sz < @size_t * 4

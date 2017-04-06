@@ -1,11 +1,11 @@
-# Implment glibc's free-related functions
-# [Reference](https://code.woboq.org/userspace/glibc/malloc/malloc.c.html)
 module HeapInfo
   # Implement free-related functions.
   module Glibc
-    # Implmentation of <tt>void __libc_free(void *mem)</tt>.
-    # [glibc-2.23](https://github.com/david942j/heapinfo/blob/master/examples/libcdb/libc-2.23/malloc.c#L2934) or
-    # [Online Source](https://code.woboq.org/userspace/glibc/malloc/malloc.c.html#__libc_free)
+    # Implmentation of +void __libc_free(void *mem)+.
+    #
+    # Reference:
+    # {https://github.com/david942j/heapinfo/blob/master/examples/libcdb/libc-2.23/malloc.c#L2934 glibc-2.23}
+    # and {https://code.woboq.org/userspace/glibc/malloc/malloc.c.html#__libc_free Online Source}
     # @param [Integer] mem Memory address to be free.
     def libc_free(mem)
       # TODO: free_hook
@@ -21,8 +21,6 @@ module HeapInfo
     private
 
     # Implmentation of <tt>void _int_free (mstate av, mchunkptr p, [int have_lock])</tt>.
-    # [glibc-2.23](https://github.com/david942j/heapinfo/blob/master/examples/libcdb/libc-2.23/malloc.c#L2934) or
-    # [Online Source](https://code.woboq.org/userspace/glibc/malloc/malloc.c.html#__libc_free)
     #
     # The original method in C is too long, split to multiple methods to match ruby convention.
     # @param [HeapInfo::Arena] av

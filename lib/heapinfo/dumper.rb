@@ -21,7 +21,7 @@ module HeapInfo
     # @return [String, nil] Dump results. If error happend, +nil+ is returned.
     # @example
     #   p dump(:elf, 4)
-    #   # => "\x7fELF"
+    #   #=> "\x7fELF"
     def dump(*args)
       return need_permission unless dumpable?
       base, len = base_len_of(*args)
@@ -78,11 +78,11 @@ module HeapInfo
     # @return [Integer, nil] The first matched address, +nil+ is returned when no such pattern found.
     # @example
     #   find(/E.F/, :elf)
-    #   # => 4194305
+    #   #=> 4194305
     #   find(0x4141414141414141, 'heap+0x10', 0x1000)
-    #   # => 6291472
+    #   #=> 6291472
     #   find('/bin/sh', :libc)
-    #   # => 140662379588827
+    #   #=> 140662379588827
     def find(pattern, from, length)
       from = base_of(from)
       length = 1 << 40 if length.is_a? Symbol

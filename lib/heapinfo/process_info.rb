@@ -1,12 +1,13 @@
 # encoding: ascii-8bit
 module HeapInfo
-  # for {Process} to record current info(s)
-  # {Process} has a +process_info+ object iff the process found (pid not +nil+).
+  # For {Process} to record basic process information.
+  #
+  # {Process} has a +process_info+ object iff the process exists (pid not +nil+).
   # Mainly records segments' base.
   class ProcessInfo
     # Methods to be transparent to +process+.
     # e.g. +process.libc+ alias to +process.info.libc+.
-    EXPORT = %i(libc ld heap program elf stack bits).freeze
+    EXPORT = %i(libc ld heap program elf stack bits auxv).freeze
 
     # @return [Integer] 32 or 64.
     attr_reader :bits
@@ -19,6 +20,9 @@ module HeapInfo
     # @return [HeapInfo::Segment]
     attr_reader :ld
     # @return [Hash{Symbol => Integer}] The parsed auxv hash.
+    # @example
+    #   auxv
+    #   #=> {:ld_base => 4152033280, :random => 4294374299}
     attr_reader :auxv
     alias elf program
 

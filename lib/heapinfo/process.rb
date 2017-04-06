@@ -7,17 +7,17 @@ module HeapInfo
     DEFAULT_LIB = {
       libc: /bc[^a-z]*\.so/
     }.freeze
-    # @return [Integer, nil] return the pid of process, +nil+ if no such process found
+    # @return [Integer, nil] The pid of process, +nil+ if no such process found.
     attr_reader :pid
 
     # Instantiate a {HeapInfo::Process} object.
-    # @param [String, Integer] prog Process name or pid, see {HeapInfo::heapinfo} for more information
-    # @param [Hash{Symbol => Regexp, String}] options libraries' filename, see {HeapInfo::heapinfo} for more information
+    # @param [String, Integer] prog Process name or pid, see {HeapInfo::heapinfo} for more information.
+    # @param [Hash{Symbol => Regexp, String}] options
+    #   Libraries' filename, see {HeapInfo::heapinfo} for more information.
     def initialize(prog, options = {})
       @prog = prog
       @options = DEFAULT_LIB.merge options
       load!
-      return unless load?
     end
 
     # Reload a new process with same program name
@@ -156,13 +156,13 @@ module HeapInfo
     # @return [Integer, nil] The first matched address, +nil+ is returned when no such pattern found.
     # @example
     #   h.find(0xdeadbeef, 'heap+0x10', 0x1000)
-    #   # => 6299664 # 0x602010
+    #   #=> 6299664 # 0x602010
     #   h.find(/E.F/, 0x400000, 4)
-    #   # => 4194305 # 0x400001
+    #   #=> 4194305 # 0x400001
     #   h.find(/E.F/, 0x400000, 3)
-    #   # => nil
+    #   #=> nil
     #   sh_offset = h.find('/bin/sh', :libc) - h.libc.base
-    #   # => 1559771 # 0x17ccdb
+    #   #=> 1559771 # 0x17ccdb
     def find(pattern, from, length = :unlimited)
       return Nil.new unless load?
       length = 1 << 40 if length.is_a? Symbol
@@ -207,7 +207,6 @@ module HeapInfo
     # @example
     #   h.canary
     #   #=> 11342701118118205184 # 0x9d695e921adc9700
-    # @todo Show in #to_s but need check if __stack_chk_fail exists.
     def canary
       return Nil.new unless load?
       addr = @info.auxv[:random]

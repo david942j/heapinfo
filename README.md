@@ -63,13 +63,13 @@ h = heapinfo('victim')
 
 # query segments' info
 "%#x" % h.libc.base
-# => "0x7f892a63a000"
+#=> "0x7f892a63a000"
 h.libc.name
-# => "/lib/x86_64-linux-gnu/libc-2.19.so"
+#=> "/lib/x86_64-linux-gnu/libc-2.19.so"
 "%#x" % h.elf.base
-# => "0x400000"
+#=> "0x400000"
 "%#x" % h.heap.base
-# => "0x11cc000"
+#=> "0x11cc000"
 ```
 
 NOTICE: While the process is not found, most methods will return `nil`. One way to prevent some error happend is to wrapper methods within `debug`, the block will be ignored while doing remote exploitation.
@@ -93,17 +93,17 @@ i.e. `/proc/sys/kernel/yama/ptrace_scope` set to 0 or run as root.
 ```ruby
 h.debug do
   p h.dump(:libc, 8)
-  # => "\x7FELF\x02\x01\x01\x00"
+  #=> "\x7FELF\x02\x01\x01\x00"
   p h.dump(:heap, 16)
-  # => "\x00\x00\x00\x00\x00\x00\x00\x00\x31\x00\x00\x00\x00\x00\x00\x00"
+  #=> "\x00\x00\x00\x00\x00\x00\x00\x00\x31\x00\x00\x00\x00\x00\x00\x00"
   p h.dump('heap+0x30', 16) # support offset!
-  # => "\x00\x00\x00\x00\x00\x00\x00\x00\x81\x00\x00\x00\x00\x00\x00\x00"
+  #=> "\x00\x00\x00\x00\x00\x00\x00\x00\x81\x00\x00\x00\x00\x00\x00\x00"
   p h.dump('heap+0x30 * 3 + 0x8', 16) # and even complex formula!
-  # => "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+  #=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
   p h.dump(:program, 8)
-  # => "\x7FELF\x02\x01\x01\x00"
+  #=> "\x7FELF\x02\x01\x01\x00"
   p h.dump(0x400000, 8) # or simply give address
-  # => "\x7FELF\x02\x01\x01\x00"
+  #=> "\x7FELF\x02\x01\x01\x00"
 end
 
 # invalid example:
@@ -151,11 +151,11 @@ Support search integer, string, and even regular expression.
 
 ```ruby
 h.find(0xdeadbeef, 'heap+0x10', 0x1000)
-# => 6299664 # 0x602010
+#=> 6299664 # 0x602010
 h.find(/E.F/, 0x400000, 4)
-# => 4194305 # 0x400001
+#=> 4194305 # 0x400001
 h.find(/E.F/, 0x400000, 3)
-# => nil
+#=> nil
 h.offset(h.find('/bin/sh', :libc))
 # 0x18c177 after libc
 ```

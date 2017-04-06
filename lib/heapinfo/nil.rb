@@ -13,7 +13,7 @@ module HeapInfo
     # @example
     #   # h.dump would return Nil when process not found
     #   p h.dump(:heap)[8, 8].unpack('Q*')
-    #   # => nil
+    #   #=> nil
     def method_missing(method_sym, *args, &block)
       return nil.send(method_sym, *args, &block) if nil.respond_to?(method_sym)
       self || super

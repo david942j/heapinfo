@@ -69,7 +69,7 @@ module HeapInfo
         integer: "\e[38;5;153m", # light blue
         fatal: "\e[38;5;197m", # dark red
         bin: "\e[38;5;120m", # light green
-        klass: "\e[38;5;155m", # pry like
+        klass: "\e[38;5;155m",
         sym: "\e[38;5;230m"
       }.freeze
       # Wrapper color codes for pretty inspect.
@@ -110,7 +110,7 @@ module HeapInfo
       # @param [Integer] num Non-negative integer.
       # @return [String] number in hex format.
       # @example
-      #   HeapInfo::Helper.hex(1000) # => '0x3e8'
+      #   HeapInfo::Helper.hex(1000) #=> '0x3e8'
       def hex(num)
         return format('0x%x', num) if num >= 0
         format('-0x%x', -num)
@@ -122,7 +122,7 @@ module HeapInfo
       # @example
       #   # suppose obj is an instance of HeapInfo::Chunk
       #   Helper.class_name(obj)
-      #   # => 'Chunk'
+      #   #=> 'Chunk'
       def class_name(obj)
         obj.class.name.split('::').last || obj.class.name
       end
@@ -132,11 +132,11 @@ module HeapInfo
       # @return [Boolean] If +str+ can be converted into integer.
       # @example
       #   Helper.integer? '1234'
-      #   # => true
+      #   #=> true
       #   Helper.integer? '0x1234'
-      #   # => true
+      #   #=> true
       #   Helper.integer? '0xheapoverflow'
-      #   # => false
+      #   #=> false
       def integer?(str)
         true if Integer(str)
       rescue ArgumentError, TypeError

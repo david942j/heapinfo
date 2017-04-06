@@ -20,7 +20,7 @@ module HeapInfo
   #   The program name of victim. If a number is given, seem as pid (useful when multi-processes exist).
   # @param [Hash] options Give library's file name.
   # @option options [String, Regexp] :libc file name of glibc, default is +/bc[^a-z]*\.so/+.
-  # @return [HeapInfo::Process] The object for further usage
+  # @return [HeapInfo::Process] The object for further usage.
   # @example
   #   h = heapinfo './victim'
   #   # outputs:
@@ -30,18 +30,21 @@ module HeapInfo
   #   # [stack]         base @ 0x7fff2b244000
   #   # libc-2.19.so    base @ 0x7f892a63a000
   #   # ld-2.19.so      base @ 0x7f892bee6000
+  #   # canary          value: 0x84b742f03d94c100
   #   p h.libc.name
-  #   # => "/lib/x86_64-linux-gnu/libc-2.19.so"
+  #   #=> "/lib/x86_64-linux-gnu/libc-2.19.so"
   #   p h.ld.name
-  #   # => "/lib/x86_64-linux-gnu/ld-2.19.so"
+  #   #=> "/lib/x86_64-linux-gnu/ld-2.19.so"
+  #   p h.heap.base.to_s(16)
+  #   #=> '11cc000'
   #
   # @example
   #   h = heapinfo(27605, libc: 'libc.so.6')
   #   # pid 27605 is run by custom loader
   #   p h.libc.name
-  #   # => "/home/heapinfo/libc.so.6"
+  #   #=> "/home/heapinfo/libc.so.6"
   #   p h.ld.name
-  #   # => "/home/heapinfo/ld-linux-x86-64.so.2"
+  #   #=> "/home/heapinfo/ld-linux-x86-64.so.2"
   def self.heapinfo(prog, options = {})
     h = HeapInfo::Process.new(prog, options)
     puts h
