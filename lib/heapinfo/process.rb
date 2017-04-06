@@ -198,7 +198,7 @@ module HeapInfo
         stack.to_s +
         libc.to_s +
         ld.to_s +
-        Helper.color("canary\t\t", sev: :sym) + 'value: ' + Helper.color(format('%#x', canary), sev: :sym)
+        format("%-28s\tvalue: #{Helper.color(format('%#x', canary), sev: :sym)}", Helper.color('canary', sev: :sym))
     end
 
     # Get the value of stack guard.

@@ -40,8 +40,8 @@ RSpec.configure do |config|
       Victims.push(victim)
     end
     @all_libs_heapinfo = lambda do |bit|
-      # TODO: use glob.
-      %w(2.19 2.23 2.24).map do |ver|
+      Dir.glob(File.join(__dir__, 'files', 'libraries', 'libc-*')).map do |dir|
+        ver = File.basename(dir).sub('libc-', '')
         HeapInfo::Process.new(@compile_and_run.call(bit: bit, lib_ver: ver))
       end
     end
