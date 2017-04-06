@@ -8,7 +8,12 @@ Gem::Specification.new do |s|
   s.version     = ::HeapInfo::VERSION
   s.date        = Date.today.to_s
   s.summary     = 'HeapInfo - interactive heap exploitation helper'
-  s.description = 'create an interactive memory info interface while pwn / exploiting'
+  s.description = <<-EOS
+Create an interactive memory info interface while pwn / exploiting.
+Useful for rubiers writing exploit scripts.
+HeapInfo can be used even when target is being ptraced,
+this tool helps a lot when one needs to debug an ptraced process.
+EOS
   s.authors     = ['david942j']
   s.email       = ['david942j@gmail.com']
   s.files       = Dir['lib/**/*.rb'] + Dir['lib/**/tools/*.c'] + %w(README.md)

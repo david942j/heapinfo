@@ -3,7 +3,7 @@ module HeapInfo
   # Main class of heapinfo.
   class Process
     # The default options of libraries,
-    # use for matching glibc and ld segments in +/proc/[pid]/maps+.
+    # use for matching glibc segments in +/proc/[pid]/maps+.
     DEFAULT_LIB = {
       libc: /bc[^a-z]*\.so/
     }.freeze
@@ -192,12 +192,13 @@ module HeapInfo
     #   puts h
     def to_s
       return 'Process not found' unless load?
-      "Program: #{Helper.color program.name} PID: #{Helper.color pid}\n" +
+      "Program: #{Helper.color(program.name)} PID: #{Helper.color(pid)}\n" +
         program.to_s +
         heap.to_s +
         stack.to_s +
         libc.to_s +
-        ld.to_s
+        ld.to_s +
+        Helper.color("canary\t\t", sev: :sym) + 'value: ' + Helper.color(format('%#x', canary), sev: :sym)
     end
 
     # Get the value of stack guard.

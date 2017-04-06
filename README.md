@@ -9,6 +9,10 @@
 ## HeapInfo
 As pwn lovers, while playing CTF with heap exploitation, we always need a debugger (e.g. gdb) for tracking memory layout. But we don't really need gdb if we want to see whether the heap layout same as our imagine or not. Hope this small tool helps us exploit easier ;).
 
+#### Why
+**HeapInfo** is very helpful when binary has somehow anti-debugger limitations, e.g being ptraced.
+**HeapInfo** still works because it doesn't use ptrace.
+
 Implement with ruby because I love ruby :P. But might also implement with Python (if no others did) in the future.
 
 If you prefer [pwntools](https://github.com/Gallopsled/pwntools) for exploiting, you can still use **HeapInfo** in irb/pry as a small debugger.
@@ -36,7 +40,7 @@ $ gem install heapinfo
 * More features and details can be found in [RDoc](http://www.rubydoc.info/github/david942j/heapinfo/master/)
 
 ### Under developing
-* `free` - Show what will happend when `free` an address.
+* `free` - Show what will happend when calling `glibc#free` an address.
 
 ## Usage
 
@@ -46,7 +50,7 @@ $ gem install heapinfo
 require 'heapinfo'
 # ./victim is running
 h = heapinfo('victim') 
-# or use h = heapinfo(20568) to prevent multi processes exist
+# or use h = heapinfo(20568) to specific pid
 
 # will present simple info when loading:
 # Program: /home/heapinfo/victim PID: 20568
@@ -55,6 +59,7 @@ h = heapinfo('victim')
 # [stack]         base @ 0x7fff2b244000
 # libc-2.19.so    base @ 0x7f892a63a000
 # ld-2.19.so      base @ 0x7f892bee6000
+# canary          value: 0x84b742f03d94c100
 
 # query segments' info
 "%#x" % h.libc.base
@@ -130,7 +135,7 @@ h.offset(0x1839cd0)
 #### canary
 ```ruby
 h.canary.to_s(16)
-#=> 9d695e921adc9700
+#=> '84b742f03d94c100'
 ```
 
 #### x - gdb-like command
