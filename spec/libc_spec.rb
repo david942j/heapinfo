@@ -1,4 +1,5 @@
 # encoding: ascii-8bit
+
 require 'heapinfo'
 describe HeapInfo::Libc do
   describe 'free' do

@@ -1,4 +1,5 @@
 # encoding: ascii-8bit
+
 require 'heapinfo'
 describe "Bin's operation" do
   describe '64bit' do

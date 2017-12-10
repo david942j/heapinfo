@@ -1,4 +1,5 @@
 # encoding: ascii-8bit
+
 require 'heapinfo'
 describe HeapInfo::Dumper do
   before(:all) do

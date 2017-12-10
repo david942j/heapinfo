@@ -1,4 +1,5 @@
 # encoding: ascii-8bit
+
 module HeapInfo
   # Main class of heapinfo.
   class Process
