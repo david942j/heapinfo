@@ -48,8 +48,10 @@ module HeapInfo
     # Heap will not be mmapped if the process not use heap yet, so create a lazy loading method.
     # Will re-read maps when heap segment not found yet.
     #
+    # Special handling here because heap might not be initialized in the beginning.
+    #
     # @return [HeapInfo::Segment] The {Segment} of heap.
-    def heap # special handle because heap might not be initialized in the beginning
+    def heap
       @heap ||= Segment.find(load_maps, '[heap]')
     end
 

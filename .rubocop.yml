@@ -22,6 +22,9 @@ Metrics/BlockLength:
 Metrics/CyclomaticComplexity:
   Enabled: false
 
+Naming/HeredocDelimiterNaming:
+  Enabled: false
+
 Security/MarshalLoad:
   Enabled: false
 

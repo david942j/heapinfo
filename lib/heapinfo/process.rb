@@ -21,9 +21,9 @@ module HeapInfo
       load!
     end
 
-    # Reload a new process with same program name
+    # Reload a new process with same program name.
     #
-    # @return [HeapInfo::Process] return +self+ for chainable.
+    # @return [HeapInfo::Process] return +self+ so that this method is chainable.
     # @example
     #   puts h.reload!
     def reload!
@@ -31,6 +31,7 @@ module HeapInfo
       load!
       self
     end
+    alias reload reload!
 
     # Use this method to wrapper all HeapInfo methods.
     #
@@ -224,11 +225,13 @@ module HeapInfo
     private
 
     attr_accessor :dumper
+
     def load?
       @pid != nil
     end
 
-    def load! # try to load
+    # try to load
+    def load!
       return true if @pid
       @pid = fetch_pid
       return clear_process if @pid.nil? # still can't load

@@ -10,7 +10,7 @@ module HeapInfo
       define_singleton_method("#{method}_of".to_sym) do |pid|
         begin
           IO.binread("/proc/#{pid}/#{method}")
-        rescue
+        rescue Errno::ENOENT
           throw "reading /proc/#{pid}/#{method} error"
         end
       end

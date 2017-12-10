@@ -38,8 +38,8 @@ module HeapInfo
         filepath = realpath(key)
         return unless File.file?(filepath)
         Marshal.load(IO.binread(filepath))
-      rescue
-        nil # handle if file content invalid
+      rescue TypeError, ArgumentError
+        nil # handle if file content is invalid
       end
 
       # Clear the cache directory.
@@ -53,7 +53,7 @@ module HeapInfo
       # @return [void]
       def init
         FileUtils.mkdir_p(CACHE_DIR)
-      rescue
+      rescue Errno::EACCES
         # To prevent ~/ is not writable.
         send(:remove_const, :CACHE_DIR)
         const_set(:CACHE_DIR, File.join(HeapInfo::TMP_DIR, '.cache/heapinfo'))

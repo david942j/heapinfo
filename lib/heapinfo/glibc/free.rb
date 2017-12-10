@@ -25,7 +25,7 @@ module HeapInfo
     # The original method in C is too long, split to multiple methods to match ruby convention.
     # @param [HeapInfo::Arena] av
     # @param [Integer] ptr Use <tt>ptr</tt> instead of <tt>p</tt> to prevent confusing with ruby native method.
-    def int_free(av, ptr) # is have_lock important?
+    def int_free(av, ptr)
       chunk = dumper.call(ptr, size_t * 2).to_chunk
       size = ulong chunk.size
       invalid_pointer(ptr, size)

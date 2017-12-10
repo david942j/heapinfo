@@ -30,7 +30,7 @@ module HeapInfo
       mem = file.readpartial len
       file.close
       mem
-    rescue => e
+    rescue => e # rubocop:disable Lint/RescueWithoutErrorClass
       raise e if e.is_a? ArgumentError
       nil
     end
@@ -107,12 +107,8 @@ module HeapInfo
     def dumpable?
       mem_f.close
       true
-    rescue => e
-      if e.is_a? Errno::EACCES
-        false
-      else
-        throw e
-      end
+    rescue Errno::EACCES
+      false
     end
 
     def mem_f
