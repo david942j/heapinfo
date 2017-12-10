@@ -47,8 +47,8 @@ module HeapInfo
         f
       end
       @unsorted_bin = UnsortedBin.new(size_t, top_ptr_offset, @dumper, head: true)
-      @smallbin = Array.new(55) do |idx|
-        s = Smallbin.new(size_t, @base + 8 + size_t * (26 + 2 * idx), @dumper, head: true)
+      @smallbin = Array.new(62) do |idx|
+        s = Smallbin.new(size_t, @base + 8 + size_t * (12 + 2 * idx), @dumper, head: true)
         s.index = idx
         s
       end
@@ -227,7 +227,7 @@ module HeapInfo
     # Mapping index of smallbin to chunk size.
     # @return [Integer] size
     def idx_to_size
-      index * size_t * 2 + size_t * 18
+      index * size_t * 2 + size_t * 4
     end
   end
 
