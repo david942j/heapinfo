@@ -27,7 +27,10 @@ module HeapInfo
       @size_t = size_t
       @base = base
       sz = dump(@base, size_t * 2)
-      return @data = dump(@base + size_t * 2, size_t * 4) if head # no need to read size if is bin
+      if head # no need to read size if is bin
+        @data = dump(@base + size_t * 2, size_t * 4)
+        return
+      end
       @prev_size = Helper.unpack(size_t, sz[0, size_t])
       @size = Helper.unpack(size_t, sz[size_t..-1])
       r_size = [size - size_t * 2, size_t * 4].min # don't read too much data

@@ -4,7 +4,7 @@ module HeapInfo
   # Can be the return value of {HeapInfo::Process#dump} and {HeapInfo::Process#dump_chunks},
   # to prevent use the return value for calculating accidentally while exploiting remote.
   class Nil
-    %i(nil? inspect to_s).each do |method_sym|
+    %i[nil? inspect to_s].each do |method_sym|
       define_method(method_sym) { |*args, &block| nil.send(method_sym, *args, &block) }
     end
 

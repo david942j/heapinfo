@@ -1,4 +1,5 @@
 # encoding: ascii-8bit
+
 require 'heapinfo'
 describe "Bin's operation" do
   describe '64bit' do
@@ -60,8 +61,8 @@ Fastbin[0x80]:  => (nil)
 
       it 'normal' do
         @hs.each do |h|
-          list = h.libc.main_arena.smallbin[0].link_list 1
-          base = h.libc.main_arena.smallbin[0].base
+          list = h.libc.main_arena.smallbin[7].link_list 1
+          base = h.libc.main_arena.smallbin[7].base
           expect(list).to eq [0x6020f0, base, 0x6020f0]
         end
       end
@@ -135,8 +136,8 @@ Fastbin[0x40]:  => 0x804b070 => 0x804b0b0 => 0x804b070(loop)
       end
       it 'normal' do
         @hs.each do |h|
-          list = h.libc.main_arena.smallbin[9].link_list 1
-          base = h.libc.main_arena.smallbin[9].base
+          list = h.libc.main_arena.smallbin[16].link_list 1
+          base = h.libc.main_arena.smallbin[16].base
           expect(list).to eq [0x804b0f0, base, 0x804b0f0]
         end
       end

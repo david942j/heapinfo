@@ -1,4 +1,5 @@
 # encoding: ascii-8bit
+
 require 'heapinfo'
 describe HeapInfo::Chunks do
   before(:each) do

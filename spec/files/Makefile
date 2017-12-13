@@ -1,6 +1,9 @@
 BIT ?= 64 # 64bit or 32bit
 
-flags =
+flags = 
+ifndef CI
+	flags += -no-pie
+endif
 ifeq ($(BIT), 32)
 flags += -m32
 endif

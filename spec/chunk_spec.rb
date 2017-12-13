@@ -1,4 +1,5 @@
 # encoding: ascii-8bit
+
 require 'heapinfo'
 describe HeapInfo::Chunk do
   describe '32bit' do
@@ -9,7 +10,7 @@ describe HeapInfo::Chunk do
     it 'basic' do
       expect(@fast.size_t).to be 4
       expect(@fast.size).to be 0x40
-      expect(@fast.flags).to eq [:non_main_arena, :mmapped, :prev_inuse]
+      expect(@fast.flags).to eq %i[non_main_arena mmapped prev_inuse]
       expect(@fast.non_main_arena? && @fast.mmapped? && @fast.prev_inuse?).to be true
       expect(@fast.bintype).to eq :fast
       expect(@fast.data).to eq [0x1337].pack('L*')
@@ -36,7 +37,7 @@ data = "\\xEF\\xCD\\xAB\\x00\"...
     it 'basic' do
       expect(@fast.size_t).to be 8
       expect(@fast.size).to be 0x80
-      expect(@fast.flags).to eq [:non_main_arena, :mmapped, :prev_inuse]
+      expect(@fast.flags).to eq %i[non_main_arena mmapped prev_inuse]
       expect(@fast.non_main_arena? && @fast.mmapped? && @fast.prev_inuse?).to be true
       expect(@fast.bintype).to eq :fast
       expect(@fast.data).to eq [0x1337].pack('Q*')

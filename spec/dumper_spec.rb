@@ -1,4 +1,5 @@
 # encoding: ascii-8bit
+
 require 'heapinfo'
 describe HeapInfo::Dumper do
   before(:all) do
@@ -49,8 +50,6 @@ describe HeapInfo::Dumper do
     dumper.instance_variable_set(:@filename, '/proc/1/mem')
     expect(dumper.send(:dumpable?)).to be false
     expect(dumper.dump).to be nil # show need permission
-    dumper.instance_variable_set(:@filename, '/proc/-1/mem')
-    expect { dumper.send(:dumpable?) }.to raise_error ArgumentError
   end
 
   describe 'find' do

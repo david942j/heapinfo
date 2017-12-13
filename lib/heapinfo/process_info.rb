@@ -1,4 +1,5 @@
 # encoding: ascii-8bit
+
 module HeapInfo
   # For {Process} to record basic process information.
   #
@@ -7,7 +8,7 @@ module HeapInfo
   class ProcessInfo
     # Methods to be transparent to +process+.
     # e.g. +process.libc+ alias to +process.info.libc+.
-    EXPORT = %i(libc ld heap program elf stack bits auxv).freeze
+    EXPORT = %i[libc ld heap program elf stack bits auxv].freeze
 
     # @return [Integer] 32 or 64.
     attr_reader :bits
@@ -47,8 +48,10 @@ module HeapInfo
     # Heap will not be mmapped if the process not use heap yet, so create a lazy loading method.
     # Will re-read maps when heap segment not found yet.
     #
+    # Special handling here because heap might not be initialized in the beginning.
+    #
     # @return [HeapInfo::Segment] The {Segment} of heap.
-    def heap # special handle because heap might not be initialized in the beginning
+    def heap
       @heap ||= Segment.find(load_maps, '[heap]')
     end
 
