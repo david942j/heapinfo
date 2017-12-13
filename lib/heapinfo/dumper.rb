@@ -107,7 +107,7 @@ module HeapInfo
     def dumpable?
       mem_f.close
       true
-    rescue Errno::EACCES
+    rescue Errno::EACCES, Errno::ENOENT
       false
     end
 

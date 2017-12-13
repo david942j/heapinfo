@@ -1,6 +1,6 @@
 BIT ?= 64 # 64bit or 32bit
 
-flags =
+flags = -no-pie
 ifeq ($(BIT), 32)
 flags += -m32
 endif
