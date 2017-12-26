@@ -118,6 +118,7 @@ module HeapInfo
       return puts "Invalid address #{Helper.hex(addr)}" if segment.nil?
       puts Helper.color(Helper.hex(addr - segment.base)) + ' after ' + Helper.color(sym, sev: :sym)
     end
+    alias off offset
 
     # Gdb-like command
     #
@@ -217,9 +218,9 @@ module HeapInfo
 
     # Make pry not so verbose.
     #
-    # @return [nil]
+    # @return [String]
     def inspect
-      nil
+      format('#<HeapInfo::Process:0x%016x>', __id__)
     end
 
     private

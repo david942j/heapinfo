@@ -39,6 +39,10 @@ describe HeapInfo::Process do
       # well.. how to check exactly value?
       expect(@h.canary & 0xff).to be_zero
     end
+
+    it 'inspect' do
+      expect(@h.inspect).to match(/^#<HeapInfo::Process:0x[0-9a-f]{16}>$/)
+    end
   end
 
   describe 'victim' do

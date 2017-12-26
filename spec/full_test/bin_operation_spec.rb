@@ -73,6 +73,18 @@ Fastbin[0x80]:  => (nil)
 UnsortedBin: 0x6021d0 === [self] === 0x6021d0
 Smallbin[0x90]: 0x6020f0 === [self] === 0x6020f0
           EOS
+
+          expect { h.layouts(:all) }.to output(<<-'EOS').to_stdout
+Fastbin[0x20]:  => 0x602020 => 0x602000 => (nil)
+Fastbin[0x30]:  => 0x602040 => 0xdeadbeef(invalid)
+Fastbin[0x40]:  => 0x602070 => 0x6020b0 => 0x602070(loop)
+Fastbin[0x50]:  => (nil)
+Fastbin[0x60]:  => (nil)
+Fastbin[0x70]:  => (nil)
+Fastbin[0x80]:  => (nil)
+UnsortedBin: 0x6021d0 === [self] === 0x6021d0
+Smallbin[0x90]: 0x6020f0 === [self] === 0x6020f0
+          EOS
         end
       end
     end

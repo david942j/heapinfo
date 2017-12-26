@@ -61,7 +61,9 @@ module HeapInfo
     # @return [String] Bin layouts that wrapper with color codes.
     # @example
     #   puts h.libc.main_arena.layouts(:fast, :unsorted, :small)
+    #   puts h.libc.main_arena.layouts(:all)
     def layouts(*args)
+      args.concat(%i[fast unsort small large]) if args.map(&:to_s).include?('all')
       args = args.map(&:to_s).join('|')
       res = ''
       res += fastbin.map(&:inspect).join if args.include?('fast')
