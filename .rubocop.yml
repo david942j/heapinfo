@@ -22,6 +22,9 @@ Metrics/BlockLength:
 Metrics/CyclomaticComplexity:
   Enabled: false
 
+Naming/FileName:
+  Enabled: false
+
 Naming/HeredocDelimiterNaming:
   Enabled: false
 
@@ -34,9 +37,6 @@ Rails:
 Metrics/LineLength:
   Enabled: true
   Max: 120
-
-Style/FileName:
-  Enabled: false
 
 Style/MultilineBlockChain:
   Enabled: false

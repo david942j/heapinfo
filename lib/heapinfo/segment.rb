@@ -19,6 +19,17 @@ module HeapInfo
       format("%-28s\tbase @ #{Helper.color(format('%#x', base))}\n", Helper.color(name.split('/')[-1]))
     end
 
+    # To support +addr - h.libc+.
+    # Treat all operations are manipulating on +base+.
+    #
+    # @param [Object] other
+    #   Any object.
+    #
+    # @return [(Object, Integer)]
+    def coerce(other)
+      [other, base]
+    end
+
     # Helper for creating a {HeapInfo::Segment}.
     #
     # Search the specific <tt>pattern</tt> in <tt>maps</tt> and return a {HeapInfo::Segment} object.

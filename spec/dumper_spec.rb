@@ -63,23 +63,23 @@ describe HeapInfo::Dumper do
       end
     end
     it 'simple' do
-      expect(@dumper.find('ELF', :elf, 4)).to eq @elf_base + 1
-      expect(@dumper.find('ELF', :elf, 3)).to be nil
+      expect(@dumper.find('ELF', :elf, 4, false)).to eq @elf_base + 1
+      expect(@dumper.find('ELF', :elf, 3, false)).to be nil
     end
     it 'regexp' do
-      addr = @dumper.find(/lin.x/, :elf, 0x1000)
+      addr = @dumper.find(/lin.x/, :elf, 0x1000, false)
       expect(@dumper.dump(addr, 5) =~ /lin.x/).to eq 0
     end
     it 'invalid' do
-      expect(@dumper.find(nil, :elf, 1)).to be nil
+      expect(@dumper.find(nil, :elf, 1, false)).to be nil
     end
     it 'parser' do
-      expect(@dumper.find('ELF', ':elf + 1', 3)).to eq @elf_base + 1
+      expect(@dumper.find('ELF', ':elf + 1', 3, false)).to eq @elf_base + 1
     end
     it 'reach end' do
       mem = @end_of_maps.call
       # check dumper won't return nil when remain readable memory less than one page
-      expect(@dumper.find("\x00", mem - 0xff0, 0x1000).nil?).to be false
+      expect(@dumper.find("\x00", mem - 0xff0, 0x1000, false).nil?).to be false
     end
   end
 

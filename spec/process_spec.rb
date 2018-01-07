@@ -47,7 +47,7 @@ describe HeapInfo::Process do
 
   describe 'victim' do
     before(:all) do
-      HeapInfo::Cache.clear_all # force cache miss, to make sure coverage
+      HeapInfo::Cache.clear_all # force cache miss, to ensure coverage
       @victim = @compile_and_run.call(bit: 64, lib_ver: '2.23')
       @h = heapinfo(@victim)
     end
@@ -55,7 +55,7 @@ describe HeapInfo::Process do
     it 'check process' do
       expect(@h.elf.name).to eq @victim
       pid = @h.pid
-      expect(pid.is_a?(Integer)).to be true
+      expect(pid).to be_a Integer
       expect(HeapInfo::Process.new(pid).elf.name).to eq @h.elf.name
     end
 
@@ -76,8 +76,11 @@ describe HeapInfo::Process do
     end
 
     describe 'find/search' do
-      it 'faraway' do
-        expect(@h.find('/bin/sh', :libc).is_a?(Integer)).to be true
+      it 'far away' do
+        expect(@h.find('/bin/sh', :libc)).to be_a Integer
+        # check coerce
+        expect(@h.find('/bin/sh', :libc) - @h.libc).to eq 0x18c177
+        expect(@h.find('/bin/sh', :libc, rel: true)).to eq 0x18c177
       end
 
       it 'value' do
@@ -85,12 +88,13 @@ describe HeapInfo::Process do
       end
 
       it 'not found' do
-        expect(@h.search(0xdeadbeef, :heap, 0x4f)).to be nil
+        expect(@h.search(0xdeadbeef, :heap, 0x4f, rel: true)).to be nil
         expect(@h.search(0xdead1234ddddd, :heap)).to be nil
       end
 
       it 'string' do
         expect(@h.search("\xbe\xad", :heap)).to eq 0x602051
+        expect(@h.search("\xbe\xad", :heap, rel: true)).to eq 0x51
       end
 
       it 'regexp' do
@@ -102,12 +106,12 @@ describe HeapInfo::Process do
       it 'monkey' do
         prog = File.readlink('/proc/self/exe')
         @h = HeapInfo::Process.new(prog)
-        expect(@h.pid.is_a?(Integer)).to be true
+        expect(@h.pid).to be_a Integer
         pid = @h.pid
         @h.instance_variable_set(:@prog, 'NO_THIS')
         expect(@h.reload!.pid).to be nil
         @h.instance_variable_set(:@prog, prog)
-        expect(@h.reload!.pid).to be pid
+        expect(@h.reload.pid).to be pid
       end
     end
 

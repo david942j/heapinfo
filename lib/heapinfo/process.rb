@@ -113,10 +113,10 @@ module HeapInfo
       segment = @info.send(sym) if HeapInfo::ProcessInfo::EXPORT.include?(sym)
       segment = nil unless segment.is_a?(HeapInfo::Segment)
       if segment.nil?
-        sym, segment = @info.segments.select { |_, seg| seg.base <= addr }.min_by { |_, seg| addr - seg.base }
+        sym, segment = @info.segments.select { |_, seg| seg.base <= addr }.min_by { |_, seg| addr - seg }
       end
       return puts "Invalid address #{Helper.hex(addr)}" if segment.nil?
-      puts Helper.color(Helper.hex(addr - segment.base)) + ' after ' + Helper.color(sym, sev: :sym)
+      puts Helper.color(Helper.hex(addr - segment)) + ' after ' + Helper.color(sym, sev: :sym)
     end
     alias off offset
 
@@ -156,6 +156,8 @@ module HeapInfo
     # @param [Integer] length
     #   The search length limit, default is unlimited,
     #   which will search until pattern found or reach unreadable memory.
+    # @param [Boolean] rel
+    #   To show relative offset of +from+ or absolute address.
     # @return [Integer, nil] The first matched address, +nil+ is returned when no such pattern found.
     # @example
     #   h.find(0xdeadbeef, 'heap+0x10', 0x1000)
@@ -164,12 +166,13 @@ module HeapInfo
     #   #=> 4194305 # 0x400001
     #   h.find(/E.F/, 0x400000, 3)
     #   #=> nil
-    #   sh_offset = h.find('/bin/sh', :libc) - h.libc.base
+    #   sh_offset = h.find('/bin/sh', :libc) - h.libc
     #   #=> 1559771 # 0x17ccdb
-    def find(pattern, from, length = :unlimited)
+    #   h.find('/bin/sh', :libc, rel: true) == h.find('/bin/sh', :libc) - h.libc
+    #   #=> true
+    def find(pattern, from, length = :unlimited, rel: false)
       return Nil.new unless load?
-      length = 1 << 40 if length.is_a? Symbol
-      dumper.find(pattern, from, length)
+      dumper.find(pattern, from, length, rel)
     end
 
     # +search+ is more intutive to me

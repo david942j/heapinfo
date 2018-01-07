@@ -9,7 +9,7 @@
 ## HeapInfo
 As pwn lovers, while playing CTF with heap exploitation, we always need a debugger (e.g. gdb) for tracking memory layout. But we don't really need gdb if we want to see whether the heap layout same as our imagine or not. Hope this small tool helps us exploit easier ;).
 
-#### Why
+### Why
 **HeapInfo** is very helpful when binary has somehow anti-debugger limitations, e.g being ptraced.
 **HeapInfo** still works because it doesn't use ptrace.
 
@@ -17,9 +17,7 @@ Implement with ruby because I love ruby :P. But might also implement with Python
 
 If you prefer [pwntools](https://github.com/Gallopsled/pwntools) for exploiting, you can still use **HeapInfo** in irb/pry as a small debugger.
 
-Any suggestion of features or bug issues is welcome.
-
-Related works are [pwntools-ruby](https://github.com/peter50216/pwntools-ruby) and [gdbpwn](https://github.com/scwuaptx/Pwngdb).
+Any suggestion of features or bug issues are welcome.
 
 ## Install
 **HeapInfo** is still under developing for more features, so the version might change frequently :p
@@ -156,12 +154,17 @@ h.find(/E.F/, 0x400000, 4)
 #=> 4194305 # 0x400001
 h.find(/E.F/, 0x400000, 3)
 #=> nil
+
+# Get relative offset of searching result
+h.find('/bin/sh', :libc, rel: true)
+#=> 1622391 # 0x18c177
 h.offset(h.find('/bin/sh', :libc))
 # 0x18c177 after libc
 ```
 
 ## Tests
 **HeapInfo** currently only run tests on ubuntu, followings are tested glibc versions:
+
 * libc-2.19
 * libc-2.23
 * libc-2.24

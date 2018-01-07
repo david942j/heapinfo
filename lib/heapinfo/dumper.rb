@@ -67,6 +67,8 @@ module HeapInfo
       puts str
     end
 
+    # @api private
+    #
     # Search a specific value/string/regexp in memory.
     # +#find+ only return the first matched address.
     # @param [Integer, String, Regexp] pattern
@@ -75,22 +77,25 @@ module HeapInfo
     #   Start address for searching, can be segment(+Symbol+)
     #   or segments with offset. See examples for more information.
     # @param [Integer] length The length limit for searching.
+    # @param [Boolean] rel Return relative or absolute.
     # @return [Integer, nil] The first matched address, +nil+ is returned when no such pattern found.
     # @example
-    #   find(/E.F/, :elf)
+    #   find(/E.F/, :elf, false)
     #   #=> 4194305
-    #   find(0x4141414141414141, 'heap+0x10', 0x1000)
+    #   find(0x4141414141414141, 'heap+0x10', 0x1000, false)
     #   #=> 6291472
-    #   find('/bin/sh', :libc)
-    #   #=> 140662379588827
-    def find(pattern, from, length)
+    #   find('/bin/sh', :libc, true)
+    #   #=> 1622391 # 0x18c177
+    def find(pattern, from, length, rel)
       from = base_of(from)
       length = 1 << 40 if length.is_a? Symbol
-      case pattern
-      when Integer then find_integer(pattern, from, length)
-      when String then find_string(pattern, from, length)
-      when Regexp then find_regexp(pattern, from, length)
-      end
+      ret = case pattern
+            when Integer then find_integer(pattern, from, length)
+            when String then find_string(pattern, from, length)
+            when Regexp then find_regexp(pattern, from, length)
+            end
+      ret -= from if ret && rel
+      ret
     end
 
     private
