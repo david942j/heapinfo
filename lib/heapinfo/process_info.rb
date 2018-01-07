@@ -73,7 +73,7 @@ module HeapInfo
     def parse_auxv(str)
       auxv = {}
       sio = StringIO.new(str)
-      fetch = ->() { Helper.unpack(@bits / 8, sio.read(@bits / 8)) }
+      fetch = -> { Helper.unpack(@bits / 8, sio.read(@bits / 8)) }
       loop do
         type = fetch.call
         val = fetch.call

@@ -113,7 +113,9 @@ module HeapInfo
       segment = @info.send(sym) if HeapInfo::ProcessInfo::EXPORT.include?(sym)
       segment = nil unless segment.is_a?(HeapInfo::Segment)
       if segment.nil?
-        sym, segment = @info.segments.select { |_, seg| seg.base <= addr }.min_by { |_, seg| addr - seg }
+        sym, segment = @info.segments
+                            .select { |_, seg| seg.base <= addr }
+                            .min_by { |_, seg| addr - seg }
       end
       return puts "Invalid address #{Helper.hex(addr)}" if segment.nil?
       puts Helper.color(Helper.hex(addr - segment)) + ' after ' + Helper.color(sym, sev: :sym)

@@ -30,7 +30,7 @@ module HeapInfo
       mem = file.readpartial len
       file.close
       mem
-    rescue => e # rubocop:disable Lint/RescueWithoutErrorClass
+    rescue => e # rubocop:disable Style/RescueStandardError
       raise e if e.is_a? ArgumentError
       nil
     end

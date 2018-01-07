@@ -31,6 +31,9 @@ Naming/HeredocDelimiterNaming:
 Security/MarshalLoad:
   Enabled: false
 
+Style/FormatStringToken:
+  Enabled: false
+
 Rails:
   Enabled: false
 
