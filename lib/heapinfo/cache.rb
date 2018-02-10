@@ -55,7 +55,7 @@ module HeapInfo
         FileUtils.mkdir_p(CACHE_DIR)
       rescue Errno::EACCES
         # To prevent ~/ is not writable.
-        send(:remove_const, :CACHE_DIR)
+        __send__(:remove_const, :CACHE_DIR)
         const_set(:CACHE_DIR, File.join(HeapInfo::TMP_DIR, '.cache/heapinfo'))
         FileUtils.mkdir_p(CACHE_DIR)
       end

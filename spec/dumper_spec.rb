@@ -45,10 +45,10 @@ describe HeapInfo::Dumper do
 
   it 'dumpable?' do
     dumper = HeapInfo::Dumper.new('/proc/self/mem')
-    expect(dumper.send(:dumpable?)).to be true
+    expect(dumper.__send__(:dumpable?)).to be true
     # a little hack
     dumper.instance_variable_set(:@filename, '/proc/1/mem')
-    expect(dumper.send(:dumpable?)).to be false
+    expect(dumper.__send__(:dumpable?)).to be false
     expect(dumper.dump).to be nil # show need permission
   end
 
@@ -90,17 +90,17 @@ describe HeapInfo::Dumper do
     end
 
     it 'normal' do
-      expect(@dumper.send(:base_len_of, 123, 321)).to eq [123, 321]
-      expect(@dumper.send(:base_len_of, 123)).to eq [123, 8]
+      expect(@dumper.__send__(:base_len_of, 123, 321)).to eq [123, 321]
+      expect(@dumper.__send__(:base_len_of, 123)).to eq [123, 8]
     end
 
     it 'segment' do
-      expect(@dumper.send(:base_len_of, :elf, 10)).to eq [@elf_base, 10]
+      expect(@dumper.__send__(:base_len_of, :elf, 10)).to eq [@elf_base, 10]
     end
 
     it 'eval' do
-      expect(@dumper.send(:base_len_of, 'elf+0x30', 10)).to eq [@elf_base + 48, 10]
-      expect(@dumper.send(:base_len_of, 'elf+0x3*2 - 1', 10)).to eq [@elf_base + 5, 10]
+      expect(@dumper.__send__(:base_len_of, 'elf+0x30', 10)).to eq [@elf_base + 48, 10]
+      expect(@dumper.__send__(:base_len_of, 'elf+0x3*2 - 1', 10)).to eq [@elf_base + 5, 10]
     end
   end
 end

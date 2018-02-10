@@ -36,4 +36,4 @@ module HeapInfo
   end
 end
 
-::String.send(:include, HeapInfo::Ext::String::InstanceMethods)
+::String.__send__(:include, HeapInfo::Ext::String::InstanceMethods)

@@ -110,7 +110,7 @@ module HeapInfo
     #   #=> 0x9637a0 after :heap
     def offset(addr, sym = nil)
       return unless load?
-      segment = @info.send(sym) if HeapInfo::ProcessInfo::EXPORT.include?(sym)
+      segment = @info.__send__(sym) if HeapInfo::ProcessInfo::EXPORT.include?(sym)
       segment = nil unless segment.is_a?(HeapInfo::Segment)
       if segment.nil?
         sym, segment = @info.segments
@@ -257,7 +257,7 @@ module HeapInfo
 
     def clear_process
       ProcessInfo::EXPORT.each do |m|
-        self.class.send(:define_method, m) { Nil.new }
+        self.class.__send__(:define_method, m) { Nil.new }
       end
       false
     end
@@ -265,10 +265,10 @@ module HeapInfo
     def load_info! # :nodoc:
       @info = ProcessInfo.new(self)
       ProcessInfo::EXPORT.each do |m|
-        self.class.send(:define_method, m) { @info.send(m) }
+        self.class.__send__(:define_method, m) { @info.__send__(m) }
       end
       @dumper = Dumper.new(mem_filename) do |sym|
-        @info.send(sym) if @info.respond_to?(sym)
+        @info.__send__(sym) if @info.respond_to?(sym)
       end
     end
 

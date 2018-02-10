@@ -5,7 +5,7 @@ module HeapInfo
   # to prevent use the return value for calculating accidentally while exploiting remote.
   class Nil
     %i[nil? inspect to_s].each do |method_sym|
-      define_method(method_sym) { |*args, &block| nil.send(method_sym, *args, &block) }
+      define_method(method_sym) { |*args, &block| nil.__send__(method_sym, *args, &block) }
     end
 
     # Hook all missing methods
@@ -15,7 +15,7 @@ module HeapInfo
     #   p h.dump(:heap)[8, 8].unpack('Q*')
     #   #=> nil
     def method_missing(method_sym, *args, &block)
-      return nil.send(method_sym, *args, &block) if nil.respond_to?(method_sym)
+      return nil.__send__(method_sym, *args, &block) if nil.respond_to?(method_sym)
       self || super
     end
 

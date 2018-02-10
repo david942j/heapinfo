@@ -151,9 +151,6 @@ module HeapInfo
       def evaluate(formula, store: {})
         calc = Dentaku::Calculator.new
         formula = formula.delete(':')
-        formula.gsub!(/0x[\da-z]+/) do |s|
-          s.to_i(16).to_s
-        end
         calc.store(store).evaluate(formula)
       end
 

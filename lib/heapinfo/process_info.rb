@@ -59,7 +59,7 @@ module HeapInfo
     # @return [Hash{Symbol => Segment}] The segments in hash format.
     def segments
       EXPORT.map do |sym|
-        seg = send(sym)
+        seg = __send__(sym)
         [sym, seg] if seg.is_a?(Segment)
       end.compact.to_h
     end

@@ -36,8 +36,8 @@ module HeapInfo
     def self.find(maps, name, bits, ld_name, dumper)
       obj = super(maps, name)
       obj.size_t = bits / 8
-      obj.send(:ld_name=, ld_name)
-      obj.send(:dumper=, dumper)
+      obj.__send__(:ld_name=, ld_name)
+      obj.__send__(:dumper=, dumper)
       obj
     end
 

@@ -214,7 +214,7 @@ module HeapInfo
           break if ptr.nil? # invalid pointer
           break if dup[ptr] # looped
           dup[ptr] = true
-          ptr = send(nxt, ptr)
+          ptr = __send__(nxt, ptr)
           sz += 1
         end
       end

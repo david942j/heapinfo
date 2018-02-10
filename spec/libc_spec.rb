@@ -10,7 +10,7 @@ describe HeapInfo::Libc do
       @fake_mem = 0x13371000
       @helper = HeapInfo::Helper
       @set_memory = lambda do |str|
-        @h.libc.send(:dumper=, lambda do |ptr, len|
+        @h.libc.__send__(:dumper=, lambda do |ptr, len|
           if ptr.between?(@fake_mem, @fake_mem + 0x1000)
             str[ptr - @fake_mem, len]
           else
