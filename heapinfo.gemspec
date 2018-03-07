@@ -27,5 +27,5 @@ EOS
   s.add_development_dependency 'rake', '~> 12.3'
   s.add_development_dependency 'rspec', '~> 3.7'
   s.add_development_dependency 'rubocop', '~> 0.52'
-  s.add_development_dependency 'simplecov', '~> 0.13.0'
+  s.add_development_dependency 'simplecov', '~> 0.15.1'
 end
