@@ -1,6 +1,7 @@
 require 'dentaku'
 require 'shellwords'
 require 'time'
+require 'tmpdir'
 
 module HeapInfo
   # Some helper functions.

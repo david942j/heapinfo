@@ -28,6 +28,9 @@ Naming/FileName:
 Naming/HeredocDelimiterNaming:
   Enabled: false
 
+Naming/UncommunicativeMethodParamName:
+  Enabled: false
+
 Security/MarshalLoad:
   Enabled: false
 

@@ -1,7 +1,6 @@
-require 'codeclimate-test-reporter'
 require 'simplecov'
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
-  [SimpleCov::Formatter::HTMLFormatter, CodeClimate::TestReporter::Formatter]
+  [SimpleCov::Formatter::HTMLFormatter]
 )
 SimpleCov.start do
   add_filter '/spec/'
@@ -31,7 +30,7 @@ RSpec.configure do |config|
     # return the absolute path of exectuable file.
     @compile_and_run = lambda do |bit: 64, lib_ver: '2.23', flags: ''|
       victim = HeapInfo::Helper.tempfile('victim')
-      cwd = File.expand_path('../files', __FILE__)
+      cwd = File.expand_path('files', __dir__)
       `cd #{cwd} && make victim OUTFILE=#{victim} BIT=#{bit} LIB_VER=#{lib_ver} CFLAGS=#{flags} 2>&1 > /dev/null`
       pid = fork
       # run without ASLR

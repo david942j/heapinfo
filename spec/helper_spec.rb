@@ -17,7 +17,7 @@ describe HeapInfo::Helper do
 
   describe 'parse_maps' do
     before(:all) do
-      @files_dir = File.expand_path('../files', __FILE__)
+      @files_dir = File.expand_path('files', __dir__)
     end
     it '32bit' do
       maps = IO.binread(@files_dir + '/32bit_maps')
