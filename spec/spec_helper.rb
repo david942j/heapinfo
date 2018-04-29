@@ -38,11 +38,21 @@ RSpec.configure do |config|
       loop until `pidof #{victim}` != ''
       Victims.push(victim)
     end
-    @all_libs_heapinfo = lambda do |bit|
+
+    @old_libs_heapinfo = lambda do |bit|
       Dir.glob(File.join(__dir__, 'files', 'libraries', 'libc-*')).map do |dir|
         ver = File.basename(dir).sub('libc-', '')
+        next if Gem::Version.new(ver) >= Gem::Version.new('2.26')
         HeapInfo::Process.new(@compile_and_run.call(bit: bit, lib_ver: ver))
-      end
+      end.compact
+    end
+
+    @tcache_libs_heapinfo = lambda do |bit|
+      Dir.glob(File.join(__dir__, 'files', 'libraries', 'libc-*')).map do |dir|
+        ver = File.basename(dir).sub('libc-', '')
+        next unless Gem::Version.new(ver) >= Gem::Version.new('2.26')
+        HeapInfo::Process.new(@compile_and_run.call(bit: bit, lib_ver: ver))
+      end.compact
     end
   end
 

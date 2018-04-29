@@ -17,11 +17,11 @@ void *search_head(size_t e) {
   return (void*) e;
 }
 int main() {
-  void **p = (void**)malloc(SZ*16); // small bin with chunk size SZ*18
+  void **p = (void**)malloc(SZ * 128 * 2); // a large chunk
   void *z = malloc(SZ); // prevent p merge with top chunk
   *p = z; // prevent compiler optimize
   free(p); // now *p must be the pointer of the (chunk_ptr) unsorted bin
-  z = (void*)((*p) - (4 + 4 + SZ * 10 )); // mutex+flags+fastbin[]
+  z = (void*)((*p) - (4 + 4 + SZ * 10)); // mutex+flags+fastbin[]
   void* a = search_head((size_t)__builtin_return_address(0));
   printf("%p\n", z-a);
   return 0;
