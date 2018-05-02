@@ -6,6 +6,11 @@ plugins:
     exclude_paths:
     - spec/
 checks:
+  method-complexity:
+    enabled: false
+  argument-count:
+    config:
+      threshold: 5
 exclude_patterns:
 - spec/
 - examples/
