@@ -1,29 +1,16 @@
 ---
-engines:
-  bundler-audit:
-    enabled: true
+version: "2"
+plugins:
   duplication:
     enabled: true
+    exclude_paths:
+    - spec/
+checks:
+  method-complexity:
+    enabled: false
+  argument-count:
     config:
-      languages:
-      - ruby
-      - javascript
-      - python
-      - php
-  fixme:
-    enabled: false
-  rubocop:
-    enabled: false
-ratings:
-  paths:
-  - Gemfile.lock
-  - "**.inc"
-  - "**.js"
-  - "**.jsx"
-  - "**.module"
-  - "**.php"
-  - "**.py"
-  - "**.rb"
-exclude_paths:
-  - spec/
-  - examples/
+      threshold: 5
+exclude_patterns:
+- spec/
+- examples/

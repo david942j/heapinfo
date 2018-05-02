@@ -110,7 +110,7 @@ module HeapInfo
     # @return [String] fastbin layouts wrapper with color codes.
     def inspect
       title + list.map do |ptr|
-        next "(#{ptr})\n" if ptr.is_a? Symbol
+        next "(#{ptr})\n" if ptr.is_a?(Symbol)
         next " => (nil)\n" if ptr.nil?
         format(' => %s', Helper.color(format('%#x', ptr)))
       end.join
@@ -178,7 +178,7 @@ module HeapInfo
       title + pretty_list(list) + "\n"
     end
 
-    # Wrapper the double-linked list with color codes.
+    # Wrapper the doubly linked list with color codes.
     # @param [Array<Integer>] list The list from {#link_list}.
     # @return [String] Wrapper with color codes.
     def pretty_list(list)
@@ -190,9 +190,9 @@ module HeapInfo
         next "#{color_c}(invalid)" if fwd.nil? # invalid c
         bck = bk_of(c)
         if center.nil? # bk side
-          Helper.color(format('%s%s', color_c, fwd == list[idx + 1] ? nil : format('(%#x)', fwd)))
+          format('%s%s', color_c, fwd == list[idx + 1] ? nil : Helper.color(format('(%#x)', fwd)))
         else # fd side
-          Helper.color(format('%s%s', bck == list[idx - 1] ? nil : format('(%#x)', bck), color_c))
+          format('%s%s', bck == list[idx - 1] ? nil : Helper.color(format('(%#x)', bck)), color_c)
         end
       end.join(' === ')
     end
@@ -210,16 +210,15 @@ module HeapInfo
         sz = 0
         dup = {}
         while ptr != @base && sz < expand_size
-          append.call ptr
-          break if ptr.nil? # invalid pointer
-          break if dup[ptr] # looped
+          append.call(ptr)
+          break if ptr.nil? || dup[ptr] # invalid or duplicated pointer
           dup[ptr] = true
           ptr = __send__(nxt, ptr)
           sz += 1
         end
       end
       work.call(@fd, :fd_of, ->(ptr) { list << ptr })
-      work.call(@bk, :bk_of, ->(ptr) { list.unshift ptr })
+      work.call(@bk, :bk_of, ->(ptr) { list.unshift(ptr) })
       list
     end
   end

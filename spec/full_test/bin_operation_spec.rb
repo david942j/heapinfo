@@ -5,7 +5,7 @@ describe "Bin's operation" do
   describe '64bit' do
     before(:all) do
       HeapInfo::Cache.clear_all # force cache miss, to make sure coverage
-      @hs = @all_libs_heapinfo.call(64)
+      @hs = @old_libs_heapinfo.call(64)
     end
 
     it 'main_arena' do
@@ -93,7 +93,7 @@ Smallbin[0x90]: 0x6020f0 === [self] === 0x6020f0
   describe '32bit' do
     before(:all) do
       HeapInfo::Cache.clear_all # force cache miss, to make sure coverage
-      @hs = @all_libs_heapinfo.call(32)
+      @hs = @old_libs_heapinfo.call(32)
     end
 
     it 'main_arena' do
