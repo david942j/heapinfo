@@ -112,10 +112,8 @@ In heap (0x602000):
       end
 
       it 'string' do
-        expect { @h.findall("\xbe\xad") }.to output(<<-EOS).to_stdout
-Searching "\\xBE\\xAD":
-In elf (0x400000):
-  elf+0x718
+        expect { @h.findall("\xbe\xad\xde\x00") }.to output(<<-EOS).to_stdout
+Searching "\\xBE\\xAD\\xDE\\x00":
 In heap (0x602000):
   heap+0x51
         EOS
