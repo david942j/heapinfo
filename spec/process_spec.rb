@@ -102,6 +102,24 @@ describe HeapInfo::Process do
       end
     end
 
+    describe 'find_all' do
+      it 'integer' do
+        expect { @h.find_all(0xdeadbeef) }.to output(<<-EOS).to_stdout
+Searching 0xdeadbeef:
+In heap (0x602000):
+  heap+0x50
+        EOS
+      end
+
+      it 'string' do
+        expect { @h.findall("\xbe\xad\xde\x00") }.to output(<<-EOS).to_stdout
+Searching "\\xBE\\xAD\\xDE\\x00":
+In heap (0x602000):
+  heap+0x51
+        EOS
+      end
+    end
+
     describe 'reload' do
       it 'monkey' do
         prog = File.readlink('/proc/self/exe')
