@@ -64,6 +64,13 @@ module HeapInfo
       end.compact.to_h
     end
 
+    def to_segment(sym)
+      return nil unless EXPORT.include?(sym)
+      seg = __send__(sym)
+      return nil unless seg.is_a?(Segment)
+      seg
+    end
+
     private
 
     def load_maps
