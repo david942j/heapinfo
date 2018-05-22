@@ -110,15 +110,14 @@ module HeapInfo
     #   #=> 0x9637a0 after :heap
     def offset(addr, sym = nil)
       return unless load?
-      segment = @info.__send__(sym) if HeapInfo::ProcessInfo::EXPORT.include?(sym)
-      segment = nil unless segment.is_a?(HeapInfo::Segment)
+      segment = @info.to_segment(sym)
       if segment.nil?
         sym, segment = @info.segments
                             .select { |_, seg| seg.base <= addr }
                             .min_by { |_, seg| addr - seg }
       end
-      return puts "Invalid address #{Helper.hex(addr)}" if segment.nil?
-      puts Helper.color(Helper.hex(addr - segment)) + ' after ' + Helper.color(sym, sev: :sym)
+      return $stdout.puts "Invalid address #{Helper.hex(addr)}" if segment.nil?
+      $stdout.puts Helper.color(Helper.hex(addr - segment)) + ' after ' + Helper.color(sym, sev: :sym)
     end
     alias off offset
 
@@ -176,9 +175,29 @@ module HeapInfo
       return Nil.new unless load?
       dumper.find(pattern, from, length, rel)
     end
-
-    # +search+ is more intutive to me
     alias search find
+
+    # Find pattern in all segments with pretty output.
+    #
+    # @param [Integer, String, Regexp] pattern
+    #   The desired search pattern, can be value(+Integer+), string, or regular expression.
+    # @param [Symbol, Array<Symbol>] segment
+    #   Only find pattern in these symbols.
+    #
+    # @return [void]
+    def find_all(pattern, segment = :all)
+      return Nil.new unless load?
+      segments = segment == :all ? %i[elf heap libc ld stack] : Array(segment)
+      result = findall_raw(pattern, segments).reject { |(_, _, ary)| ary.empty? }
+      target = pattern.is_a?(Integer) ? Helper.hex(pattern) : pattern.inspect
+      str = ["Searching #{Helper.color(target)}:\n"]
+      str.concat(result.map do |(sym, base, ary)|
+        "In #{Helper.color(sym, sev: :bin)} (#{Helper.color(Helper.hex(base))}):\n" +
+        ary.map { |v| "  #{Helper.color(sym, sev: :bin)}+#{Helper.color(Helper.hex(v))}\n" }.join
+      end)
+      $stdout.puts str
+    end
+    alias findall find_all
 
     # Pretty dump of bins layouts.
     #
@@ -189,7 +208,7 @@ module HeapInfo
     #   h.layouts(:fast, :unsorted, :small)
     def layouts(*args)
       return unless load?
-      puts libc.main_arena.layouts(*args)
+      $stdout.puts libc.main_arena.layouts(*args)
     end
 
     # Show simple information of target process.
@@ -270,6 +289,14 @@ module HeapInfo
       @dumper = Dumper.new(mem_filename) do |sym|
         @info.__send__(sym) if @info.respond_to?(sym)
       end
+    end
+
+    def findall_raw(pattern, segments)
+      segments.map do |sym|
+        seg = @info.to_segment(sym)
+        next unless seg
+        [sym, seg.base, dumper.scan(pattern, sym, :unlimited)]
+      end.compact
     end
 
     def mem_filename

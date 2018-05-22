@@ -98,6 +98,19 @@ module HeapInfo
       ret
     end
 
+    def scan(pattern, from, length)
+      from = base_of(from)
+      cur = from
+      result = []
+      loop do
+        addr = find(pattern, cur, length, false)
+        break if addr.nil?
+        result << addr - from
+        cur = addr + @match_length
+      end
+      result
+    end
+
     private
 
     def need_permission
@@ -151,15 +164,20 @@ module HeapInfo
     end
 
     def find_integer(value, from, length)
+      @match_length = size_t
       find_string([value].pack(size_t == 4 ? 'L*' : 'Q*'), from, length)
     end
 
     def find_string(string, from, length)
+      @match_length = string.size
       batch_dumper(from, length) { |str| str.index(string) }
     end
 
     def find_regexp(pattern, from, length)
-      batch_dumper(from, length) { |str| str =~ pattern }
+      batch_dumper(from, length) do |str|
+        str.match(pattern).tap { |m| @match_length = m[0].size if m }
+        str =~ pattern
+      end
     end
 
     def batch_dumper(from, remain_size)
