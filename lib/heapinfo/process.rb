@@ -1,5 +1,10 @@
 # encoding: ascii-8bit
 
+require 'heapinfo/dumper'
+require 'heapinfo/helper'
+require 'heapinfo/nil'
+require 'heapinfo/process_info'
+
 module HeapInfo
   # Main class of heapinfo.
   class Process
@@ -206,6 +211,8 @@ module HeapInfo
     # @return [void]
     # @example
     #   h.layouts(:fast, :unsorted, :small)
+    #   # ...
+    #   h.layouts(:all) # show all bin(s)
     def layouts(*args)
       return unless load?
       $stdout.puts libc.main_arena.layouts(*args)

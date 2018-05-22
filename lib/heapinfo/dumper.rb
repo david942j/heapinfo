@@ -1,3 +1,6 @@
+require 'heapinfo/helper'
+require 'heapinfo/nil'
+
 module HeapInfo
   # Class for memory dump relation works
   class Dumper

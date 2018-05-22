@@ -1,3 +1,11 @@
+require 'fileutils'
+
+require 'heapinfo/arena'
+require 'heapinfo/cache'
+require 'heapinfo/glibc/glibc'
+require 'heapinfo/helper'
+require 'heapinfo/segment'
+
 module HeapInfo
   # Record libc's base, name, and offsets.
   class Libc < Segment
@@ -34,11 +42,11 @@ module HeapInfo
     # @param [Proc] dumper The memory dumper for fetch more information.
     # @return [HeapInfo::Libc] libc segment found in maps.
     def self.find(maps, name, bits, ld_name, dumper)
-      obj = super(maps, name)
-      obj.size_t = bits / 8
-      obj.__send__(:ld_name=, ld_name)
-      obj.__send__(:dumper=, dumper)
-      obj
+      super(maps, name).tap do |obj|
+        obj.size_t = bits / 8
+        obj.__send__(:ld_name=, ld_name)
+        obj.__send__(:dumper=, dumper)
+      end
     end
 
     private

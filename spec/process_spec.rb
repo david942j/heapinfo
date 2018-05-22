@@ -1,6 +1,7 @@
 # encoding: ascii-8bit
 
-require 'heapinfo'
+require 'heapinfo/process'
+
 describe HeapInfo::Process do
   describe 'self' do
     before(:all) do

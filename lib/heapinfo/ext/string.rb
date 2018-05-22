@@ -1,3 +1,6 @@
+require 'heapinfo/chunk'
+require 'heapinfo/chunks'
+
 module HeapInfo
   # Define extensions of naive objects.
   module Ext

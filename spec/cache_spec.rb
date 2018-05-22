@@ -1,6 +1,7 @@
 # encoding: ascii-8bit
 
-require 'heapinfo'
+require 'heapinfo/cache'
+
 describe HeapInfo::Cache do
   before(:all) do
     @prefix = 'testcx1dd/'

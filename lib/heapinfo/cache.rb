@@ -1,4 +1,6 @@
 require 'digest'
+require 'fileutils'
+
 module HeapInfo
   # Self implment file-base cache manager.
   #

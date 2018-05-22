@@ -1,3 +1,6 @@
+require 'heapinfo/chunk'
+require 'heapinfo/helper'
+
 module HeapInfo
   # Records status of an arena, including bin(s) and top chunk.
   class Arena

@@ -1,6 +1,7 @@
 # encoding: ascii-8bit
 
-require 'heapinfo'
+require 'heapinfo/libc'
+
 describe HeapInfo::Libc do
   describe 'free' do
     before(:all) do

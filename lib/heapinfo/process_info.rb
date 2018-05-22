@@ -1,5 +1,11 @@
 # encoding: ascii-8bit
 
+require 'stringio'
+
+require 'heapinfo/segment'
+require 'heapinfo/libc'
+require 'heapinfo/helper'
+
 module HeapInfo
   # For {Process} to record basic process information.
   #
