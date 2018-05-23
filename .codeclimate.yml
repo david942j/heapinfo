@@ -8,6 +8,8 @@ plugins:
 checks:
   method-complexity:
     enabled: false
+  method-count:
+    enabled: false
   argument-count:
     config:
       threshold: 5

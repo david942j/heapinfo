@@ -70,6 +70,12 @@ describe HeapInfo::Process do
       EOS
     end
 
+    it 's' do
+      expect(@h.s(:elf)).to eq "\x7FELF\x02\x01\x01"
+      expect(@h.s('heap+8')).to eq "\x21"
+      expect(@h.s('heap-8')).to eq ''
+    end
+
     it 'debug wrapper' do
       @h.instance_variable_set(:@pid, nil)
       # will reload pid
