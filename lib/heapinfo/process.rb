@@ -216,7 +216,7 @@ module HeapInfo
     def layouts(*args)
       return unless load?
       str = ''
-      str << libc.tcache.layouts if (%w[all tcache] & args.map(&:to_s)).any?
+      str << libc.tcache.layouts if libc.tcache? && (%w[all tcache] & args.map(&:to_s)).any?
       str << libc.main_arena.layouts(*args)
       $stdout.puts str
     end
