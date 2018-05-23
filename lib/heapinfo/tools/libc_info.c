@@ -43,9 +43,9 @@ int tcache_enable() {
 }
 
 int main(int argc, char **argv) {
-  printf(R"STRING({
-  "main_arena_offset": %u,
-  "tcache_enable": %s
-})STRING" "\n", main_arena_offset(), tcache_enable() ? "true" : "false");
+  printf("{" \
+  "\"main_arena_offset\": %u," \
+  "\"tcache_enable\": %s" \
+  "}\n", main_arena_offset(), tcache_enable() ? "true" : "false");
   return 0;
 }
