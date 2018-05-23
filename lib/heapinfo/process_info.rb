@@ -48,7 +48,13 @@ module HeapInfo
       @auxv = parse_auxv(Helper.auxv_of(@pid))
       ld_seg = maps.find { |m| m[0] == @auxv[:ld_base] } # nil if static-linked elf
       @ld = ld_seg.nil? ? Nil.new : Segment.new(@auxv[:ld_base], ld_seg.last)
-      @libc = Libc.find(maps, match_maps(maps, options[:libc]), @bits, @ld.name, ->(*args) { process.dump(*args) })
+      @libc = Libc.find(
+        maps, match_maps(maps, options[:libc]),
+        bits: @bits,
+        ld_name: @ld.name,
+        dumper: ->(*args) { process.dump(*args) },
+        method_heap: method(:heap)
+      )
     end
 
     # Heap will not be mmapped if the process not use heap yet, so create a lazy loading method.

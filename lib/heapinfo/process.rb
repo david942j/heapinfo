@@ -215,7 +215,10 @@ module HeapInfo
     #   h.layouts(:all) # show all bin(s)
     def layouts(*args)
       return unless load?
-      $stdout.puts libc.main_arena.layouts(*args)
+      str = ''
+      str << libc.tcache.layouts if (%w[all tcache] & args.map(&:to_s)).any?
+      str << libc.main_arena.layouts(*args)
+      $stdout.puts str
     end
 
     # Show simple information of target process.
