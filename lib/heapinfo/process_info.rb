@@ -76,6 +76,10 @@ module HeapInfo
       end.compact.to_h
     end
 
+    # Convert symbol to segment.
+    #
+    # @return [HeapInfo::Segment?]
+    #   The segment object.
     def to_segment(sym)
       return nil unless EXPORT.include?(sym)
       seg = __send__(sym)

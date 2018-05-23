@@ -3,6 +3,7 @@ require 'heapinfo/arena'
 module HeapInfo
   # Fetch tcache structure and show its content.
   class Tcache
+    # #define TCACHE_MAX_BINS 64
     MAX_BINS = 64
     # Instantiate a {HeapInfo::Tcache} object.
     #
@@ -35,6 +36,10 @@ module HeapInfo
   #
   # Though this class inherited from {Chunk} ({Fastbin}), tcache entries are *not* chunks.
   class TcacheEntry < Fastbin
+    # For pretty inspect.
+    #
+    # @return [String]
+    #   Empty string is returned if this entry contains nothing.
     def inspect
       return '' if fd_of(@base).zero? # empty
       super

@@ -204,7 +204,7 @@ module HeapInfo
     end
     alias findall find_all
 
-    # Pretty dump of bins layouts.
+    # Pretty dump of bins' layouts.
     #
     # The request layouts will output to +stdout+.
     # @param [Array<Symbol>] args Bin type(s) you want to see.
@@ -212,7 +212,9 @@ module HeapInfo
     # @example
     #   h.layouts(:fast, :unsorted, :small)
     #   # ...
-    #   h.layouts(:all) # show all bin(s)
+    #   h.layouts(:tcache)
+    #   # ...
+    #   h.layouts(:all) # show all bin(s), includes tcache
     def layouts(*args)
       return unless load?
       str = ''
@@ -222,6 +224,7 @@ module HeapInfo
     end
 
     # Show simple information of target process.
+    #
     # Contains program names, pid, and segments' info.
     #
     # @return [String]

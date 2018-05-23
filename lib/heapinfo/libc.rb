@@ -34,7 +34,7 @@ module HeapInfo
       @main_arena = Arena.new(off + base, size_t, dumper)
     end
 
-    # Is this glibc supports tcache?
+    # Does this glibc support tcache?
     #
     # @return [Boolean]
     #   +true+ or +false+.
@@ -42,6 +42,10 @@ module HeapInfo
       info['tcache_enable']
     end
 
+    # The tcache object.
+    #
+    # @return [HeapInfo::Tcache?]
+    #   Returns +nil+ if this libc doesn't support tcache.
     def tcache
       return unless tcache?
       @tcache ||= Tcache.new(tcache_base, size_t, dumper)
