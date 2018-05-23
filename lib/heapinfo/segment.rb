@@ -1,3 +1,6 @@
+require 'heapinfo/helper'
+require 'heapinfo/nil'
+
 module HeapInfo
   # Record the base address and name in maps
   class Segment

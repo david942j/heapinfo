@@ -1,4 +1,9 @@
+require 'heapinfo/helper'
+require 'heapinfo/nil'
+
 module HeapInfo
+  # @api private
+  #
   # Class for memory dump relation works
   class Dumper
     # Default dump length
@@ -67,8 +72,6 @@ module HeapInfo
       puts str
     end
 
-    # @api private
-    #
     # Search a specific value/string/regexp in memory.
     # +#find+ only return the first matched address.
     # @param [Integer, String, Regexp] pattern
@@ -98,6 +101,7 @@ module HeapInfo
       ret
     end
 
+    # @return [Array<Integer>]
     def scan(pattern, from, length)
       from = base_of(from)
       cur = from

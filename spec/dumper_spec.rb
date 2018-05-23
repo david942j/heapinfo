@@ -1,6 +1,7 @@
 # encoding: ascii-8bit
 
-require 'heapinfo'
+require 'heapinfo/dumper'
+
 describe HeapInfo::Dumper do
   before(:all) do
     @get_block = lambda do |base|

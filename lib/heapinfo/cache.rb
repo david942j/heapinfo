@@ -1,4 +1,6 @@
 require 'digest'
+require 'fileutils'
+
 module HeapInfo
   # Self implment file-base cache manager.
   #
@@ -10,12 +12,12 @@ module HeapInfo
 
     # Define class methods.
     module ClassMethods
-      # Get the key for store libc offsets.
+      # Get the key for storing libc info.
       #
       # @param [String] libc_path The realpath to libc file.
-      # @return [String] The key for cache read/write.
-      def key_libc_offset(libc_path)
-        File.join('libc', Digest::MD5.hexdigest(IO.binread(libc_path)), 'offset')
+      # @return [String] The key for cache to read/write.
+      def key_libc_info(libc_path)
+        File.join('libc', Digest::MD5.hexdigest(IO.binread(libc_path)), 'info')
       end
 
       # Write cache to file.

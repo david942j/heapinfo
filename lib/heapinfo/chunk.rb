@@ -1,3 +1,5 @@
+require 'heapinfo/helper'
+
 module HeapInfo
   # The object of a heap chunk
   class Chunk

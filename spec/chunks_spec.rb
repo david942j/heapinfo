@@ -1,6 +1,7 @@
 # encoding: ascii-8bit
 
-require 'heapinfo'
+require 'heapinfo/chunks'
+
 describe HeapInfo::Chunks do
   before(:each) do
     @chunks = HeapInfo::Chunks.new

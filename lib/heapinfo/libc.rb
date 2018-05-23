@@ -1,3 +1,13 @@
+require 'fileutils'
+require 'json'
+
+require 'heapinfo/arena'
+require 'heapinfo/cache'
+require 'heapinfo/glibc/glibc'
+require 'heapinfo/helper'
+require 'heapinfo/segment'
+require 'heapinfo/tcache'
+
 module HeapInfo
   # Record libc's base, name, and offsets.
   class Libc < Segment
@@ -7,15 +17,12 @@ module HeapInfo
     # @param [Mixed] args See {HeapInfo::Segment#initialize} for more information.
     def initialize(*args)
       super
-      @offset = {}
     end
 
     # Get the offset of +main_arena+ in libc.
     # @return [Integer]
     def main_arena_offset
-      return @offset[:main_arena] if @offset[:main_arena]
-      return nil unless exhaust_search :main_arena
-      @offset[:main_arena]
+      info['main_arena_offset']
     end
 
     # Get the +main_arena+ of libc.
@@ -27,50 +34,69 @@ module HeapInfo
       @main_arena = Arena.new(off + base, size_t, dumper)
     end
 
+    # Does this glibc support tcache?
+    #
+    # @return [Boolean]
+    #   +true+ or +false+.
+    def tcache?
+      info['tcache_enable']
+    end
+
+    # The tcache object.
+    #
+    # @return [HeapInfo::Tcache?]
+    #   Returns +nil+ if this libc doesn't support tcache.
+    def tcache
+      return unless tcache?
+      @tcache ||= Tcache.new(tcache_base, size_t, dumper)
+    end
+
     # @param [Array] maps See {HeapInfo::Segment#find} for more information.
     # @param [String] name See {HeapInfo::Segment#find} for more information.
-    # @param [Integer] bits Either 64 or 32.
-    # @param [String] ld_name The loader's realpath, will be used for running subprocesses.
-    # @param [Proc] dumper The memory dumper for fetch more information.
+    #
+    # @option options [Integer] bits Either 64 or 32.
+    # @option options [String] ld_name The loader's realpath, will be used for running subprocesses.
+    # @option options [Proc] dumper The memory dumper for fetch more information.
+    # @option options [Proc] method_heap Method for getting heap segment.
+    #
     # @return [HeapInfo::Libc] libc segment found in maps.
-    def self.find(maps, name, bits, ld_name, dumper)
-      obj = super(maps, name)
-      obj.size_t = bits / 8
-      obj.__send__(:ld_name=, ld_name)
-      obj.__send__(:dumper=, dumper)
-      obj
+    def self.find(maps, name, **options)
+      super(maps, name).tap do |obj|
+        obj.size_t = options[:bits] / 8
+        %i[ld_name dumper method_heap].each do |sym|
+          obj.__send__("#{sym}=", options[sym])
+        end
+      end
     end
 
     private
 
-    attr_accessor :ld_name
-    # only for searching offset of main_arena now
-    def exhaust_search(symbol)
-      return false if symbol != :main_arena
-      read_main_arena_offset
-      true
+    attr_accessor :ld_name, :method_heap
+    # Get libc's info.
+    def info
+      return @info if @info
+      # Try to fetch from cache first.
+      key = HeapInfo::Cache.key_libc_info(name)
+      @info = HeapInfo::Cache.read(key)
+      @info ||= execute_libc_info.tap { |i| HeapInfo::Cache.write(key, i) }
     end
 
-    def read_main_arena_offset
-      key = HeapInfo::Cache.key_libc_offset(name)
-      @offset = HeapInfo::Cache.read(key) || {}
-      return @offset[:main_arena] if @offset.key?(:main_arena)
-      @offset[:main_arena] = resolve_main_arena_offset
-      HeapInfo::Cache.write(key, @offset)
-    end
-
-    def resolve_main_arena_offset
+    def execute_libc_info
       dir = HeapInfo::Helper.tempfile('')
       FileUtils.mkdir(dir)
-      tmp_elf = File.join(dir, 'get_arena')
+      tmp_elf = File.join(dir, 'libc_info')
       libc_file = File.join(dir, 'libc.so.6')
       ld_file = File.join(dir, 'ld.so')
       flags = "-w #{size_t == 4 ? '-m32' : ''}"
-      `cp #{name} #{libc_file} && \
+      JSON.parse(`cp #{name} #{libc_file} && \
          cp #{ld_name} #{ld_file} && \
-         gcc #{flags} #{File.expand_path('tools/get_arena.c', __dir__)} -o #{tmp_elf} 2>&1 > /dev/null && \
+         gcc #{flags} #{File.expand_path('tools/libc_info.c', __dir__)} -o #{tmp_elf} 2>&1 > /dev/null && \
          #{ld_file} --library-path #{dir} #{tmp_elf} && \
-         rm -fr #{dir}`.to_i(16)
+         rm -fr #{dir}`)
+    end
+
+    def tcache_base
+      method_heap.call.base + 2 * size_t
     end
   end
 end

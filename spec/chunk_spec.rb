@@ -1,6 +1,7 @@
 # encoding: ascii-8bit
 
-require 'heapinfo'
+require 'heapinfo/chunk'
+
 describe HeapInfo::Chunk do
   describe '32bit' do
     before(:all) do

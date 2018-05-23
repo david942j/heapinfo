@@ -1,3 +1,6 @@
+require 'heapinfo/chunk'
+require 'heapinfo/helper'
+
 module HeapInfo
   # Records status of an arena, including bin(s) and top chunk.
   class Arena
@@ -18,8 +21,8 @@ module HeapInfo
     # Instantiate a {HeapInfo::Arena} object.
     #
     # @param [Integer] base Base address of arena.
-    # @param [Integer] size_t Either 8 or 4
-    # @param [Proc] dumper For dump more data
+    # @param [Integer] size_t Either 8 or 4.
+    # @param [Proc] dumper For dumping more data.
     def initialize(base, size_t, dumper)
       @base = base
       @size_t = size_t
@@ -35,22 +38,18 @@ module HeapInfo
       top_ptr = Helper.unpack(size_t, @dumper.call(top_ptr_offset, size_t))
       @fastbin = []
       return self if top_ptr.zero? # arena not init yet
-      @top_chunk = Chunk.new size_t, top_ptr, @dumper
-      @last_remainder = Chunk.new size_t, top_ptr_offset + 8, @dumper
+      @top_chunk = Chunk.new(size_t, top_ptr, @dumper)
+      @last_remainder = Chunk.new(size_t, top_ptr_offset + 8, @dumper)
       # this offset diff after 2.23
       @system_mem = Array.new(2) do |off|
         Helper.unpack(size_t, @dumper.call(top_ptr_offset + 258 * size_t + 16 + off * size_t, size_t))
       end.find { |val| val >= 0x21000 && (val & 0xfff).zero? }
       @fastbin = Array.new(7) do |idx|
-        f = Fastbin.new(size_t, @base + 8 - size_t * 2 + size_t * idx, @dumper, head: true)
-        f.index = idx
-        f
+        Fastbin.new(size_t, @base + 8 - size_t * 2 + size_t * idx, @dumper, head: true).tap { |f| f.index = idx }
       end
       @unsorted_bin = UnsortedBin.new(size_t, top_ptr_offset, @dumper, head: true)
       @smallbin = Array.new(62) do |idx|
-        s = Smallbin.new(size_t, @base + 8 + size_t * (12 + 2 * idx), @dumper, head: true)
-        s.index = idx
-        s
+        Smallbin.new(size_t, @base + 8 + size_t * (12 + 2 * idx), @dumper, head: true).tap { |s| s.index = idx }
       end
       self
     end
@@ -86,10 +85,10 @@ module HeapInfo
 
     # Instantiate a {HeapInfo::Fastbin} object.
     #
-    # @param [Mixed] args See {HeapInfo::Chunk} for more information.
-    def initialize(*args)
+    # @see HeapInfo::Chunk
+    def initialize(_size_t, base, *)
       super
-      @fd = Helper.unpack(size_t, @data[0, @size_t])
+      @fd = fd_of(base)
     end
 
     # Mapping index of fastbin to chunk size.
@@ -135,6 +134,14 @@ module HeapInfo
       ret << nil
     end
 
+    private
+
+    def addr_of(ptr, offset)
+      t = dump(ptr + size_t * offset, size_t)
+      return nil if t.nil?
+      Helper.unpack(size_t, t)
+    end
+
     # @param [Integer] ptr Get the +fd+ value of chunk at +ptr+.
     # @return [Integer] The +fd+.
     def fd_of(ptr)
@@ -145,14 +152,6 @@ module HeapInfo
     # @return [Integer] The +bk+.
     def bk_of(ptr)
       addr_of(ptr, 3)
-    end
-
-    private
-
-    def addr_of(ptr, offset)
-      t = dump(ptr + size_t * offset, size_t)
-      return nil if t.nil?
-      Helper.unpack(size_t, t)
     end
   end
 

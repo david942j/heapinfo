@@ -1,6 +1,7 @@
 # encoding: ascii-8bit
 
-require 'heapinfo'
+require 'heapinfo/helper'
+
 describe HeapInfo::Helper do
   describe 'unpack' do
     it '32bit' do

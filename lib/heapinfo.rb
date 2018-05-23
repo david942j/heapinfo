@@ -1,6 +1,9 @@
 # Basic requirements from standard library
 require 'fileutils'
 
+require 'heapinfo/ext/string.rb'
+require 'heapinfo/process'
+
 # HeapInfo - an interactive debugger for heap exploitation
 #
 # HeapInfo makes pwning life easier with ruby style memory dumper.
@@ -46,9 +49,7 @@ module HeapInfo
   #   p h.ld.name
   #   #=> "/home/heapinfo/ld-linux-x86-64.so.2"
   def self.heapinfo(prog, options = {})
-    h = HeapInfo::Process.new(prog, options)
-    puts h
-    h
+    HeapInfo::Process.new(prog, options).tap { |h| $stdout.puts h }
   end
 end
 
@@ -58,17 +59,3 @@ end
 def heapinfo(*args)
   ::HeapInfo.heapinfo(*args)
 end
-
-require 'heapinfo/helper'
-require 'heapinfo/nil'
-require 'heapinfo/cache'
-require 'heapinfo/process_info'
-require 'heapinfo/process'
-require 'heapinfo/segment'
-require 'heapinfo/glibc/glibc'
-require 'heapinfo/libc'
-require 'heapinfo/chunk'
-require 'heapinfo/chunks'
-require 'heapinfo/arena'
-require 'heapinfo/dumper'
-require 'heapinfo/ext/string.rb'

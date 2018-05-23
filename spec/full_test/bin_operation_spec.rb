@@ -14,6 +14,8 @@ describe "Bin's operation" do
         expect(h.libc.main_arena.top_chunk.base).to eq 0x602340
         expect(h.libc.main_arena.system_mem).to eq 0x21000
         expect(h.libc.main_arena.fastbin.size).to eq 7
+
+        expect(h.libc.tcache?).to be false
       end
     end
 
@@ -102,6 +104,8 @@ Smallbin[0x90]: 0x6020f0 === [self] === 0x6020f0
         expect(h.libc.main_arena.top_chunk.base).to eq 0x804b340
         expect(h.libc.main_arena.system_mem).to eq 0x21000
         expect(h.libc.main_arena.fastbin.size).to eq 7
+
+        expect(h.libc.tcache?).to be false
       end
     end
 

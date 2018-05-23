@@ -1,4 +1,5 @@
-require 'heapinfo'
+require 'heapinfo/nil'
+
 describe HeapInfo::Nil do
   before(:all) do
     @nil = HeapInfo::Nil.new

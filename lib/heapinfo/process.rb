@@ -1,5 +1,10 @@
 # encoding: ascii-8bit
 
+require 'heapinfo/dumper'
+require 'heapinfo/helper'
+require 'heapinfo/nil'
+require 'heapinfo/process_info'
+
 module HeapInfo
   # Main class of heapinfo.
   class Process
@@ -199,19 +204,27 @@ module HeapInfo
     end
     alias findall find_all
 
-    # Pretty dump of bins layouts.
+    # Pretty dump of bins' layouts.
     #
     # The request layouts will output to +stdout+.
     # @param [Array<Symbol>] args Bin type(s) you want to see.
     # @return [void]
     # @example
     #   h.layouts(:fast, :unsorted, :small)
+    #   # ...
+    #   h.layouts(:tcache)
+    #   # ...
+    #   h.layouts(:all) # show all bin(s), includes tcache
     def layouts(*args)
       return unless load?
-      $stdout.puts libc.main_arena.layouts(*args)
+      str = ''
+      str << libc.tcache.layouts if libc.tcache? && (%w[all tcache] & args.map(&:to_s)).any?
+      str << libc.main_arena.layouts(*args)
+      $stdout.puts str
     end
 
     # Show simple information of target process.
+    #
     # Contains program names, pid, and segments' info.
     #
     # @return [String]
