@@ -14,6 +14,8 @@ describe 'tcache libraries' do
         expect(h.libc.main_arena.top_chunk.base).to eq 0x6225a0
         expect(h.libc.main_arena.system_mem).to eq 0x21000
         expect(h.libc.main_arena.fastbin.size).to eq 7
+
+        expect(h.libc.tcache?).to be true
       end
     end
   end
@@ -30,6 +32,8 @@ describe 'tcache libraries' do
         expect(h.libc.main_arena.top_chunk.base).to eq 0x806b4a8
         expect(h.libc.main_arena.system_mem).to eq 0x22000
         expect(h.libc.main_arena.fastbin.size).to eq 7
+
+        expect(h.libc.tcache?).to be true
       end
     end
   end
