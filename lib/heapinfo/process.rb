@@ -151,6 +151,19 @@ module HeapInfo
       dumper.x(count, address)
     end
 
+    # Gdb-like command
+    #
+    # Dump a string until reach the null-byte.
+    # @param [String, Symbol, Integer] address The base address to be dumped.
+    #   See {#dump}.
+    #
+    # @return [String]
+    #   The string *without* null-byte.
+    def s(address)
+      return Nil.new unless load?
+      dumper.cstring(address)
+    end
+
     # Gdb-like command.
     #
     # Search a specific value/string/regexp in memory.

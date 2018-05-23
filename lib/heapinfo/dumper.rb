@@ -1,3 +1,5 @@
+# encoding: ascii-8bit
+
 require 'heapinfo/helper'
 require 'heapinfo/nil'
 
@@ -70,6 +72,21 @@ module HeapInfo
           values.map { |v| Helper.color(format("0x%0#{size_t * 2}x", v)) }.join("\t")
       end.join("\n")
       puts str
+    end
+
+    # Dump data from +address+ until reach null-byte.
+    #
+    # @return [String]
+    def cstring(address)
+      base = base_of(address)
+      len = 1
+      cur = ''
+      loop do
+        cur << dump(base + len - 1, len)
+        break if cur.index("\x00")
+        len <<= 1
+      end
+      cur[0, cur.index("\x00")]
     end
 
     # Search a specific value/string/regexp in memory.
