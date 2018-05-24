@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    heapinfo (1.1.0)
+    heapinfo (1.2.0)
       dentaku (~> 3)
 
 GEM
