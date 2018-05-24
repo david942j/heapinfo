@@ -10,10 +10,10 @@
 As pwn lovers, while playing CTF with heap exploitation, we always need a debugger (e.g. gdb) for tracking memory layout. But we don't really need gdb if we want to see whether the heap layout same as our imagine or not. Hope this small tool helps us exploit easier ;).
 
 ### Why
-**HeapInfo** is very helpful when binary has somehow anti-debugger limitations, e.g being ptraced.
+**HeapInfo** is very helpful when binary has somehow anti-debugger limitations, e.g. being ptraced.
 **HeapInfo** still works because it doesn't use ptrace.
 
-Implement with ruby because I love ruby :P. But might also implement with Python (if no others did) in the future.
+Implement with Ruby because I love Ruby :P. But might implement with Python (if no others did) in the future.
 
 If you prefer [pwntools](https://github.com/Gallopsled/pwntools) for exploiting, you can still use **HeapInfo** in irb/pry as a small debugger.
 
@@ -33,12 +33,10 @@ $ gem install heapinfo
 * `layouts` - Show the current bin layouts, very useful for heap exploitation.
 * `offset` - Show the offset between given address and segment. Very useful for calculating relative offset.
 * `canary` - Fetch the value of stack guard!
-* `x` - Provide gdb-like commands.
-* `find` - Provide gdb-like commands.
+* `x` - Provide gdb-like command.
+* `s` - Provide gdb-like command.
+* `find` - Provide gdb-like command.
 * More features and details can be found in [RDoc](http://www.rubydoc.info/github/david942j/heapinfo/master/)
-
-### Under developing
-* `free` - Show what will happend when calling `glibc#free` an address.
 
 ## Usage
 
@@ -48,7 +46,7 @@ $ gem install heapinfo
 require 'heapinfo'
 # ./victim is running
 h = heapinfo('victim') 
-# or use h = heapinfo(20568) to specific pid
+# or use h = heapinfo(20568) to specify a pid
 
 # will present simple info when loading:
 # Program: /home/heapinfo/victim PID: 20568
@@ -119,6 +117,11 @@ h.layouts :unsorted, :small
 ```
 ![smallbin layouts](https://github.com/david942j/heapinfo/blob/master/examples/unsorted_smallbin_layouts.png?raw=true)
 
+```ruby
+h.layouts :tcache
+```
+![tcache layouts](https://github.com/david942j/heapinfo/blob/master/examples/tcache_layouts.png?raw=true)
+
 #### offset
 ```ruby
 h.offset(0x7fda86fe8670)
@@ -169,3 +172,5 @@ h.offset(h.find('/bin/sh', :libc))
 * libc-2.23
 * libc-2.24
 * libc-2.25
+* libc-2.26
+* libc-2.27
