@@ -86,8 +86,8 @@ describe HeapInfo::Process do
       it 'far away' do
         expect(@h.find('/bin/sh', :libc)).to be_a Integer
         # check coerce
-        expect(@h.find('/bin/sh', :libc) - @h.libc).to eq 0x18c177
-        expect(@h.find('/bin/sh', :libc, rel: true)).to eq 0x18c177
+        expect(@h.find('/bin/sh', :libc) - @h.libc).to eq 0x18cd57
+        expect(@h.find('/bin/sh', :libc, rel: true)).to eq 0x18cd57
       end
 
       it 'value' do
