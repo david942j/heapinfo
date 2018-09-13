@@ -30,6 +30,7 @@ module HeapInfo
           [Time.parse(time), pid.to_i]
         end
         return nil if info.empty? # process not exists yet
+
         info.max_by(&:first).last
       end
 
@@ -52,6 +53,7 @@ module HeapInfo
         lines.map do |line|
           s = line.scan(%r{^([0-9a-f]+)-([0-9a-f]+)\s([rwxp-]{4})[^/|\[]*([/|\[].+)$})[0]
           next nil if s.nil?
+
           s[0], s[1] = s[0, 2].map { |h| h.to_i(16) }
           s
         end.compact
@@ -83,6 +85,7 @@ module HeapInfo
       def color(s, sev: nil)
         s = s.to_s
         return s if @disable_color
+
         cc = COLOR_CODE
         color = if cc.key?(sev) then cc[sev]
                 elsif integer?(s) then cc[:integer] # integers
@@ -115,6 +118,7 @@ module HeapInfo
       #   HeapInfo::Helper.hex(1000) #=> '0x3e8'
       def hex(num)
         return format('0x%x', num) if num >= 0
+
         format('-0x%x', -num)
       end
 

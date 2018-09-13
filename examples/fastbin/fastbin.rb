@@ -27,6 +27,7 @@ def new(idx, size, data)
   z.gets $pt
   z.puts "1 #{idx} #{size}"
   raise if data.include? "\n"
+
   z.write data + "\n"
 end
 

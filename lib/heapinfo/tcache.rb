@@ -42,6 +42,7 @@ module HeapInfo
     #   Empty string is returned if this entry contains nothing.
     def inspect
       return '' if fd_of(@base).zero? # empty
+
       super
     end
 

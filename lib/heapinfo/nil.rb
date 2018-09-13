@@ -16,6 +16,7 @@ module HeapInfo
     #   #=> nil
     def method_missing(method_sym, *args, &block)
       return nil.__send__(method_sym, *args, &block) if nil.respond_to?(method_sym)
+
       self || super
     end
 

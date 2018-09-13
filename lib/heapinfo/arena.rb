@@ -38,6 +38,7 @@ module HeapInfo
       top_ptr = Helper.unpack(size_t, @dumper.call(top_ptr_offset, size_t))
       @fastbin = []
       return self if top_ptr.zero? # arena not init yet
+
       @top_chunk = Chunk.new(size_t, top_ptr, @dumper)
       @last_remainder = Chunk.new(size_t, top_ptr_offset + 8, @dumper)
       # this offset diff after 2.23
@@ -111,6 +112,7 @@ module HeapInfo
       title + list.map do |ptr|
         next "(#{ptr})\n" if ptr.is_a?(Symbol)
         next " => (nil)\n" if ptr.nil?
+
         format(' => %s', Helper.color(format('%#x', ptr)))
       end.join
     end
@@ -127,6 +129,7 @@ module HeapInfo
       while ptr != 0
         ret << ptr
         return ret << :loop if dup[ptr]
+
         dup[ptr] = true
         ptr = fd_of(ptr)
         return ret << :invalid if ptr.nil?
@@ -139,6 +142,7 @@ module HeapInfo
     def addr_of(ptr, offset)
       t = dump(ptr + size_t * offset, size_t)
       return nil if t.nil?
+
       Helper.unpack(size_t, t)
     end
 
@@ -174,6 +178,7 @@ module HeapInfo
     def inspect(size: 2)
       list = link_list(size)
       return '' if list.size <= 1 && Helper.class_name(self) != 'UnsortedBin' # bad..
+
       title + pretty_list(list) + "\n"
     end
 
@@ -184,9 +189,11 @@ module HeapInfo
       center = nil
       list.map.with_index do |c, idx|
         next center = Helper.color('[self]', sev: :bin) if c == @base
+
         color_c = Helper.color(format('%#x', c))
         fwd = fd_of(c)
         next "#{color_c}(invalid)" if fwd.nil? # invalid c
+
         bck = bk_of(c)
         if center.nil? # bk side
           format('%s%s', color_c, fwd == list[idx + 1] ? nil : Helper.color(format('(%#x)', fwd)))
@@ -211,6 +218,7 @@ module HeapInfo
         while ptr != @base && sz < expand_size
           append.call(ptr)
           break if ptr.nil? || dup[ptr] # invalid or duplicated pointer
+
           dup[ptr] = true
           ptr = __send__(nxt, ptr)
           sz += 1

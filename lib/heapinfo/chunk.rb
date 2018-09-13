@@ -25,6 +25,7 @@ module HeapInfo
     #   # create a chunk with chunk size 0x21
     def initialize(size_t, base, dumper, head: false)
       raise ArgumentError, 'size_t can be either 4 or 8' unless [4, 8].include?(size_t)
+
       self.class.__send__(:define_method, :dump) { |*args| dumper.call(*args) }
       @size_t = size_t
       @base = base
@@ -116,6 +117,7 @@ module HeapInfo
       return :fast if sz <= @size_t * 16
       return :small if sz <= @size_t * 0x7e
       return :large if sz <= @size_t * 0x3ffe # is this correct?
+
       :mmap
     end
   end

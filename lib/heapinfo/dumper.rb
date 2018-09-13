@@ -31,6 +31,7 @@ module HeapInfo
     #   #=> "\x7fELF"
     def dump(*args)
       return need_permission unless dumpable?
+
       base, len = base_len_of(*args)
       file = mem_f
       file.pos = base
@@ -39,6 +40,7 @@ module HeapInfo
       mem
     rescue => e # rubocop:disable Style/RescueStandardError
       raise e if e.is_a? ArgumentError
+
       nil
     end
 
@@ -84,6 +86,7 @@ module HeapInfo
       loop do
         cur << (dump(base + len - 1, len) || '')
         break if cur.index("\x00")
+
         len <<= 1
         return cur if cur.size != len - 1 # reached undumpable memory
       end
@@ -127,6 +130,7 @@ module HeapInfo
       loop do
         addr = find(pattern, cur, length, false)
         break if addr.nil?
+
         result << addr - from
         cur = addr + @match_length
       end
@@ -178,6 +182,7 @@ module HeapInfo
              when String then Helper.evaluate(arg, store: segments)
              end
       raise ArgumentError, "Invalid base: #{arg.inspect}" unless base.is_a?(Integer) # invalid usage
+
       [base, len]
     end
 
@@ -210,10 +215,12 @@ module HeapInfo
         break if str.nil? # unreadable
         break unless (idx = yield(str)).nil?
         break if str.length < dump_size # remain is unreadable
+
         remain_size -= str.length
         from += str.length
       end
       return if idx.nil?
+
       from + idx
     end
 

@@ -43,6 +43,7 @@ RSpec.configure do |config|
       Dir.glob(File.join(__dir__, 'files', 'libraries', 'libc-*')).map do |dir|
         ver = File.basename(dir).sub('libc-', '')
         next if Gem::Version.new(ver) >= Gem::Version.new('2.26')
+
         HeapInfo::Process.new(@compile_and_run.call(bit: bit, lib_ver: ver))
       end.compact
     end
@@ -51,6 +52,7 @@ RSpec.configure do |config|
       Dir.glob(File.join(__dir__, 'files', 'libraries', 'libc-*')).map do |dir|
         ver = File.basename(dir).sub('libc-', '')
         next unless Gem::Version.new(ver) >= Gem::Version.new('2.26')
+
         HeapInfo::Process.new(@compile_and_run.call(bit: bit, lib_ver: ver))
       end.compact
     end
