@@ -55,6 +55,7 @@ module HeapInfo
     #   # block of #debug will not execute if can't found process
     def debug
       return unless load!
+
       yield if block_given?
     end
 
@@ -82,6 +83,7 @@ module HeapInfo
     #   dump(:meow) # no such segment
     def dump(*args)
       return Nil.new unless load?
+
       dumper.dump(*args)
     end
 
@@ -92,6 +94,7 @@ module HeapInfo
     # @param [Mixed] args Same as arguments of {#dump}.
     def dump_chunks(*args)
       return Nil.new unless load?
+
       dumper.dump_chunks(*args)
     end
 
@@ -115,6 +118,7 @@ module HeapInfo
     #   #=> 0x9637a0 after :heap
     def offset(addr, sym = nil)
       return unless load?
+
       segment = @info.to_segment(sym)
       if segment.nil?
         sym, segment = @info.segments
@@ -122,6 +126,7 @@ module HeapInfo
                             .min_by { |_, seg| addr - seg }
       end
       return $stdout.puts "Invalid address #{Helper.hex(addr)}" if segment.nil?
+
       $stdout.puts Helper.color(Helper.hex(addr - segment)) + ' after ' + Helper.color(sym, sev: :sym)
     end
     alias off offset
@@ -148,6 +153,7 @@ module HeapInfo
     #   # 0x400010:       0x00000001003e0002
     def x(count, address)
       return unless load?
+
       dumper.x(count, address)
     end
 
@@ -161,6 +167,7 @@ module HeapInfo
     #   The string *without* null-byte.
     def s(address)
       return Nil.new unless load?
+
       dumper.cstring(address)
     end
 
@@ -191,6 +198,7 @@ module HeapInfo
     #   #=> true
     def find(pattern, from, length = :unlimited, rel: false)
       return Nil.new unless load?
+
       dumper.find(pattern, from, length, rel)
     end
     alias search find
@@ -205,6 +213,7 @@ module HeapInfo
     # @return [void]
     def find_all(pattern, segment = :all)
       return Nil.new unless load?
+
       segments = segment == :all ? %i[elf heap libc ld stack] : Array(segment)
       result = findall_raw(pattern, segments).reject { |(_, _, ary)| ary.empty? }
       target = pattern.is_a?(Integer) ? Helper.hex(pattern) : pattern.inspect
@@ -230,6 +239,7 @@ module HeapInfo
     #   h.layouts(:all) # show all bin(s), includes tcache
     def layouts(*args)
       return unless load?
+
       str = ''
       str << libc.tcache.layouts if libc.tcache? && (%w[all tcache] & args.map(&:to_s)).any?
       str << libc.main_arena.layouts(*args)
@@ -245,6 +255,7 @@ module HeapInfo
     #   puts h
     def to_s
       return 'Process not found' unless load?
+
       "Program: #{Helper.color(program.name)} PID: #{Helper.color(pid)}\n" +
         program.to_s +
         heap.to_s +
@@ -262,6 +273,7 @@ module HeapInfo
     #   #=> 11342701118118205184 # 0x9d695e921adc9700
     def canary
       return Nil.new unless load?
+
       addr = @info.auxv[:random]
       Helper.unpack(bits / 8, @dumper.dump(addr, bits / 8)) & 0xffffffffffffff00
     end
@@ -284,8 +296,10 @@ module HeapInfo
     # try to load
     def load!
       return true if @pid
+
       @pid = fetch_pid
       return clear_process if @pid.nil? # still can't load
+
       load_info!
       true
     end
@@ -321,6 +335,7 @@ module HeapInfo
       segments.map do |sym|
         seg = @info.to_segment(sym)
         next unless seg
+
         [sym, seg.base, dumper.scan(pattern, sym, :unlimited)]
       end.compact
     end

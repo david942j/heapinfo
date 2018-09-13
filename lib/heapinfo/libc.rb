@@ -29,8 +29,10 @@ module HeapInfo
     # @return [HeapInfo::Arena]
     def main_arena
       return @main_arena.reload! if @main_arena
+
       off = main_arena_offset
       return if off.nil?
+
       @main_arena = Arena.new(off + base, size_t, dumper)
     end
 
@@ -48,6 +50,7 @@ module HeapInfo
     #   Returns +nil+ if this libc doesn't support tcache.
     def tcache
       return unless tcache?
+
       @tcache ||= Tcache.new(tcache_base, size_t, dumper)
     end
 
@@ -75,6 +78,7 @@ module HeapInfo
     # Get libc's info.
     def info
       return @info if @info
+
       # Try to fetch from cache first.
       key = HeapInfo::Cache.key_libc_info(name)
       @info = HeapInfo::Cache.read(key)

@@ -39,6 +39,7 @@ module HeapInfo
       def read(key)
         filepath = realpath(key)
         return unless File.file?(filepath)
+
         Marshal.load(IO.binread(filepath))
       rescue TypeError, ArgumentError
         nil # handle if file content is invalid
@@ -66,6 +67,7 @@ module HeapInfo
       # @return [String] Prepend with {HeapInfo::Cache::CACHE_DIR}.
       def realpath(key)
         raise ArgumentError, 'Invalid key(file path)' if key =~ %r{[^\w/]}
+
         File.join(CACHE_DIR, key)
       end
     end

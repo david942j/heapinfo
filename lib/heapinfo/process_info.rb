@@ -82,8 +82,10 @@ module HeapInfo
     #   The segment object.
     def to_segment(sym)
       return nil unless EXPORT.include?(sym)
+
       seg = __send__(sym)
       return nil unless seg.is_a?(Segment)
+
       seg
     end
 

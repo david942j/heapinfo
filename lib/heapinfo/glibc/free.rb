@@ -11,8 +11,10 @@ module HeapInfo
       # TODO: free_hook
       mem = ulong mem
       return if mem.zero? # free(0) has no effect
+
       ptr = mem2chunk(mem)
       return munmap_chunk(ptr) if chunk_is_mmapped(ptr)
+
       av = arena_for_chunk(ptr)
       int_free(av, ptr)
     end

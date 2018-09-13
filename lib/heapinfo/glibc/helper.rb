@@ -40,6 +40,7 @@ module HeapInfo
     def arena_for_chunk(ptr)
       # not support arena other than initial main_arena
       return if dumper.call(ptr, size_t * 2).to_chunk.non_main_arena?
+
       main_arena
     end
 
