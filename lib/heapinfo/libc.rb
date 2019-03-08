@@ -28,7 +28,7 @@ module HeapInfo
     # Get the +main_arena+ of libc.
     # @return [HeapInfo::Arena]
     def main_arena
-      return @main_arena.reload! if @main_arena
+      return @main_arena.reload! if defined? @main_arena
 
       off = main_arena_offset
       return if off.nil?
@@ -77,7 +77,7 @@ module HeapInfo
     attr_accessor :ld_name, :method_heap
     # Get libc's info.
     def info
-      return @info if @info
+      return @info if defined? @info
 
       # Try to fetch from cache first.
       key = HeapInfo::Cache.key_libc_info(name)
