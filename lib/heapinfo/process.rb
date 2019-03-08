@@ -26,7 +26,7 @@ module HeapInfo
       @pid = nil
       # Transparent info's methods
       ProcessInfo::EXPORT.each do |m|
-        self.define_singleton_method(m) do
+        define_singleton_method(m) do
           return Nil.new if @pid.nil?
 
           @info.__send__(m)
@@ -325,7 +325,9 @@ module HeapInfo
 
     def load_info!
       @info = ProcessInfo.new(self)
-      @dumper ||= Dumper.new(mem_filename) do |sym|
+      return if defined? @dumper
+
+      @dumper = Dumper.new(mem_filename) do |sym|
         @info.__send__(sym) if @info.respond_to?(sym)
       end
     end

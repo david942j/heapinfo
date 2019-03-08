@@ -26,7 +26,7 @@ module HeapInfo
     def initialize(size_t, base, dumper, head: false)
       raise ArgumentError, 'size_t can be either 4 or 8' unless [4, 8].include?(size_t)
 
-      self.define_singleton_method(:dump) { |*args| dumper.call(*args) }
+      define_singleton_method(:dump) { |*args| dumper.call(*args) }
       @size_t = size_t
       @base = base
       sz = dump(@base, size_t * 2)
