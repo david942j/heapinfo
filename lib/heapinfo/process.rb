@@ -23,6 +23,15 @@ module HeapInfo
     def initialize(prog, options = {})
       @prog = prog
       @options = DEFAULT_LIB.merge options
+      @pid = nil
+      # Transparent info's methods
+      ProcessInfo::EXPORT.each do |m|
+        define_singleton_method(m) do
+          return Nil.new if @pid.nil?
+
+          @info.__send__(m)
+        end
+      end
       load!
     end
 
@@ -298,7 +307,7 @@ module HeapInfo
       return true if @pid
 
       @pid = fetch_pid
-      return clear_process if @pid.nil? # still can't load
+      return false if @pid.nil? # still can't load
 
       load_info!
       true
@@ -314,18 +323,10 @@ module HeapInfo
       pid
     end
 
-    def clear_process
-      ProcessInfo::EXPORT.each do |m|
-        self.class.__send__(:define_method, m) { Nil.new }
-      end
-      false
-    end
-
-    def load_info! # :nodoc:
+    def load_info!
       @info = ProcessInfo.new(self)
-      ProcessInfo::EXPORT.each do |m|
-        self.class.__send__(:define_method, m) { @info.__send__(m) }
-      end
+      return if defined? @dumper
+
       @dumper = Dumper.new(mem_filename) do |sym|
         @info.__send__(sym) if @info.respond_to?(sym)
       end
