@@ -325,8 +325,6 @@ module HeapInfo
 
     def load_info!
       @info = ProcessInfo.new(self)
-      return if defined? @dumper
-
       @dumper = Dumper.new(mem_filename) do |sym|
         @info.__send__(sym) if @info.respond_to?(sym)
       end
