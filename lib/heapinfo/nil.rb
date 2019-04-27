@@ -1,9 +1,13 @@
+require 'singleton'
+
 module HeapInfo
   # Self define a +nil+ like class.
   #
   # Can be the return value of {HeapInfo::Process#dump} and {HeapInfo::Process#dump_chunks},
   # to prevent use the return value for calculating accidentally while exploiting remote.
   class Nil
+    include Singleton
+
     %i[nil? inspect to_s].each do |method_sym|
       define_method(method_sym) { |*args, &block| nil.__send__(method_sym, *args, &block) }
     end
@@ -14,10 +18,10 @@ module HeapInfo
     #   # h.dump would return Nil when process not found
     #   p h.dump(:heap)[8, 8].unpack('Q*')
     #   #=> nil
-    def method_missing(method_sym, *args, &block)
+    def method_missing(method_sym, *args, &block) # rubocop:disable Style/MethodMissingSuper
       return nil.__send__(method_sym, *args, &block) if nil.respond_to?(method_sym)
 
-      self || super
+      self
     end
 
     # Yap
@@ -25,8 +29,8 @@ module HeapInfo
       super
     end
 
-    # To prevent error raised when using +puts Nil.new+.
-    # @return [Array] Empty array
+    # To prevent error raised with +puts Nil.instance+.
+    # @return [Array] An empty array.
     def to_ary
       []
     end

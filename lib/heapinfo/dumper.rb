@@ -19,7 +19,7 @@ module HeapInfo
     #   See {Dumper#base_len_of} for more information.
     def initialize(mem_filename, &block)
       @filename = mem_filename
-      @info = block || ->(*) { HeapInfo::Nil.new }
+      @info = block || ->(*) { HeapInfo::Nil.instance }
       need_permission unless dumpable?
     end
 
@@ -35,7 +35,7 @@ module HeapInfo
       base, len = base_len_of(*args)
       file = mem_f
       file.pos = base
-      mem = file.readpartial len
+      mem = file.readpartial(len)
       file.close
       mem
     rescue => e # rubocop:disable Style/RescueStandardError

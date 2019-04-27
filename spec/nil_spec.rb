@@ -2,7 +2,7 @@ require 'heapinfo/nil'
 
 describe HeapInfo::Nil do
   before(:all) do
-    @nil = HeapInfo::Nil.new
+    @nil = HeapInfo::Nil.instance
   end
   it 'nil?' do
     expect(@nil.nil?).to be true

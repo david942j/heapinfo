@@ -47,7 +47,7 @@ module HeapInfo
       @stack = Segment.find(maps, '[stack]')
       @auxv = parse_auxv(Helper.auxv_of(@pid))
       ld_seg = maps.find { |m| m[0] == @auxv[:ld_base] } # nil if static-linked elf
-      @ld = ld_seg.nil? ? Nil.new : Segment.new(@auxv[:ld_base], ld_seg.last)
+      @ld = ld_seg.nil? ? Nil.instance : Segment.new(@auxv[:ld_base], ld_seg.last)
       @libc = Libc.find(
         maps, match_maps(maps, options[:libc]),
         bits: @bits,
