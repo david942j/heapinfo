@@ -1,12 +1,14 @@
 # encoding: ascii-8bit
 
+require 'open3'
+
 require 'heapinfo/process'
 
 describe HeapInfo::Process do
   describe 'self' do
     before(:all) do
       @prog = File.readlink('/proc/self/exe')
-      @h = HeapInfo::Process.new(@prog)
+      @h = described_class.new(@prog)
       @h.instance_variable_set(:@pid, 'self')
     end
 
@@ -57,7 +59,7 @@ describe HeapInfo::Process do
       expect(@h.elf.name).to eq @victim
       pid = @h.pid
       expect(pid).to be_a Integer
-      expect(HeapInfo::Process.new(pid).elf.name).to eq @h.elf.name
+      expect(described_class.new(pid).elf.name).to eq @h.elf.name
     end
 
     it 'x' do
@@ -130,13 +132,32 @@ In heap (0x602000):
     describe 'reload' do
       it 'monkey' do
         prog = File.readlink('/proc/self/exe')
-        @h = HeapInfo::Process.new(prog)
-        expect(@h.pid).to be_a Integer
-        pid = @h.pid
-        @h.instance_variable_set(:@prog, 'NO_THIS')
-        expect(@h.reload!.pid).to be nil
-        @h.instance_variable_set(:@prog, prog)
-        expect(@h.reload.pid).to be pid
+        h = described_class.new(prog)
+        expect(h.pid).to be_a Integer
+        pid = h.pid
+        h.instance_variable_set(:@prog, 'NO_THIS')
+        expect(h.reload!.pid).to be nil
+        h.instance_variable_set(:@prog, prog)
+        expect(h.reload.pid).to be pid
+      end
+
+      it 'new process' do
+        prog = 'cat'
+        stdin, _, _, wait_thr = Open3.popen3(prog)
+        h = described_class.new(prog)
+        pid = wait_thr[:pid]
+        expect(h.pid).to be pid
+        stdin.close
+        expect(wait_thr.value.exitstatus).to be_zero
+
+        expect(h.reload.pid).to be_nil
+
+        stdin, _, _, wait_thr = Open3.popen3(prog)
+        pid2 = wait_thr[:pid]
+        expect(h.reload.pid).to be pid2
+        expect(h.to_s).to include prog
+        stdin.close
+        expect(wait_thr.value.exitstatus).to be_zero
       end
     end
 
