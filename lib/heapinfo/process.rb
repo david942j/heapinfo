@@ -27,7 +27,7 @@ module HeapInfo
       # Transparent info's methods
       ProcessInfo::EXPORT.each do |m|
         define_singleton_method(m) do
-          return Nil.new if @pid.nil?
+          return Nil.instance if @pid.nil?
 
           @info.__send__(m)
         end
@@ -91,7 +91,7 @@ module HeapInfo
     #   # Invalid usage
     #   dump(:meow) # no such segment
     def dump(*args)
-      return Nil.new unless load?
+      return Nil.instance unless load?
 
       dumper.dump(*args)
     end
@@ -102,7 +102,7 @@ module HeapInfo
     # @return [HeapInfo::Chunks, HeapInfo::Nil] An array of chunk(s).
     # @param [Mixed] args Same as arguments of {#dump}.
     def dump_chunks(*args)
-      return Nil.new unless load?
+      return Nil.instance unless load?
 
       dumper.dump_chunks(*args)
     end
@@ -175,7 +175,7 @@ module HeapInfo
     # @return [String]
     #   The string *without* null-byte.
     def s(address)
-      return Nil.new unless load?
+      return Nil.instance unless load?
 
       dumper.cstring(address)
     end
@@ -206,7 +206,7 @@ module HeapInfo
     #   h.find('/bin/sh', :libc, rel: true) == h.find('/bin/sh', :libc) - h.libc
     #   #=> true
     def find(pattern, from, length = :unlimited, rel: false)
-      return Nil.new unless load?
+      return Nil.instance unless load?
 
       dumper.find(pattern, from, length, rel)
     end
@@ -221,7 +221,7 @@ module HeapInfo
     #
     # @return [void]
     def find_all(pattern, segment = :all)
-      return Nil.new unless load?
+      return Nil.instance unless load?
 
       segments = segment == :all ? %i[elf heap libc ld stack] : Array(segment)
       result = findall_raw(pattern, segments).reject { |(_, _, ary)| ary.empty? }
@@ -282,7 +282,7 @@ module HeapInfo
     #   h.canary
     #   #=> 11342701118118205184 # 0x9d695e921adc9700
     def canary
-      return Nil.new unless load?
+      return Nil.instance unless load?
 
       addr = @info.auxv[:random]
       Helper.unpack(bits / 8, @dumper.dump(addr, bits / 8)) & 0xffffffffffffff00
