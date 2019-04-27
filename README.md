@@ -7,17 +7,17 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](http://choosealicense.com/licenses/mit/)
 
 ## HeapInfo
-As pwn lovers, while playing CTF with heap exploitation, we always need a debugger (e.g. gdb) for tracking memory layout. But we don't really need gdb if we want to see whether the heap layout same as our imagine or not. Hope this small tool helps us exploit easier ;).
+As pwn lovers, while playing CTF with heap exploitation, we always need a debugger (e.g. gdb) for tracking memory layout. But we don't really need gdb if we want to see whether the heap layout same as our imagination or not. Hope this small tool helps us exploit easier ;).
 
 ### Why
 **HeapInfo** is very helpful when binary has somehow anti-debugger limitations, e.g. being ptraced.
 **HeapInfo** still works because it doesn't use ptrace.
 
-Implement with Ruby because I love Ruby :P. But might implement with Python (if no others did) in the future.
+Implements with Ruby because I love Ruby :P. But might implement with Python (if no others did) in the future.
 
 If you prefer [pwntools](https://github.com/Gallopsled/pwntools) for exploiting, you can still use **HeapInfo** in irb/pry as a small debugger.
 
-Any suggestion of features or bug issues are welcome.
+Any suggestion of features or bug issues is welcome.
 
 ## Install
 **HeapInfo** is still under developing for more features, so the version might change frequently :p
@@ -68,7 +68,7 @@ h.libc.name
 #=> "0x11cc000"
 ```
 
-NOTICE: While the process is not found, most methods will return `nil`. One way to prevent some error happend is to wrapper methods within `debug`, the block will be ignored while doing remote exploitation.
+NOTICE: When the process is not found, most methods will return `nil`. One way to prevent some error happend is to wrapper methods within `debug`, the block will be ignored while doing remote exploitation.
 
 ```ruby
 h = heapinfo('remote')
@@ -166,7 +166,7 @@ h.offset(h.find('/bin/sh', :libc))
 ```
 
 ## Tests
-**HeapInfo** currently only run tests on ubuntu, followings are tested glibc versions:
+**HeapInfo** currently only run tests on Ubuntu, followings are tested glibc versions:
 
 * libc-2.19
 * libc-2.23

@@ -1,7 +1,9 @@
 lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'heapinfo/version'
+
 require 'date'
+
+require 'heapinfo/version'
 
 Gem::Specification.new do |s|
   s.name        = 'heapinfo'
@@ -9,10 +11,10 @@ Gem::Specification.new do |s|
   s.date        = Date.today.to_s
   s.summary     = 'HeapInfo - interactive heap exploitation helper'
   s.description = <<-EOS
-Create an interactive memory info interface while pwn / exploiting.
-Useful for rubiers writing exploit scripts.
-HeapInfo can be used even when target is being ptraced,
-this tool helps a lot when one needs to debug an ptraced process.
+Provides an interactive memory info interface when pwning / exploiting.
+This is for Rubiers to write exploit and debug in one script.
+HeapInfo can be used even when the target is being ptraced,
+pretty helpful when one needs to debug a ptraced process.
   EOS
   s.authors     = ['david942j']
   s.email       = ['david942j@gmail.com']
@@ -20,6 +22,13 @@ this tool helps a lot when one needs to debug an ptraced process.
   s.homepage    = 'https://github.com/david942j/heapinfo'
   s.license     = 'MIT'
   s.required_ruby_version = '>= 2.1.0'
+
+  s.metadata = {
+    'bug_tracker_uri' => 'https://github.com/david942j/heapinfo/issues',
+    'documentation_uri' => 'https://www.rubydoc.info/github/david942j/heapinfo/master',
+    'homepage_uri' => 'https://github.com/david942j/heapinfo',
+    'source_code_uri' => 'https://github.com/david942j/heapinfo'
+  }
 
   s.add_runtime_dependency 'dentaku', '~> 3'
 
