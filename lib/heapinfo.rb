@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Basic requirements from standard library
 require 'fileutils'
 
@@ -14,7 +16,7 @@ require 'heapinfo/process'
 module HeapInfo
   # Directory for writing some tmp files when working,
   # make sure /tmp is writable
-  TMP_DIR = '/tmp/.heapinfo'.freeze
+  TMP_DIR = '/tmp/.heapinfo'
   FileUtils.mkdir_p(TMP_DIR)
 
   # Entry point for using {HeapInfo}.

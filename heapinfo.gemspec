@@ -21,7 +21,7 @@ pretty helpful when one needs to debug a ptraced process.
   s.files       = Dir['lib/**/*.rb'] + Dir['lib/**/tools/*.c'] + %w[README.md]
   s.homepage    = 'https://github.com/david942j/heapinfo'
   s.license     = 'MIT'
-  s.required_ruby_version = '>= 2.1.0'
+  s.required_ruby_version = '>= 2.3'
 
   s.metadata = {
     'bug_tracker_uri' => 'https://github.com/david942j/heapinfo/issues',
