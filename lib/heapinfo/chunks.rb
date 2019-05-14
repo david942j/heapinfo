@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module HeapInfo
   # Self-defined array for collecting chunk(s).
   class Chunks

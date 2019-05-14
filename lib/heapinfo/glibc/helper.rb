@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module HeapInfo
   # Define some useful functions here.
   module Glibc

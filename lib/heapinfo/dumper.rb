@@ -1,4 +1,5 @@
 # encoding: ascii-8bit
+# frozen_string_literal: true
 
 require 'heapinfo/helper'
 require 'heapinfo/nil'
@@ -82,7 +83,7 @@ module HeapInfo
     def cstring(address)
       base = base_of(address)
       len = 1
-      cur = ''
+      cur = +''
       loop do
         cur << (dump(base + len - 1, len) || '')
         break if cur.index("\x00")
@@ -209,7 +210,7 @@ module HeapInfo
 
     def batch_dumper(from, remain_size)
       page_size = 0x1000
-      while remain_size > 0
+      while remain_size.positive?
         dump_size = [remain_size, page_size].min
         str = dump(from, dump_size)
         break if str.nil? # unreadable

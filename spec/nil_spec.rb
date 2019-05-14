@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'heapinfo/nil'
 
 describe HeapInfo::Nil do
