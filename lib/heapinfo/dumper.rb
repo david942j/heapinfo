@@ -52,7 +52,7 @@ module HeapInfo
     # @return [HeapInfo::Chunks] An array of chunk(s).
     # @param [Mixed] args Same as arguments of {#dump}.
     def dump_chunks(*args)
-      base = base_of(*args)
+      base = base_of(args.first)
       dump(*args).to_chunks(bits: @info[:bits], base: base)
     end
 
@@ -67,8 +67,8 @@ module HeapInfo
     #   # 0x400000:       0x00010102464c457f      0x0000000000000000
     #   # 0x400010:       0x00000001003e0002
     def x(count, address)
+      base = base_of(address)
       commands = [address, count * size_t]
-      base = base_of(*commands)
       res = dump(*commands).unpack(size_t == 4 ? 'L*' : 'Q*')
       str = res.group_by.with_index { |_, i| i / (16 / size_t) }.map do |round, values|
         Helper.hex(base + round * 16) + ":\t" +
@@ -138,6 +138,18 @@ module HeapInfo
       result
     end
 
+    # Get the base address given the address calculation annotation.
+    #
+    # @param [Integer, Symbol, String] arg The base address, see examples.
+    # @example
+    #   base_of(123) #=> 123
+    #   base_of(:heap) #=> 0x603000 # assume heap base @ 0x603000
+    #   base_of('heap+0x30') #=> 0x603030
+    #   base_of('elf+0x3*2-1') #=> 0x400005
+    def base_of(arg)
+      base_len_of(arg)[0]
+    end
+
     private
 
     def need_permission
@@ -185,10 +197,6 @@ module HeapInfo
       raise ArgumentError, "Invalid base: #{arg.inspect}" unless base.is_a?(Integer) # invalid usage
 
       [base, len]
-    end
-
-    def base_of(*args)
-      base_len_of(*args)[0]
     end
 
     def find_integer(value, from, length)
