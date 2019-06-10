@@ -135,9 +135,9 @@ module HeapInfo
                             .select { |_, seg| seg.base <= addr }
                             .min_by { |_, seg| addr - seg }
       end
-      return $stdout.puts "Invalid address #{Helper.hex(addr)}" if segment.nil?
+      return $stdout.puts("Invalid address #{Helper.color_hex(addr)}") if segment.nil?
 
-      $stdout.puts Helper.color(Helper.hex(addr - segment)) + ' after ' + Helper.color(sym, sev: :sym)
+      $stdout.puts(Helper.color_hex(addr - segment) + ' after ' + Helper.color(sym, sev: :sym))
     end
     alias off offset
 
@@ -292,7 +292,7 @@ module HeapInfo
       str = +''
       str << libc.tcache.layouts if libc.tcache? && (%w[all tcache] & args.map(&:to_s)).any?
       str << libc.main_arena.layouts(*args)
-      $stdout.puts str
+      $stdout.puts(str)
     end
 
     # Show simple information of target process.

@@ -52,7 +52,7 @@ describe HeapInfo::Process do
   describe 'victim' do
     before(:all) do
       HeapInfo::Cache.clear_all # force cache miss, to ensure coverage
-      @victim = @compile_and_run.call(bit: 64, lib_ver: '2.23')
+      @victim = @compile_and_run.call(bit: 64, lib_ver: '2.23', flags: '-fstack-protector-all')
       @h = heapinfo(@victim)
     end
 
@@ -130,21 +130,16 @@ In [heap](0x602000-0x623000), permission=rw-
       end
 
       it 'canary' do
+        base = @h.ld.base + 0x1fc000
         expect { @h.find_all(@h.canary, :ld, :stack) }.to output(<<-EOS).to_stdout
 Searching #{HeapInfo::Helper.hex(@h.canary)}:
-In (0x7ffff7fd3000-0x7ffff7ff7000), permission=rw-
-  0x7ffff7ff5728
+In (#{HeapInfo::Helper.hex(base)}-#{HeapInfo::Helper.hex(base + 0x24000)}), permission=rw-
+  #{HeapInfo::Helper.hex(base + 0x22728)}
         EOS
       end
 
       it 'canary' do
-        expect { @h.find_all(@h.canary) }.to output(<<-EOS).to_stdout
-Searching #{HeapInfo::Helper.hex(@h.canary)}:
-In (0x7ffff7fd3000-0x7ffff7ff7000), permission=rw-
-  0x7ffff7ff5728
-In [stack](0x7ffffffdd000-0x7ffffffff000), permission=rw-
-  0x7fffffffda28
-        EOS
+        expect { @h.find_all(@h.canary) }.to output(/\[stack\]/).to_stdout
       end
     end
 
