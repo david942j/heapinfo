@@ -39,7 +39,7 @@ module HeapInfo
     #
     # Search the specific <tt>pattern</tt> in <tt>maps</tt> and return a {HeapInfo::Segment} object.
     #
-    # @param [Array] maps <tt>maps</tt> is in form of the return value of {Helper::ClassMethods#parse_maps}.
+    # @param [Array] maps <tt>maps</tt> is in form of the return value of {Helper.parse_maps}.
     # @param [Regexp, String] pattern
     #   The segment name want to match in maps. If +String+ is given, the pattern is matched as a substring.
     # @return [HeapInfo::Segment, nil]

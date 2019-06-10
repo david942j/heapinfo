@@ -52,7 +52,7 @@ describe HeapInfo::Process do
   describe 'victim' do
     before(:all) do
       HeapInfo::Cache.clear_all # force cache miss, to ensure coverage
-      @victim = @compile_and_run.call(bit: 64, lib_ver: '2.23')
+      @victim = @compile_and_run.call(bit: 64, lib_ver: '2.23', flags: '-fstack-protector-all')
       @h = heapinfo(@victim)
     end
 
@@ -116,17 +116,26 @@ describe HeapInfo::Process do
       it 'integer' do
         expect { @h.find_all(0xdeadbeef) }.to output(<<-EOS).to_stdout
 Searching 0xdeadbeef:
-In heap (0x602000):
-  heap+0x50
+In [heap](0x602000-0x623000), permission=rw-
+  0x602050
         EOS
       end
 
       it 'string' do
         expect { @h.findall("\xbe\xad\xde\x00") }.to output(<<-EOS).to_stdout
 Searching "\\xBE\\xAD\\xDE\\x00":
-In heap (0x602000):
-  heap+0x51
+In [heap](0x602000-0x623000), permission=rw-
+  0x602051
         EOS
+      end
+
+      it 'canary' do
+        expectation = expect { @h.find_all(@h.canary, :ld, :stack) }
+        expectation.to output(/Searching 0x[0-9a-f]+:\nIn \(.*\), permission=rw-/).to_stdout
+      end
+
+      it 'canary' do
+        expect { @h.find_all(@h.canary) }.to output(/\[stack\]/).to_stdout
       end
     end
 

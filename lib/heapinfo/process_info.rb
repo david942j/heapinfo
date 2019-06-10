@@ -93,7 +93,7 @@ module HeapInfo
     private
 
     def load_maps
-      Helper.parse_maps(Helper.maps_of(@pid))
+      Helper.parsed_maps(@pid)
     end
 
     def parse_auxv(str)
