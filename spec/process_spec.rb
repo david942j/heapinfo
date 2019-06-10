@@ -130,12 +130,8 @@ In [heap](0x602000-0x623000), permission=rw-
       end
 
       it 'canary' do
-        base = @h.ld.base + 0x1fc000
-        expect { @h.find_all(@h.canary, :ld, :stack) }.to output(<<-EOS).to_stdout
-Searching #{HeapInfo::Helper.hex(@h.canary)}:
-In (#{HeapInfo::Helper.hex(base)}-#{HeapInfo::Helper.hex(base + 0x24000)}), permission=rw-
-  #{HeapInfo::Helper.hex(base + 0x22728)}
-        EOS
+        expectation = expect { @h.find_all(@h.canary, :ld, :stack) }
+        expectation.to output(/Searching 0x[0-9a-f]+:\nIn \(.*\), permission=rw-/).to_stdout
       end
 
       it 'canary' do
