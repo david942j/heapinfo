@@ -65,10 +65,11 @@ module HeapInfo
     def parse_maps(content)
       lines = content.split("\n")
       lines.map do |line|
-        s = line.scan(%r{^([0-9a-f]+)-([0-9a-f]+)\s([rwxp-]{4})[^/|\[]*([/|\[].+)$})[0]
+        s = line.scan(%r{^([0-9a-f]+)-([0-9a-f]+)\s([rwxp-]{4})[^/|\[]*([/|\[].+)?$})[0]
         next nil if s.nil?
 
         s[0], s[1] = s[0, 2].map { |h| h.to_i(16) }
+        s[3] ||= '' # some segments don't have a name
         s
       end.compact
     end
