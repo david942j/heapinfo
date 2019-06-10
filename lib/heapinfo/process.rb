@@ -215,24 +215,62 @@ module HeapInfo
 
     # Find pattern in all segments with pretty output.
     #
+    # The search result will be output to +$stdout+.
+    #
     # @param [Integer, String, Regexp] pattern
     #   The desired search pattern, can be value(+Integer+), string, or regular expression.
-    # @param [Symbol, Array<Symbol>] segment
-    #   Only find pattern in these symbols.
+    # @param [String, Symbol, Integer] from
+    #   Instead of searching all mapped segments, find the pattern from this address.
+    #   +from+ can be an address, symbol name of segments (+:ld/:libc/:heap+, etc.) or string with address calculation,
+    #   see {#dump} or {Dumper#base_of} for examples of string annotation.
+    # @param [String, Symbol, Integer] to
+    #   End address for searching. In the same format as +from+.
     #
     # @return [void]
-    def find_all(pattern, segment = :all)
+    #
+    # @example
+    #   h = heapinfo('victim')
+    #   h.find_all(0xdeadbeef)
+    #   # Searching 0xdeadbeef:
+    #   # In [heap](0x563055f3c000-0x56305b82c000), permission=rw-
+    #   #   0x563058076510
+    #   #   0x563058253d50
+    #   #=> nil
+    # @example
+    #   h = heapinfo('victim')
+    #   h.find_all(h.canary)
+    #   # Searching 0xc83db42feb3c0f00:
+    #   # In (0x7ffff7fd3000-0x7ffff7ff7000), permission=rw-
+    #   #   0x7ffff7ff5728
+    #   # In [stack](0x7ffffffdd000-0x7ffffffff000), permission=rw-
+    #   #   0x7fffffffda28
+    #   #=> nil
+    # @example
+    #   h = heapinfo('victim')
+    #   h.find_all(h.canary, :ld, :stack)
+    #   # Searching 0xc83db42feb3c0f00:
+    #   # In (0x7ffff7fd3000-0x7ffff7ff7000), permission=rw-
+    #   #   0x7ffff7ff5728
+    #   #=> nil
+    def find_all(pattern, from = 0, to = 1 << 64)
       return Nil.instance unless load?
 
-      segments = segment == :all ? %i[elf heap libc ld stack] : Array(segment)
-      result = findall_raw(pattern, segments).reject { |(_, _, ary)| ary.empty? }
+      from = dumper.base_of(from)
+      to = dumper.base_of(to)
+      result = []
+      HeapInfo::Helper.parsed_maps(pid).each do |st, ed, perm, name|
+        next if st >= to || ed < from || !perm.include?('r')
+
+        start = [st, from].max
+        len = [ed, to].min - start
+        matches = dumper.scan(pattern, start, len).map { |v| v + start }
+        result << [st, ed, perm, name, matches] if matches.any?
+      end
+
       target = pattern.is_a?(Integer) ? Helper.hex(pattern) : pattern.inspect
-      str = ["Searching #{Helper.color(target)}:\n"]
-      str.concat(result.map do |(sym, base, ary)|
-        "In #{Helper.color(sym, sev: :bin)} (#{Helper.color(Helper.hex(base))}):\n" +
-        ary.map { |v| "  #{Helper.color(sym, sev: :bin)}+#{Helper.color(Helper.hex(v))}\n" }.join
-      end)
-      $stdout.puts str
+      str = ["Searching #{Helper.color(target)}:"]
+      str.concat(format_findall_result(result))
+      $stdout.puts(str)
     end
     alias findall find_all
 
@@ -332,13 +370,12 @@ module HeapInfo
       end
     end
 
-    def findall_raw(pattern, segments)
-      segments.map do |sym|
-        seg = @info.to_segment(sym)
-        next unless seg
-
-        [sym, seg.base, dumper.scan(pattern, sym, :unlimited)]
-      end.compact
+    def format_findall_result(result)
+      result.map do |(st, ed, perm, name, ary)|
+        title = "In #{name.empty? ? '' : Helper.color(name, sev: :bin)}" \
+                "(#{Helper.color_hex(st)}-#{Helper.color_hex(ed)}), permission=#{perm.delete('p')}\n"
+        title + ary.map { |v| "  #{Helper.color_hex(v)}" }.join("\n")
+      end
     end
 
     def mem_filename

@@ -8,8 +8,8 @@ require 'tmpdir'
 module HeapInfo
   # Some helper functions.
   module Helper
-
     module_function
+
     # @!macro proc_content_doc
     #   @param [Integer] pid The process id.
     #   @return [String] The file content.
@@ -139,7 +139,7 @@ module HeapInfo
 
     # Convert number in hex format.
     #
-    # @param [Integer] num Non-negative integer.
+    # @param [Integer] num An integer.
     # @return [String] number in hex format.
     # @example
     #   HeapInfo::Helper.hex(1000) #=> '0x3e8'
@@ -147,6 +147,17 @@ module HeapInfo
       return format('0x%x', num) if num >= 0
 
       format('-0x%x', -num)
+    end
+
+    # Combines {.hex} and {.color}.
+    #
+    # @param [Integer] num
+    #   An integer.
+    #
+    # @return [String]
+    #   Returns hex string wrapped with color code.
+    def color_hex(num)
+      color(hex(num))
     end
 
     # Retrieve pure class name(without module) of an object.
@@ -192,5 +203,5 @@ module HeapInfo
     def tempfile(name)
       Dir::Tmpname.create(name, HeapInfo::TMP_DIR) {}
     end
-end
+  end
 end

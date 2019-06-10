@@ -116,16 +116,34 @@ describe HeapInfo::Process do
       it 'integer' do
         expect { @h.find_all(0xdeadbeef) }.to output(<<-EOS).to_stdout
 Searching 0xdeadbeef:
-In heap (0x602000):
-  heap+0x50
+In [heap](0x602000-0x623000), permission=rw-
+  0x602050
         EOS
       end
 
       it 'string' do
         expect { @h.findall("\xbe\xad\xde\x00") }.to output(<<-EOS).to_stdout
 Searching "\\xBE\\xAD\\xDE\\x00":
-In heap (0x602000):
-  heap+0x51
+In [heap](0x602000-0x623000), permission=rw-
+  0x602051
+        EOS
+      end
+
+      it 'canary' do
+        expect { @h.find_all(@h.canary, :ld, :stack) }.to output(<<-EOS).to_stdout
+Searching #{HeapInfo::Helper.hex(@h.canary)}:
+In (0x7ffff7fd3000-0x7ffff7ff7000), permission=rw-
+  0x7ffff7ff5728
+        EOS
+      end
+
+      it 'canary' do
+        expect { @h.find_all(@h.canary) }.to output(<<-EOS).to_stdout
+Searching #{HeapInfo::Helper.hex(@h.canary)}:
+In (0x7ffff7fd3000-0x7ffff7ff7000), permission=rw-
+  0x7ffff7ff5728
+In [stack](0x7ffffffdd000-0x7ffffffff000), permission=rw-
+  0x7fffffffda28
         EOS
       end
     end
