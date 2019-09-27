@@ -32,7 +32,7 @@ pretty helpful when one needs to debug a ptraced process.
 
   s.add_runtime_dependency 'dentaku', '~> 3'
 
-  s.add_development_dependency 'rake', '~> 12.3'
+  s.add_development_dependency 'rake', '~> 13.0'
   s.add_development_dependency 'rspec', '~> 3.7'
   s.add_development_dependency 'rubocop', '~> 0.59'
   s.add_development_dependency 'simplecov', '~> 0.17.0'
