@@ -34,9 +34,6 @@ Security/MarshalLoad:
 Style/FormatStringToken:
   Enabled: false
 
-Rails:
-  Enabled: false
-
 Metrics/LineLength:
   Enabled: true
   Max: 120

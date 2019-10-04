@@ -54,12 +54,12 @@ module HeapInfo
       true
     end
 
-    def int_free_small(av, ptr, size) # rubocop:disable UnusedMethodArgument
+    def int_free_small(av, ptr, size) # rubocop:disable Lint/UnusedMethodArgument
       # TODO: unfinished
       true
     end
 
-    def munmap_chunk(ptr) # rubocop:disable UnusedMethodArgument
+    def munmap_chunk(ptr) # rubocop:disable Lint/UnusedMethodArgument
       # TODO: check page alignment and... page exists?
       true
     end
