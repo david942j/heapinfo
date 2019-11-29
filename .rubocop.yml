@@ -2,7 +2,7 @@ AllCops:
   DisplayCopNames: true
   DisplayStyleGuide: true
 
-Layout/IndentHeredoc:
+Layout/HeredocIndentation:
   Enabled: true
   Exclude:
     - spec/**/*_spec.rb
@@ -25,7 +25,7 @@ Metrics/CyclomaticComplexity:
 Naming/HeredocDelimiterNaming:
   Enabled: false
 
-Naming/UncommunicativeMethodParamName:
+Naming/MethodParameterName:
   Enabled: false
 
 Security/MarshalLoad:
