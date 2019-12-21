@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'English'
 require 'simplecov'
 
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
@@ -31,11 +32,13 @@ RSpec.configure do |config|
 
   config.before(:all) do
     HeapInfo::Helper.toggle_color(on: false)
-    # return the absolute path of exectuable file.
+    # returns the absolute path of the executable file
     @compile_and_run = lambda do |bit: 64, lib_ver: '2.23', flags: ''|
       victim = HeapInfo::Helper.tempfile('victim')
       cwd = File.expand_path('files', __dir__)
-      `cd #{cwd} && make victim OUTFILE=#{victim} BIT=#{bit} LIB_VER=#{lib_ver} CFLAGS=#{flags} 2>&1 > /dev/null`
+      `cd #{cwd} && make victim OUTFILE=#{victim} BIT=#{bit} LIB_VER=#{lib_ver} CFLAGS=#{flags} > /dev/null`
+      raise unless $CHILD_STATUS.success?
+
       pid = fork
       # run without ASLR
       exec "setarch `uname -m` -R /bin/sh -c #{victim}" if pid.nil?
