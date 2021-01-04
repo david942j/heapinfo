@@ -56,7 +56,7 @@ RSpec.configure do |config|
     end
 
     @tcache_libs_heapinfo = lambda do |bit|
-      Dir.glob(File.join(__dir__, 'files', 'libraries', 'libc-*')).map do |dir|
+      Dir.glob(File.join(__dir__, 'files', 'libraries', 'libc-*')).sort.map do |dir|
         ver = File.basename(dir).sub('libc-', '')
         next unless Gem::Version.new(ver) >= Gem::Version.new('2.26')
 

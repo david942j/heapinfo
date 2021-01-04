@@ -174,3 +174,4 @@ h.offset(h.find('/bin/sh', :libc))
 * libc-2.25
 * libc-2.26
 * libc-2.27
+* libc-2.29
