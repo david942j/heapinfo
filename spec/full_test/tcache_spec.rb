@@ -5,7 +5,7 @@ require 'heapinfo'
 describe 'tcache libraries' do
   describe '64bit' do
     before(:all) do
-      HeapInfo::Cache.clear_all # force cache miss, to make sure coverage
+      HeapInfo::Cache.clear_all # force cache miss, to ensure coverage
       @hs = @tcache_libs_heapinfo.call(64)
     end
 
@@ -35,7 +35,7 @@ TcacheEntry[0xa0]:  => 0x622440 => (nil)
 
   describe '32bit' do
     before(:all) do
-      HeapInfo::Cache.clear_all # force cache miss, to make sure coverage
+      HeapInfo::Cache.clear_all # force cache miss, to ensure coverage
       @hs = @tcache_libs_heapinfo.call(32)
     end
 
