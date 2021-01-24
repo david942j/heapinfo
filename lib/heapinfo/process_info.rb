@@ -68,7 +68,7 @@ module HeapInfo
       @heap ||= Segment.find(load_maps, '[heap]')
     end
 
-    # Return segemnts load currently.
+    # Return currently loaded segments.
     # @return [Hash{Symbol => Segment}] The segments in hash format.
     def segments
       EXPORT.map do |sym|

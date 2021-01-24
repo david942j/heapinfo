@@ -86,7 +86,7 @@ module HeapInfo
     #   h.dump('heap+256', 64)  # heap[256, 64]
     #   h.dump('heap+0x100', 64) # heap[256, 64]
     #   h.dump('heap+0x100 * 2 + 0x300', 64) # heap[1024, 64]
-    #   h.dump(<segment>, 8) # semgent can be [heap, stack, (program|elf), libc, ld]
+    #   h.dump(<segment>, 8) # segment can be [heap, stack, (program|elf), libc, ld]
     #   h.dump(addr, 64) # addr[0, 64]
     #
     #   # Invalid usage
@@ -113,7 +113,7 @@ module HeapInfo
     # see examples for more details.
     # @param [Integer] addr The leaked address.
     # @param [Symbol] sym
-    #   The segement symbol to be calculated offset.
+    #   The segment symbol to be calculated offset.
     #   If this parameter not given, will loop segments
     #   and find the most close one. See examples for more details.
     # @return [void] Offset will show to stdout.
@@ -141,7 +141,7 @@ module HeapInfo
     end
     alias off offset
 
-    # Gdb-like command
+    # GDB-style command
     #
     # Show dump results like gdb's command +x+.
     # While will auto detect the current elf class to decide using +gx+ or +wx+.
@@ -167,7 +167,7 @@ module HeapInfo
       dumper.x(count, address)
     end
 
-    # Gdb-like command
+    # GDB-style command
     #
     # Dump a string until reach the null-byte.
     # @param [String, Symbol, Integer] address The base address to be dumped.
@@ -181,7 +181,7 @@ module HeapInfo
       dumper.cstring(address)
     end
 
-    # Gdb-like command.
+    # GDB-style command.
     #
     # Search a specific value/string/regexp in memory.
     # @param [Integer, String, Regexp] pattern
@@ -372,9 +372,14 @@ module HeapInfo
 
     def format_findall_result(result)
       result.map do |(st, ed, perm, name, ary)|
-        title = "In #{name.empty? ? '' : Helper.color(name, sev: :bin)}" \
+        sym = @info.segments.find { |_k, v| v.name == name }&.first || name.split('/').last
+        has_name = !name.empty?
+        title = "In #{has_name ? Helper.color(name, sev: :bin) : ''}" \
                 "(#{Helper.color_hex(st)}-#{Helper.color_hex(ed)}), permission=#{perm.delete('p')}\n"
-        title + ary.map { |v| "  #{Helper.color_hex(v)}" }.join("\n")
+        title + ary.map do |v|
+          r = +"  #{Helper.color_hex(v)}"
+          r << " (#{Helper.color(sym, sev: :sym)}+#{Helper.color_hex(v - st)})" if has_name
+        end.join("\n")
       end
     end
 

@@ -33,9 +33,9 @@ $ gem install heapinfo
 * `layouts` - Show the current bin layouts, very useful for heap exploitation.
 * `offset` - Show the offset between given address and segment. Very useful for calculating relative offset.
 * `canary` - Fetch the value of stack guard!
-* `x` - Provide gdb-like command.
-* `s` - Provide gdb-like command.
-* `find` - Provide gdb-like command.
+* `x` - GDB-style commands.
+* `s` - GDB-style commands.
+* `find` - GDB-style commands.
 * More features and details can be found in [RDoc](http://www.rubydoc.info/github/david942j/heapinfo/master/)
 
 ## Usage
@@ -139,13 +139,13 @@ h.canary.to_s(16)
 #=> '84b742f03d94c100'
 ```
 
-#### x - gdb-like command
+#### x - GDB-style command
 ```ruby
 h.x 8, :heap
 ```
 ![x/8gx](https://github.com/david942j/heapinfo/blob/master/examples/x8_heap.png?raw=true)
 
-#### find - gdb-like command
+#### find - GDB-style command
 Provide a searcher of memory, easier to use than in (naive) gdb.
 
 Support search integer, string, and even regular expression.

@@ -117,7 +117,7 @@ describe HeapInfo::Process do
         expect { @h.find_all(0xdeadbeef) }.to output(<<-EOS).to_stdout
 Searching 0xdeadbeef:
 In [heap](0x602000-0x623000), permission=rw-
-  0x602050
+  0x602050 (heap+0x50)
         EOS
       end
 
@@ -125,7 +125,7 @@ In [heap](0x602000-0x623000), permission=rw-
         expect { @h.findall("\xbe\xad\xde\x00") }.to output(<<-EOS).to_stdout
 Searching "\\xBE\\xAD\\xDE\\x00":
 In [heap](0x602000-0x623000), permission=rw-
-  0x602051
+  0x602051 (heap+0x51)
         EOS
       end
 
