@@ -372,13 +372,16 @@ module HeapInfo
 
     def format_findall_result(result)
       result.map do |(st, ed, perm, name, ary)|
-        sym = @info.segments.find { |_k, v| v.name == name }&.first || name.split('/').last
+        seg_name, seg = @info.segments.find { |_k, v| v.name == name }
+        sym = seg_name || name.split('/').last
         has_name = !name.empty?
         title = "In #{has_name ? Helper.color(name, sev: :bin) : ''}" \
                 "(#{Helper.color_hex(st)}-#{Helper.color_hex(ed)}), permission=#{perm.delete('p')}\n"
         title + ary.map do |v|
           r = +"  #{Helper.color_hex(v)}"
+          st = seg.base if seg
           r << " (#{Helper.color(sym, sev: :sym)}+#{Helper.color_hex(v - st)})" if has_name
+          r
         end.join("\n")
       end
     end
