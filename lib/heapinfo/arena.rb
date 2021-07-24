@@ -89,7 +89,7 @@ module HeapInfo
     # Instantiate a {HeapInfo::Fastbin} object.
     #
     # @see HeapInfo::Chunk
-    def initialize(_size_t, base, *)
+    def initialize(_size_t, base, *, **)
       super
       @fd = fd_of(base)
     end
@@ -168,8 +168,8 @@ module HeapInfo
 
     # Instantiate a {HeapInfo::UnsortedBin} object.
     #
-    # @param [Mixed] args See {HeapInfo::Chunk} for more information.
-    def initialize(*args)
+    # @see {HeapInfo::Chunk} for more information.
+    def initialize(*, **)
       super
       @bk = Helper.unpack(size_t, @data[@size_t, @size_t])
     end
