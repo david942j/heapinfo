@@ -41,17 +41,8 @@ RSpec.configure do |config|
       raise unless $CHILD_STATUS.success?
 
       pid = fork
-      # run without ASLR
-      exec "setarch `uname -m` -R /bin/sh -c #{victim}" if pid.nil?
-      begin
-        Timeout.timeout(2) { loop until `pidof #{victim}` != '' }
-      rescue Timeout::Error => e
-        warn(`ps aux`)
-        warn(victim)
-        warn(`#{victim}`)
-        warn(system("/bin/sh -c #{victim}"))
-        raise e
-      end
+      exec(victim) if pid.nil?
+      Timeout.timeout(2) { loop until `pidof #{victim}` != '' }
       Victims.push(victim)
     end
 
@@ -77,4 +68,11 @@ RSpec.configure do |config|
   config.after(:all) do
     Victims.killall
   end
+
+  module Helper
+    def to_hex(val)
+      HeapInfo::Helper.hex(val)
+    end
+  end
+  config.include(Helper)
 end
