@@ -3,6 +3,8 @@
 
 require 'open3'
 
+require 'heapinfo'
+require 'heapinfo/helper'
 require 'heapinfo/process'
 
 describe HeapInfo::Process do
@@ -64,12 +66,13 @@ describe HeapInfo::Process do
     end
 
     it 'x' do
-      expect { @h.x(3, :heap) }.to output(<<-'EOS').to_stdout
-0x602000:	0x0000000000000000	0x0000000000000021
-0x602010:	0x0000000000000000
+      heap = @h.heap.base
+      expect { @h.x(3, :heap) }.to output(<<-EOS).to_stdout
+#{to_hex(heap)}:	0x0000000000000000	0x0000000000000021
+#{to_hex(heap + 0x10)}:	0x0000000000000000
       EOS
-      expect { @h.x(2, 'heap+0x20') }.to output(<<-'EOS').to_stdout
-0x602020:	0x0000000000000000	0x0000000000000021
+      expect { @h.x(2, 'heap+0x20') }.to output(<<-EOS).to_stdout
+#{to_hex(heap + 0x20)}:	0x0000000000000000	0x0000000000000021
       EOS
     end
 
@@ -94,7 +97,7 @@ describe HeapInfo::Process do
       end
 
       it 'value' do
-        expect(@h.search(0xdeadbeef, :heap)).to eq 0x602050
+        expect(@h.search(0xdeadbeef, :heap)).to eq @h.heap.base + 0x50
       end
 
       it 'not found' do
@@ -103,30 +106,30 @@ describe HeapInfo::Process do
       end
 
       it 'string' do
-        expect(@h.search("\xbe\xad", :heap)).to eq 0x602051
+        expect(@h.search("\xbe\xad", :heap)).to eq @h.heap.base + 0x51
         expect(@h.search("\xbe\xad", :heap, rel: true)).to eq 0x51
       end
 
       it 'regexp' do
-        expect(@h.search(/[^\x00]/, :heap)).to eq 0x602008
+        expect(@h.search(/[^\x00]/, :heap)).to eq @h.heap.base + 8
       end
     end
 
     describe 'find_all' do
       it 'integer' do
-        expect { @h.find_all(0xdeadbeef) }.to output(<<-EOS).to_stdout
-Searching 0xdeadbeef:
-In [heap](0x602000-0x623000), permission=rw-
-  0x602050 (heap+0x50)
-        EOS
+        expect { @h.find_all(0xdeadbeef) }.to output(
+          /Searching 0xdeadbeef:
+In \[heap\]\(0x\w+000-0x\w+000\), permission=rw-
+  0x\w+050 \(heap\+0x50\)/
+        ).to_stdout
       end
 
       it 'string' do
-        expect { @h.findall("\xbe\xad\xde\x00") }.to output(<<-EOS).to_stdout
-Searching "\\xBE\\xAD\\xDE\\x00":
-In [heap](0x602000-0x623000), permission=rw-
-  0x602051 (heap+0x51)
-        EOS
+        expect { @h.findall("\xbe\xad\xde\x00") }.to output(
+          /Searching "\\xBE\\xAD\\xDE\\x00":
+In \[heap\]\(0x\w+000-0x\w+000\), permission=rw-
+  0x\w+051 \(heap\+0x51\)/
+        ).to_stdout
       end
 
       it 'canary' do
