@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/david942j/heapinfo.svg?branch=master)](https://travis-ci.org/david942j/heapinfo)
+[![Build Status](https://github.com/david942j/heapinfo/workflows/build/badge.svg)](https://github.com/david942j/heapinfo/actions)
 [![Downloads](http://ruby-gem-downloads-badge.herokuapp.com/heapinfo?type=total)](https://rubygems.org/gems/heapinfo)
 [![Code Climate](https://codeclimate.com/github/david942j/heapinfo/badges/gpa.svg)](https://codeclimate.com/github/david942j/heapinfo)
 [![Issue Count](https://codeclimate.com/github/david942j/heapinfo/badges/issue_count.svg)](https://codeclimate.com/github/david942j/heapinfo)
