@@ -43,7 +43,15 @@ RSpec.configure do |config|
       pid = fork
       # run without ASLR
       exec "setarch `uname -m` -R /bin/sh -c #{victim}" if pid.nil?
-      Timeout.timeout(2) { loop until `pidof #{victim}` != '' }
+      begin
+        Timeout.timeout(2) { loop until `pidof #{victim}` != '' }
+      rescue Timeout::Error => e
+        warn(`ps aux`)
+        warn(victim)
+        warn(`#{victim}`)
+        warn(system("/bin/sh -c #{victim}"))
+        raise e
+      end
       Victims.push(victim)
     end
 
