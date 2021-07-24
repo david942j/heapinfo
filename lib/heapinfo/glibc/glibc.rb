@@ -11,7 +11,3 @@ module HeapInfo
     attr_accessor :dumper
   end
 end
-
-require 'heapinfo/glibc/error.rb'
-require 'heapinfo/glibc/helper.rb'
-require 'heapinfo/glibc/free.rb'
