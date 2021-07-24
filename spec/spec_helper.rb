@@ -2,6 +2,7 @@
 
 require 'English'
 require 'simplecov'
+require 'timeout'
 
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
   [SimpleCov::Formatter::HTMLFormatter]
@@ -42,7 +43,7 @@ RSpec.configure do |config|
       pid = fork
       # run without ASLR
       exec "setarch `uname -m` -R /bin/sh -c #{victim}" if pid.nil?
-      loop until `pidof #{victim}` != ''
+      Timeout.timeout(2) { loop until `pidof #{victim}` != '' }
       Victims.push(victim)
     end
 
