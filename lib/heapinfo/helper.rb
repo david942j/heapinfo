@@ -36,7 +36,7 @@ module HeapInfo
 
     # Get the process id from program name.
     #
-    # When multiple processes exist, the one with lastest start time would be returned.
+    # When multiple processes exist, the one with the last start time would be returned.
     # @param [String] prog The request process name.
     # @return [Integer] Process id.
     def pidof(prog)
@@ -46,7 +46,7 @@ module HeapInfo
       end
       return nil if info.empty? # process not exists yet
 
-      info.max_by(&:first).last
+      info.max.last
     end
 
     # Parse the contents of <tt>/proc/[pid]/maps</tt>.
