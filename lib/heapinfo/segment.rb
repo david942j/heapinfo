@@ -48,6 +48,9 @@ module HeapInfo
       return Nil.instance if pattern.nil?
 
       needs = maps.select { |m| pattern.is_a?(Regexp) ? m[3] =~ pattern : m[3].include?(pattern) }
+      # Use the last heap segment when multiple of them present
+      return new(needs.map(&:first).max, needs[0][3]) if pattern == '[heap]'
+
       new(needs.map(&:first).min, needs[0][3]) unless needs.empty?
     end
   end
