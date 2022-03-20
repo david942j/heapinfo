@@ -9,7 +9,7 @@ GEM
   specs:
     ast (2.4.0)
     concurrent-ruby (1.1.9)
-    dentaku (3.4.2)
+    dentaku (3.5.0)
       concurrent-ruby
     diff-lcs (1.5.0)
     docile (1.3.2)
